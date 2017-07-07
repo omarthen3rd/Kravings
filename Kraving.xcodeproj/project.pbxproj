@@ -1,0 +1,537 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		56D99D9F1F102F35000FA4F8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */; };
+		56D99DA11F102F35000FA4F8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DA01F102F35000FA4F8 /* ViewController.swift */; };
+		56D99DA41F102F35000FA4F8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 56D99DA21F102F35000FA4F8 /* Main.storyboard */; };
+		56D99DA61F102F35000FA4F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 56D99DA51F102F35000FA4F8 /* Assets.xcassets */; };
+		56D99DA91F102F35000FA4F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */; };
+		56D99DB41F102F36000FA4F8 /* KravingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DB31F102F36000FA4F8 /* KravingTests.swift */; };
+		56D99DBF1F102F36000FA4F8 /* KravingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		56D99DB01F102F35000FA4F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56D99D931F102F35000FA4F8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 56D99D9A1F102F35000FA4F8;
+			remoteInfo = Kraving;
+		};
+		56D99DBB1F102F36000FA4F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56D99D931F102F35000FA4F8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 56D99D9A1F102F35000FA4F8;
+			remoteInfo = Kraving;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		56D99D9B1F102F35000FA4F8 /* Kraving.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kraving.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		56D99DA01F102F35000FA4F8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		56D99DA31F102F35000FA4F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		56D99DA51F102F35000FA4F8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		56D99DA81F102F35000FA4F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		56D99DAA1F102F35000FA4F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		56D99DAF1F102F35000FA4F8 /* KravingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KravingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		56D99DB31F102F36000FA4F8 /* KravingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KravingTests.swift; sourceTree = "<group>"; };
+		56D99DB51F102F36000FA4F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		56D99DBA1F102F36000FA4F8 /* KravingUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KravingUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KravingUITests.swift; sourceTree = "<group>"; };
+		56D99DC01F102F36000FA4F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		56D99D981F102F35000FA4F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56D99DAC1F102F35000FA4F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56D99DB71F102F36000FA4F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		56D99D921F102F35000FA4F8 = {
+			isa = PBXGroup;
+			children = (
+				56D99D9D1F102F35000FA4F8 /* Kraving */,
+				56D99DB21F102F36000FA4F8 /* KravingTests */,
+				56D99DBD1F102F36000FA4F8 /* KravingUITests */,
+				56D99D9C1F102F35000FA4F8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		56D99D9C1F102F35000FA4F8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				56D99D9B1F102F35000FA4F8 /* Kraving.app */,
+				56D99DAF1F102F35000FA4F8 /* KravingTests.xctest */,
+				56D99DBA1F102F36000FA4F8 /* KravingUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		56D99D9D1F102F35000FA4F8 /* Kraving */ = {
+			isa = PBXGroup;
+			children = (
+				56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */,
+				56D99DA01F102F35000FA4F8 /* ViewController.swift */,
+				56D99DA21F102F35000FA4F8 /* Main.storyboard */,
+				56D99DA51F102F35000FA4F8 /* Assets.xcassets */,
+				56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */,
+				56D99DAA1F102F35000FA4F8 /* Info.plist */,
+			);
+			path = Kraving;
+			sourceTree = "<group>";
+		};
+		56D99DB21F102F36000FA4F8 /* KravingTests */ = {
+			isa = PBXGroup;
+			children = (
+				56D99DB31F102F36000FA4F8 /* KravingTests.swift */,
+				56D99DB51F102F36000FA4F8 /* Info.plist */,
+			);
+			path = KravingTests;
+			sourceTree = "<group>";
+		};
+		56D99DBD1F102F36000FA4F8 /* KravingUITests */ = {
+			isa = PBXGroup;
+			children = (
+				56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */,
+				56D99DC01F102F36000FA4F8 /* Info.plist */,
+			);
+			path = KravingUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		56D99D9A1F102F35000FA4F8 /* Kraving */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56D99DC31F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "Kraving" */;
+			buildPhases = (
+				56D99D971F102F35000FA4F8 /* Sources */,
+				56D99D981F102F35000FA4F8 /* Frameworks */,
+				56D99D991F102F35000FA4F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Kraving;
+			productName = Kraving;
+			productReference = 56D99D9B1F102F35000FA4F8 /* Kraving.app */;
+			productType = "com.apple.product-type.application";
+		};
+		56D99DAE1F102F35000FA4F8 /* KravingTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56D99DC61F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "KravingTests" */;
+			buildPhases = (
+				56D99DAB1F102F35000FA4F8 /* Sources */,
+				56D99DAC1F102F35000FA4F8 /* Frameworks */,
+				56D99DAD1F102F35000FA4F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				56D99DB11F102F35000FA4F8 /* PBXTargetDependency */,
+			);
+			name = KravingTests;
+			productName = KravingTests;
+			productReference = 56D99DAF1F102F35000FA4F8 /* KravingTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		56D99DB91F102F36000FA4F8 /* KravingUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56D99DC91F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "KravingUITests" */;
+			buildPhases = (
+				56D99DB61F102F36000FA4F8 /* Sources */,
+				56D99DB71F102F36000FA4F8 /* Frameworks */,
+				56D99DB81F102F36000FA4F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				56D99DBC1F102F36000FA4F8 /* PBXTargetDependency */,
+			);
+			name = KravingUITests;
+			productName = KravingUITests;
+			productReference = 56D99DBA1F102F36000FA4F8 /* KravingUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		56D99D931F102F35000FA4F8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 0830;
+				ORGANIZATIONNAME = "Omar Abbasi";
+				TargetAttributes = {
+					56D99D9A1F102F35000FA4F8 = {
+						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = 7CSTNGA4CB;
+						ProvisioningStyle = Automatic;
+					};
+					56D99DAE1F102F35000FA4F8 = {
+						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = 7CSTNGA4CB;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 56D99D9A1F102F35000FA4F8;
+					};
+					56D99DB91F102F36000FA4F8 = {
+						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = 7CSTNGA4CB;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 56D99D9A1F102F35000FA4F8;
+					};
+				};
+			};
+			buildConfigurationList = 56D99D961F102F35000FA4F8 /* Build configuration list for PBXProject "Kraving" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 56D99D921F102F35000FA4F8;
+			productRefGroup = 56D99D9C1F102F35000FA4F8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				56D99D9A1F102F35000FA4F8 /* Kraving */,
+				56D99DAE1F102F35000FA4F8 /* KravingTests */,
+				56D99DB91F102F36000FA4F8 /* KravingUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		56D99D991F102F35000FA4F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56D99DA91F102F35000FA4F8 /* LaunchScreen.storyboard in Resources */,
+				56D99DA61F102F35000FA4F8 /* Assets.xcassets in Resources */,
+				56D99DA41F102F35000FA4F8 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56D99DAD1F102F35000FA4F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56D99DB81F102F36000FA4F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		56D99D971F102F35000FA4F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56D99DA11F102F35000FA4F8 /* ViewController.swift in Sources */,
+				56D99D9F1F102F35000FA4F8 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56D99DAB1F102F35000FA4F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56D99DB41F102F36000FA4F8 /* KravingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56D99DB61F102F36000FA4F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56D99DBF1F102F36000FA4F8 /* KravingUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		56D99DB11F102F35000FA4F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 56D99D9A1F102F35000FA4F8 /* Kraving */;
+			targetProxy = 56D99DB01F102F35000FA4F8 /* PBXContainerItemProxy */;
+		};
+		56D99DBC1F102F36000FA4F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 56D99D9A1F102F35000FA4F8 /* Kraving */;
+			targetProxy = 56D99DBB1F102F36000FA4F8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		56D99DA21F102F35000FA4F8 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				56D99DA31F102F35000FA4F8 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				56D99DA81F102F35000FA4F8 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		56D99DC11F102F36000FA4F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		56D99DC21F102F36000FA4F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		56D99DC41F102F36000FA4F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7CSTNGA4CB;
+				INFOPLIST_FILE = Kraving/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.Kraving;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		56D99DC51F102F36000FA4F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7CSTNGA4CB;
+				INFOPLIST_FILE = Kraving/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.Kraving;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		56D99DC71F102F36000FA4F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 7CSTNGA4CB;
+				INFOPLIST_FILE = KravingTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.KravingTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kraving.app/Kraving";
+			};
+			name = Debug;
+		};
+		56D99DC81F102F36000FA4F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 7CSTNGA4CB;
+				INFOPLIST_FILE = KravingTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.KravingTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kraving.app/Kraving";
+			};
+			name = Release;
+		};
+		56D99DCA1F102F36000FA4F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				DEVELOPMENT_TEAM = 7CSTNGA4CB;
+				INFOPLIST_FILE = KravingUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.KravingUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = Kraving;
+			};
+			name = Debug;
+		};
+		56D99DCB1F102F36000FA4F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				DEVELOPMENT_TEAM = 7CSTNGA4CB;
+				INFOPLIST_FILE = KravingUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.KravingUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = Kraving;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		56D99D961F102F35000FA4F8 /* Build configuration list for PBXProject "Kraving" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56D99DC11F102F36000FA4F8 /* Debug */,
+				56D99DC21F102F36000FA4F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56D99DC31F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "Kraving" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56D99DC41F102F36000FA4F8 /* Debug */,
+				56D99DC51F102F36000FA4F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		56D99DC61F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "KravingTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56D99DC71F102F36000FA4F8 /* Debug */,
+				56D99DC81F102F36000FA4F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		56D99DC91F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "KravingUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56D99DCA1F102F36000FA4F8 /* Debug */,
+				56D99DCB1F102F36000FA4F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 56D99D931F102F35000FA4F8 /* Project object */;
+}
