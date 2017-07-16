@@ -130,7 +130,7 @@ class SettingsTableViewController: UITableViewController {
     func addBlur() {
         
         self.tableView.backgroundColor = UIColor.clear
-        let blurEffect = UIBlurEffect(style: .light)
+        let blurEffect = UIBlurEffect(style: .extraLight)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         tableView.separatorEffect = UIVibrancyEffect(blurEffect: blurEffect)
         
@@ -144,7 +144,7 @@ class SettingsTableViewController: UITableViewController {
         
         if section == 0 {
             
-            let blurEffect = UIBlurEffect(style: .light)
+            let blurEffect = UIBlurEffect(style: .extraLight)
             let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
             let vibrancyEffectView = UIVisualEffectView(effect: vibrancyEffect)
             vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 60)
@@ -165,7 +165,7 @@ class SettingsTableViewController: UITableViewController {
         } else {
             
             
-            let blurEffect = UIBlurEffect(style: .light)
+            let blurEffect = UIBlurEffect(style: .extraLight)
             let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
             let vibrancyEffectView = UIVisualEffectView(effect: vibrancyEffect)
             vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 30)

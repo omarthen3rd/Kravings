@@ -54,7 +54,7 @@ class Alert {
     
 }
 
-class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
+class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, CallAlert {
     
     @IBOutlet var contentView: UIView!
     @IBOutlet var mainTableView: UITableView!
@@ -75,6 +75,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet var restaurantMapsButton: UIButton!
     @IBOutlet var restaurantWebsiteButton: UIButton!
     @IBOutlet var restaurantReviewsButton: UIButton!
+    @IBOutlet var restaurantFavouritesButton: UIButton!
     
     var didAnimateView = false
     
@@ -105,6 +106,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
             restaurantStars.settings.emptyBorderColor = UIColor.clear
             restaurantStars.settings.emptyColor = UIColor.lightText
             restaurantStars.settings.updateOnTouch = false
+            restaurantStars.settings.starSize = 22
             restaurantPriceRange.text = checkPrice(restaurant.priceRange)
             restaurantDistance.text = convert(restaurant.distance)
             
@@ -128,7 +130,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
             self.mainTableView.dataSource = self
             
             self.mainTableView.backgroundColor = UIColor.clear
-            self.buttonsBlurBackground.alpha = 0.0
+            self.buttonsBlurBackground.bounds.origin.y -= self.buttonsBlurBackground.bounds.size.height
             
             DispatchQueue.main.async {
              
@@ -146,6 +148,9 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
             self.gradientView.layoutSubviews()
             
             restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
+            restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
+            restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
+            restaurantFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: .touchUpInside)
             
             tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
             // panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
@@ -262,7 +267,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
                 for operationDay in arr {
                     
                     if operationDay.day == self.getCurrentDay() {
-                        
+                                                
                         timings = "\(operationDay.startTime) to " + "\(operationDay.endTime)"
                         self.information.insert(timings, at: 2)
                         self.headers.insert("TIMINGS", at: 2)
@@ -483,7 +488,8 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
             
             animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeOut, animations: {
                 self.gradient.opacity = 1
-                self.buttonsBlurBackground.alpha = 0.0
+                // self.buttonsBlurBackground.alpha = 0.0
+                self.buttonsBlurBackground.bounds.origin.y -= self.buttonsBlurBackground.bounds.size.height
                 self.mainBlurView.effect = nil
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * -1))
             })
@@ -494,12 +500,58 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
             
             animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeOut, animations: {
                 self.gradient.opacity = 0
-                self.buttonsBlurBackground.alpha = 1.0
+                // self.buttonsBlurBackground.alpha = 1.0
+                self.buttonsBlurBackground.bounds.origin.y += self.buttonsBlurBackground.bounds.size.height
                 self.mainBlurView.effect = UIBlurEffect(style: UIBlurEffectStyle.dark)
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * 1))
             })
             animator.startAnimation()
             didAnimateView = true
+            
+        }
+        
+    }
+    
+    func addToFavourites() {
+        
+        if defaults.object(forKey: "favourites") == nil {
+            
+            // no favs, create arr, encode and replace
+            
+            var favouriteRestaurants = [Restaurant]()
+            favouriteRestaurants.append(restaurant)
+            
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: favouriteRestaurants)
+            defaults.set(encodedData, forKey: "favourites")
+            defaults.synchronize()
+            
+        } else {
+            
+            if let decodedArr = defaults.object(forKey: "favourites") as? Data {
+                
+                if var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                    
+                    if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
+                        
+                        // not in favourites
+                        decodedRestaurants.append(restaurant)
+                        
+                    } else {
+                        
+                        // already in favourites
+                        
+                        let alert = Alert()
+                        alert.msg(title: "Already In Favourites", message: "The restaurant you favourited is already in your favourites.")
+                        
+                    }
+                    
+                    let encode: Data = NSKeyedArchiver.archivedData(withRootObject: decodedRestaurants)
+                    defaults.set(encode, forKey: "favourites")
+                    defaults.synchronize()
+                    
+                }
+                
+            }
             
         }
         
@@ -657,6 +709,24 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
                 
             }
             
+        }
+        
+    }
+    
+    func setDelegate(controller: UIViewController) {
+        
+        if let control = controller as? ViewController {
+            control.delegate = self
+        }
+        
+    }
+    
+    func showAlertView(_ alreadyInFav: Bool) {
+        
+        if alreadyInFav {
+            print("already in favourites")
+        } else {
+            print("added to favourites")
         }
         
     }
