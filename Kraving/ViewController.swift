@@ -633,11 +633,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     let reviewText = review["text"].stringValue
                     let timeCreated = review["time_created"].stringValue
                     
-                    self.formatDate(timeCreated)
+                    let goodDate = self.formatDate(timeCreated)
                     
-                    print("name: " + name)
-                    
-                    let newReview = RestaurantReviews(name: name, rating: rating, imageURL: imageUrl, reviewText: reviewText, reviewTime: timeCreated)
+                    let newReview = RestaurantReviews(name: name, rating: rating, imageURL: imageUrl, reviewText: reviewText, reviewTime: goodDate)
                     self.currentReviews.append(newReview)
                     
                 }
@@ -656,13 +654,18 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
-    func formatDate(_ date: String) {
+    func formatDate(_ OGdate: String) -> String {
         
         let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-mm-dd HH:MM:SS"
-        let dateOutput = inputFormatter.date(from: date)
+        let tempLocale = inputFormatter.locale
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let dateOutput = inputFormatter.date(from: OGdate)!
+        inputFormatter.dateFormat = "MMM dd, yyyy"
+        inputFormatter.locale = tempLocale
+        let dateString = inputFormatter.string(from: dateOutput)
         
-        print(dateOutput)
+        return dateString
         
     }
     
@@ -1158,22 +1161,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     }
     
     func openReviews() {
-        
-        let shadowAnimator = UIViewPropertyAnimator(duration: 5, curve: .easeOut) {
-            
-            self.restaurantReviewsButton.layer.shadowPath = UIBezierPath(roundedRect: self.restaurantReviewsButton.bounds, cornerRadius: 90).cgPath
-            self.restaurantReviewsButton.layer.shadowColor = UIColor.black.cgColor
-            self.restaurantReviewsButton.layer.shadowOffset = CGSize(width: 0, height: 9)
-            self.restaurantReviewsButton.layer.shadowRadius = 10
-            self.restaurantReviewsButton.layer.shadowOpacity = 0.7
-            
-        }
-        
-        let noShadowAnimator = UIViewPropertyAnimator(duration: 5, curve: .easeOut) {
-            
-            self.restaurantReviewsButton.layer.shadowOpacity = 0.0
-            
-        }
         
         if reviewsContainerView.isHidden == true {
             
