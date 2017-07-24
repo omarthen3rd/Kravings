@@ -23,6 +23,15 @@ class FavouritesTableViewController: UITableViewController {
     var blurEffectView = UIVisualEffectView()
     var noDataLabel = UILabel()
     let defaults = UserDefaults.standard
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.tableView.estimatedRowHeight = 400
+        self.tableView.rowHeight = UITableViewAutomaticDimension
+        self.tableView.setNeedsLayout()
+        self.tableView.layoutIfNeeded()
+        self.tableView.reloadData()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -144,7 +153,33 @@ class FavouritesTableViewController: UITableViewController {
             
         }
         
+        cell.layoutIfNeeded()
+        
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        let del = UITableViewRowAction(style: .destructive, title: "Delete") { (action, index) in
+            
+            self.favourites.remove(at: indexPath.row)
+            
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: self.favourites)
+            self.defaults.set(encodedData, forKey: "favourites")
+            self.defaults.synchronize()
+            
+            self.tableView.reloadData()
+            
+        }
+        
+        return [del]
+        
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return UITableViewAutomaticDimension
+        
     }
 
     // Override to support conditional editing of the table view.

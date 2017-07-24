@@ -28,6 +28,16 @@ protocol CallAlert {
     
 }
 
+class ReviewsCell: UITableViewCell {
+    
+    @IBOutlet var name: UILabel!
+    @IBOutlet var rating: UILabel!
+    @IBOutlet var timeOfReview: UILabel!
+    @IBOutlet var textReview: UILabel!
+    @IBOutlet var userImage: UIImageView!
+    
+}
+
 class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDataSource, UITableViewDelegate, SettingsDelegate {
     
     @IBOutlet var mainBackgroundImage: UIImageView!
@@ -47,8 +57,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     @IBOutlet var restaurantReviewsButton: UIButton!
     @IBOutlet var restaurantFavouritesButton: UIButton!
     
+    @IBOutlet var bottomStackView: UIStackView!
+    @IBOutlet var reviewsHeaderView: UIVisualEffectView!
+    @IBOutlet var reviewsHeaderLabel: UILabel!
     @IBOutlet var categoryContainerView: UIView!
+    @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
+    @IBOutlet var reviewsTableView: UITableView!
     @IBAction func unwindToMenu(segue: UIStoryboardSegue) {}
     
     var delegate: CallAlert?
@@ -64,9 +79,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
 
     var accessToken = String()
     var viewIsOpen = false
+    var isReviewsOpen = false
     
     var restaurants = [Restaurant]()
     var favouriteRestaurants = [Restaurant]()
+    var currentReviews = [RestaurantReviews]()
     var restaurantIndex = 0
     
     var locationManager = CLLocationManager()
@@ -76,6 +93,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     var cardCenter = CGPoint()
     
     var restaurant: Restaurant!
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // self.navigationController?.isNavigationBarHidden = false
+        self.reviewsTableView.estimatedRowHeight = 400
+        self.reviewsTableView.rowHeight = UITableViewAutomaticDimension
+        self.reviewsTableView.setNeedsLayout()
+        self.reviewsTableView.layoutIfNeeded()
+        self.reviewsTableView.reloadData()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -129,6 +156,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.card = RestaurantCardALT(frame: CGRect(x: 16, y: 93, width: 343, height: 481))
         self.card.restaurant = self.restaurants[self.restaurantIndex]
         self.card.setDelegate(controller: self)
+        self.getReviews()
         
         let imgURL = URL(string: self.restaurants[self.restaurantIndex].imageURL)
         
@@ -154,16 +182,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 let margins = self.view.layoutMarginsGuide
                 
+                self.card.bottomAnchor.constraint(equalTo: self.bottomStackView.topAnchor, constant: -1).isActive = true
                 self.card.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 0).isActive = true
                 self.card.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: 0).isActive = true
                 self.card.topAnchor.constraint(equalTo: margins.topAnchor, constant: 30).isActive = true
-                self.card.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -156).isActive = true
+                // self.card.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -156).isActive = true
                 self.card.centerXAnchor.constraint(equalTo: margins.centerXAnchor, constant: 16)
                 self.card.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: 0)
                 
                 self.view.layoutIfNeeded()
                 self.card.layoutIfNeeded()
-                
                 
             }, completion: { (success) in
                 
@@ -196,10 +224,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 let margins = self.view.layoutMarginsGuide
                 
+                self.card.bottomAnchor.constraint(equalTo: self.bottomStackView.topAnchor, constant: -1).isActive = true
                 self.card.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 0).isActive = true
                 self.card.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: 0).isActive = true
                 self.card.topAnchor.constraint(equalTo: margins.topAnchor, constant: 30).isActive = true
-                self.card.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -156).isActive = true
+                // self.card.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -156).isActive = true
                 self.card.centerXAnchor.constraint(equalTo: margins.centerXAnchor, constant: 16)
                 self.card.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: 0)
                 
@@ -252,14 +281,22 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
         restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
         restaurantFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: .touchUpInside)
+        restaurantReviewsButton.addTarget(self, action: #selector(self.openReviews), for: .touchUpInside)
         
         forwardButton.tag = 1
         backButton.tag = 0
+        
+        reviewsContainerView.layer.cornerRadius = 15
+        reviewsContainerView.clipsToBounds = true
+        reviewsContainerView.isHidden = true
         
         // tableView
         
         categoriesTableView.tableFooterView = UIView(frame: .zero)
         categoriesTableView.backgroundColor = UIColor.clear
+        
+        reviewsTableView.tableFooterView = UIView(frame: .zero)
+        reviewsTableView.backgroundColor = UIColor.clear
         
         let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
@@ -267,7 +304,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         categoriesTableView.backgroundView = blurEffectView
         categoriesTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
-        // buttonsBlurBackground.effect = nil
+        let blurEffectView2 = UIVisualEffectView(effect: blurEffect)
+        blurEffectView2.frame = reviewsTableView.bounds
+        reviewsTableView.backgroundView = blurEffectView2
+        reviewsTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
         let indexPath = IndexPath(row: 0, section: 0)
         self.categoriesTableView.selectRow(at: indexPath, animated: true, scrollPosition: .bottom)
@@ -571,6 +611,61 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
+    func getReviews() {
+        
+        self.currentReviews.removeAll()
+        
+        let headers: HTTPHeaders = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        
+        Alamofire.request("https://api.yelp.com/v3/businesses/\(self.restaurants[self.restaurantIndex].id)/reviews", headers: headers).responseJSON { (Response) in
+            
+            if let value = Response.result.value {
+                
+                let json = JSON(value)
+                
+                print(json)
+                
+                for review in json["reviews"].arrayValue {
+                    
+                    let rating = review["rating"].intValue
+                    let name = review["user"]["name"].stringValue
+                    let imageUrl = review["user"]["image_url"].stringValue
+                    let reviewText = review["text"].stringValue
+                    let timeCreated = review["time_created"].stringValue
+                    
+                    self.formatDate(timeCreated)
+                    
+                    print("name: " + name)
+                    
+                    let newReview = RestaurantReviews(name: name, rating: rating, imageURL: imageUrl, reviewText: reviewText, reviewTime: timeCreated)
+                    self.currentReviews.append(newReview)
+                    
+                }
+                
+                DispatchQueue.main.async {
+                    
+                    self.reviewsTableView.reloadData()
+                    
+                }
+                
+            }
+            
+        }
+        
+        self.reviewsHeaderLabel.text = "\(self.restaurants[self.restaurantIndex].reviewCount) VOTES"
+        
+    }
+    
+    func formatDate(_ date: String) {
+        
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-mm-dd HH:MM:SS"
+        let dateOutput = inputFormatter.date(from: date)
+        
+        print(dateOutput)
+        
+    }
+    
     func handleSelectedRestaurant(_ category: String, onlySelect: Bool = false) {
         
         self.spinningView.startAnimating()
@@ -631,6 +726,24 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     func handleTap() {
         
+        if categoryContainerView.isHidden == true {
+            
+            self.categoryContainerView.isHidden = false
+            self.card.isHidden = true
+            self.backButton.isEnabled = false
+            self.forwardButton.isEnabled = false
+            
+        } else {
+            
+            self.categoryContainerView.isHidden = true
+            self.card.isHidden = false
+            self.backButton.isEnabled = true
+            self.forwardButton.isEnabled = true
+            
+        }
+        
+        /*
+        
         if viewIsOpen {
             
             UIView.animate(withDuration: 0.3, animations: { 
@@ -679,6 +792,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             self.viewIsOpen = true
             
         }
+         */
         
     }
     
@@ -1043,6 +1157,42 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
+    func openReviews() {
+        
+        let shadowAnimator = UIViewPropertyAnimator(duration: 5, curve: .easeOut) {
+            
+            self.restaurantReviewsButton.layer.shadowPath = UIBezierPath(roundedRect: self.restaurantReviewsButton.bounds, cornerRadius: 90).cgPath
+            self.restaurantReviewsButton.layer.shadowColor = UIColor.black.cgColor
+            self.restaurantReviewsButton.layer.shadowOffset = CGSize(width: 0, height: 9)
+            self.restaurantReviewsButton.layer.shadowRadius = 10
+            self.restaurantReviewsButton.layer.shadowOpacity = 0.7
+            
+        }
+        
+        let noShadowAnimator = UIViewPropertyAnimator(duration: 5, curve: .easeOut) {
+            
+            self.restaurantReviewsButton.layer.shadowOpacity = 0.0
+            
+        }
+        
+        if reviewsContainerView.isHidden == true {
+            
+            self.reviewsContainerView.isHidden = false
+            self.card.isHidden = true
+            self.backButton.isEnabled = false
+            self.forwardButton.isEnabled = false
+            
+        } else {
+            
+            self.reviewsContainerView.isHidden = true
+            self.card.isHidden = false
+            self.backButton.isEnabled = true
+            self.forwardButton.isEnabled = true
+            
+        }
+        
+    }
+    
     func callBusiness() {
         
         restaurant = self.restaurants[self.restaurantIndex]
@@ -1207,30 +1357,75 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return self.categories.count
+        if tableView == categoriesTableView {
+            
+            return self.categories.count
+            
+        } else {
+         
+            return self.currentReviews.count
+            
+        }
         
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
-        
-        cell.categoryLabel.text = categories[indexPath.row]
-        
-        let newSelectionView = UIVisualEffectView(frame: cell.bounds)
-        newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
-        cell.selectedBackgroundView = newSelectionView
-        
-        return cell
+        if tableView == categoriesTableView {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
+            
+            cell.categoryLabel.text = categories[indexPath.row]
+            
+            let newSelectionView = UIVisualEffectView(frame: cell.bounds)
+            newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
+            cell.selectedBackgroundView = newSelectionView
+            
+            return cell
+            
+        } else {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ReviewsCell", for: indexPath) as! ReviewsCell
+            
+            let currentReview = currentReviews[indexPath.row]
+            let imageURL = URL(string: currentReview.imageURL)
+            
+            if let urlThing = imageURL {
+                cell.userImage.sd_setImage(with: urlThing, placeholderImage: UIImage(named: "maps"))
+            } else {
+                cell.userImage.image = #imageLiteral(resourceName: "maps")
+            }
+            
+            cell.userImage.layer.cornerRadius = 6
+            cell.userImage.clipsToBounds = true
+            
+            cell.name.text = currentReview.name
+            cell.rating.text = "\(currentReview.rating)"
+            cell.textReview.text = currentReview.reviewText
+            cell.timeOfReview.text = currentReview.reviewTime
+            
+            return cell
+            
+        }
         
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
+        if tableView == categoriesTableView {
+            
+            let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
+            
+            self.selectedCategory = cell.categoryLabel.text!
+            self.handleSelectedRestaurant(self.selectedCategory)
+            
+        }
         
-        self.selectedCategory = cell.categoryLabel.text!
-        self.handleSelectedRestaurant(self.selectedCategory)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return UITableViewAutomaticDimension
         
     }
     

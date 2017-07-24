@@ -137,3 +137,13 @@ class RestaurantHours: NSObject, NSCoding {
     }
     
 }
+
+struct RestaurantReviews {
+    
+    var name: String
+    var rating: Int
+    var imageURL: String
+    var reviewText: String
+    var reviewTime: String
+    
+}

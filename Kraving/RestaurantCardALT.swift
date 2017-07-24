@@ -70,6 +70,9 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     @IBOutlet var restaurantPriceRange: UILabel!
     @IBOutlet var restaurantDistance: UILabel!
     
+    @IBOutlet var alertView: UIVisualEffectView!
+    @IBOutlet var alertViewLabel: UILabel!
+    @IBOutlet var alertViewImage: UIImageView!
     @IBOutlet var buttonsBlurBackground: UIVisualEffectView!
     @IBOutlet var restaurantPhoneButton: UIButton!
     @IBOutlet var restaurantMapsButton: UIButton!
@@ -95,6 +98,11 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     var restaurant: Restaurant! {
         
         didSet {
+            
+            alertView.effect = nil
+            
+            alertView.layer.cornerRadius = 10
+            alertView.clipsToBounds = true
             
             featuredImageView.sd_setImage(with: URL(string: restaurant.imageURL))
             featuredImageView.contentMode = .scaleAspectFill
@@ -723,10 +731,42 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     
     func showAlertView(_ alreadyInFav: Bool) {
         
+        let blurAnimator = UIViewPropertyAnimator(duration: 0.3, curve: .linear) {
+            
+            self.alertView.isHidden = false
+            self.alertViewLabel.alpha = 1
+            self.alertViewImage.alpha = 1
+            self.alertView.effect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
+            
+        }
+        blurAnimator.addCompletion { (position) in
+            
+            UIView.animate(withDuration: 0.3, delay: 2, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
+                
+                self.alertView.effect = nil
+                self.alertViewLabel.alpha = 0
+                self.alertViewImage.alpha = 0
+                
+            }, completion: { (success) in
+                
+                self.alertView.isHidden = true
+                
+            })
+            
+        }
+        
         if alreadyInFav {
-            print("already in favourites")
+            
+            alertViewImage.image = UIImage(named: "favouritesAlreadyIn")?.withRenderingMode(.alwaysTemplate)
+            alertViewLabel.text = "Already In Favourites"
+            blurAnimator.startAnimation()
+
         } else {
-            print("added to favourites")
+            
+            alertViewImage.image = UIImage(named: "favouritesAddedIn")?.withRenderingMode(.alwaysTemplate)
+            alertViewLabel.text = "Added To Favourites"
+            blurAnimator.startAnimation()
+            
         }
         
     }
