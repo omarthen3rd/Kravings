@@ -14,6 +14,71 @@ import SystemConfiguration
 import CoreLocation
 import MapKit
 
+extension UIButton {
+    
+    func setBackgroundColor(color: UIColor, forState: UIControlState) {
+        
+        UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
+        UIGraphicsGetCurrentContext()!.setFillColor(color.cgColor)
+        UIGraphicsGetCurrentContext()!.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+        let colorImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        self.setBackgroundImage(colorImage, for: forState)
+        
+    }
+    
+}
+
+extension NSMutableAttributedString {
+    
+    func setColorForText(_ textToFind: String, with color: UIColor) {
+        let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
+        if range.location != NSNotFound {
+            addAttribute(NSForegroundColorAttributeName, value: color, range: range)
+        }
+    }
+    
+    func setBoldForText(_ textToFind: String) {
+        let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
+        if range.location != NSNotFound {
+            let attrs = [NSFontAttributeName : UIFont.boldSystemFont(ofSize: 18)]
+            addAttributes(attrs, range: range)
+        }
+        
+    }
+    
+}
+
+extension String {
+    
+    init(htmlEncodedString: String) {
+        do {
+            let encodedData = htmlEncodedString.data(using: String.Encoding.utf8)!
+            let attributedOptions : [String: AnyObject] = [
+                NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType as AnyObject,
+                NSCharacterEncodingDocumentAttribute: NSNumber(value: String.Encoding.utf8.rawValue)
+            ]
+            let attributedString = try NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil)
+            self.init(attributedString.string)!
+        } catch {
+            fatalError("Unhandled error: \(error)")
+        }
+    }
+    
+    var first: String {
+        return String(characters.prefix(1))
+    }
+    
+    var last: String {
+        return String(characters.suffix(1))
+    }
+    
+    var uppercaseFirst: String {
+        return first.uppercased() + String(characters.dropFirst())
+    }
+    
+}
+
 extension UIColor {
     
     static let silverBlue = UIColor(red:0.96, green:0.96, blue:0.98, alpha:1.0)
@@ -60,6 +125,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     @IBOutlet var bottomStackView: UIStackView!
     @IBOutlet var reviewsHeaderView: UIVisualEffectView!
     @IBOutlet var reviewsHeaderLabel: UILabel!
+    @IBOutlet var reviewsSubHeaderLabel: UILabel!
     @IBOutlet var categoryContainerView: UIView!
     @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
@@ -277,11 +343,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.categoriesButton.addTarget(self, action: #selector(handleTap), for: .touchUpInside)
         self.forwardButton.addTarget(self, action: #selector(goForward), for: .touchUpInside)
         
-        restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
-        restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
-        restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
-        restaurantFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: .touchUpInside)
-        restaurantReviewsButton.addTarget(self, action: #selector(self.openReviews), for: .touchUpInside)
+        // restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
+        // restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
+        // restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
+        // restaurantFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: .touchUpInside)
+        // restaurantReviewsButton.addTarget(self, action: #selector(self.openReviews), for: .touchUpInside)
         
         forwardButton.tag = 1
         backButton.tag = 0
@@ -298,7 +364,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         reviewsTableView.tableFooterView = UIView(frame: .zero)
         reviewsTableView.backgroundColor = UIColor.clear
         
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = categoriesTableView.bounds
         categoriesTableView.backgroundView = blurEffectView
@@ -351,28 +417,36 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             self.restaurants.removeAll()
             self.restaurantIndex = 0
-            self.getCategories()
-            self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
+            self.getCategories(completionHandler: { (success) in
                 
                 if success {
                     
-                    self.loadInterface(completionHandler: { (success) in
+                    self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
                         
-                        self.loadCard(self.forwardButton)
-                        
+                        if success {
+                            
+                            self.loadInterface(completionHandler: { (success) in
+                                
+                                self.loadCard(self.forwardButton)
+                                
+                            })
+                            
+                        } else {
+                            
+                            self.loadInterface(completionHandler: { (success) in
+                                
+                                self.spinningView.stopAnimating()
+                                self.noresultsLabel.text = "No Results In Your Search Radius"
+                                self.noresultsLabel.isHidden = false
+                                
+                            })
+                            
+                        }
                     })
                     
-                } else {
-                    
-                    self.loadInterface(completionHandler: { (success) in
-                        
-                        self.spinningView.stopAnimating()
-                        self.noresultsLabel.text = "No Results In Your Search Radius"
-                        self.noresultsLabel.isHidden = false
-                        
-                    })
                     
                 }
+                
             })
         }
     }
@@ -406,7 +480,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
-    func getCategories() {
+    func getCategories(completionHandler: @escaping (Bool) -> ()) {
         
         let url = "https://www.yelp.com/developers/documentation/v3/all_category_list/categories.json"
         
@@ -433,6 +507,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     self.categoriesTableView.reloadData()
                 }
                 self.selectedCategory = "All Types"
+                
+                completionHandler(true)
+                
+            } else {
+                
+                completionHandler(false)
+                
             }
             
         }
@@ -623,8 +704,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 let json = JSON(value)
                 
-                print(json)
-                
                 for review in json["reviews"].arrayValue {
                     
                     let rating = review["rating"].intValue
@@ -650,7 +729,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
         }
         
-        self.reviewsHeaderLabel.text = "\(self.restaurants[self.restaurantIndex].reviewCount) VOTES"
+        self.reviewsHeaderLabel.text = "\(self.restaurants[self.restaurantIndex].reviewCount) Votes"
+         self.reviewsSubHeaderLabel.text = "\(self.restaurants[self.restaurantIndex].rating) Stars Average"
         
     }
     
@@ -727,21 +807,52 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
-    func handleTap() {
+    func openReviews() {
         
-        if categoryContainerView.isHidden == true {
+        if reviewsContainerView.isHidden == true {
             
-            self.categoryContainerView.isHidden = false
+            self.reviewsContainerView.isHidden = false
             self.card.isHidden = true
             self.backButton.isEnabled = false
             self.forwardButton.isEnabled = false
             
         } else {
             
-            self.categoryContainerView.isHidden = true
+            self.reviewsContainerView.isHidden = true
             self.card.isHidden = false
             self.backButton.isEnabled = true
             self.forwardButton.isEnabled = true
+            
+        }
+        
+    }
+    
+    func handleTap() {
+        
+        if reviewsContainerView.isHidden == false && categoryContainerView.isHidden == true {
+            
+            // deal with it here
+            self.reviewsContainerView.isHidden = true
+            self.categoryContainerView.isHidden = false
+            
+            
+        } else {
+            
+            if categoryContainerView.isHidden == true {
+                
+                self.categoryContainerView.isHidden = false
+                self.card.isHidden = true
+                self.backButton.isEnabled = false
+                self.forwardButton.isEnabled = false
+                
+            } else {
+                
+                self.categoryContainerView.isHidden = true
+                self.card.isHidden = false
+                self.backButton.isEnabled = true
+                self.forwardButton.isEnabled = true
+                
+            }
             
         }
         
@@ -970,7 +1081,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.buttonsBlurBackground.effect = nil
             })
             
-            if viewCard.center.x < 16 {
+            if viewCard.center.x < 40 {
                 // move to left, go forward
                 if self.restaurants.endIndex == self.restaurantIndex {
                     
@@ -1008,7 +1119,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     
                 }
                 
-            } else if viewCard.center.x > (view.frame.width - 16) {
+            } else if viewCard.center.x > (view.frame.width - 40) {
                 // move to right side, go back
                 
                 if self.restaurantIndex == 0 {
@@ -1155,26 +1266,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 }
                 
             }
-            
-        }
-        
-    }
-    
-    func openReviews() {
-        
-        if reviewsContainerView.isHidden == true {
-            
-            self.reviewsContainerView.isHidden = false
-            self.card.isHidden = true
-            self.backButton.isEnabled = false
-            self.forwardButton.isEnabled = false
-            
-        } else {
-            
-            self.reviewsContainerView.isHidden = true
-            self.card.isHidden = false
-            self.backButton.isEnabled = true
-            self.forwardButton.isEnabled = true
             
         }
         
@@ -1378,9 +1469,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             let imageURL = URL(string: currentReview.imageURL)
             
             if let urlThing = imageURL {
-                cell.userImage.sd_setImage(with: urlThing, placeholderImage: UIImage(named: "maps"))
+                cell.userImage.sd_setImage(with: urlThing, placeholderImage: UIImage(named: "emptyProfile"))
             } else {
-                cell.userImage.image = #imageLiteral(resourceName: "maps")
+                cell.userImage.image = #imageLiteral(resourceName: "emptyProfile")
             }
             
             cell.userImage.layer.cornerRadius = 6

@@ -15,6 +15,10 @@ class FavouritesCell: UITableViewCell {
     @IBOutlet var restaurantTitle: UILabel!
     @IBOutlet var restaurantStars: CosmosView!
     
+    override func didMoveToSuperview() {
+        self.layoutIfNeeded()
+    }
+    
 }
 
 class FavouritesTableViewController: UITableViewController {
@@ -26,7 +30,7 @@ class FavouritesTableViewController: UITableViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.tableView.estimatedRowHeight = 400
+        self.tableView.estimatedRowHeight = 280
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.setNeedsLayout()
         self.tableView.layoutIfNeeded()
@@ -46,7 +50,7 @@ class FavouritesTableViewController: UITableViewController {
         loadFavourites()
         
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -226,7 +230,7 @@ extension FavouritesTableViewController: UIViewControllerPreviewingDelegate {
                 return nil
         }
         
-        guard let detailVC = storyboard?.instantiateViewController(withIdentifier: "FavouritesDetailTableViewController") as? FavouritesDetailTableViewController else { return nil }
+        guard let detailVC = storyboard?.instantiateViewController(withIdentifier: "FavouritesDetailContainerViewController") as? FavouritesDetailContainerViewController else { return nil }
         
         let favDetail = favourites[indexPath.row]
         detailVC.restaurant = favDetail

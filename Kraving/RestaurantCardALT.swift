@@ -12,36 +12,6 @@ import SwiftyJSON
 import PhoneNumberKit
 import Cosmos
 
-extension String {
-    
-    init(htmlEncodedString: String) {
-        do {
-            let encodedData = htmlEncodedString.data(using: String.Encoding.utf8)!
-            let attributedOptions : [String: AnyObject] = [
-                NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType as AnyObject,
-                NSCharacterEncodingDocumentAttribute: NSNumber(value: String.Encoding.utf8.rawValue)
-            ]
-            let attributedString = try NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil)
-            self.init(attributedString.string)!
-        } catch {
-            fatalError("Unhandled error: \(error)")
-        }
-    }
-    
-    var first: String {
-        return String(characters.prefix(1))
-    }
-    
-    var last: String {
-        return String(characters.suffix(1))
-    }
-    
-    var uppercaseFirst: String {
-        return first.uppercased() + String(characters.dropFirst())
-    }
-    
-}
-
 class Alert {
     
     func msg(title: String, message: String) {
@@ -58,7 +28,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     
     @IBOutlet var contentView: UIView!
     @IBOutlet var mainTableView: UITableView!
-    @IBOutlet var containerMainView: UIView!
     @IBOutlet var mainView: UIView!
     @IBOutlet var mainBlurView: UIVisualEffectView!
     @IBOutlet var gradientView: UIView!
@@ -67,18 +36,11 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     @IBOutlet var restaurantName: UILabel!
     @IBOutlet var restaurantCategory: UILabel!
     @IBOutlet var restaurantStars: CosmosView!
-    @IBOutlet var restaurantPriceRange: UILabel!
-    @IBOutlet var restaurantDistance: UILabel!
+    @IBOutlet var restaurantWebsite: UIButton!
     
     @IBOutlet var alertView: UIVisualEffectView!
     @IBOutlet var alertViewLabel: UILabel!
     @IBOutlet var alertViewImage: UIImageView!
-    @IBOutlet var buttonsBlurBackground: UIVisualEffectView!
-    @IBOutlet var restaurantPhoneButton: UIButton!
-    @IBOutlet var restaurantMapsButton: UIButton!
-    @IBOutlet var restaurantWebsiteButton: UIButton!
-    @IBOutlet var restaurantReviewsButton: UIButton!
-    @IBOutlet var restaurantFavouritesButton: UIButton!
     
     var didAnimateView = false
     
@@ -92,7 +54,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     
     let phoneNumberKit = PhoneNumberKit()
     var information = [String]()
-    var headers = ["ADDRESS", "CONTACT", "TRANSACTIONS"]
+    var headers = ["ADDRESS", "PHONE", "TRANSACTIONS"]
     var distanceToMoveBy = CGFloat()
     
     var restaurant: Restaurant! {
@@ -108,15 +70,26 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             featuredImageView.contentMode = .scaleAspectFill
             
             restaurantName.text = restaurant.name
-            restaurantCategory.text = restaurant.category
+            
+            // start attributed label
+            
+            let priceText = checkPrice(restaurant.priceRange)
+            let multipleText = checkPrice(restaurant.priceRange) + " · " + restaurant.category + " · " + convert(restaurant.distance)
+            
+            let attributedString = NSMutableAttributedString(string: multipleText)
+            attributedString.setColorForText(priceText, with: UIColor.green)
+            attributedString.setBoldForText(priceText)
+            
+            restaurantCategory.attributedText = attributedString
+            
+            // end attributed label
+            
             restaurantStars.rating = Double(restaurant.rating)
             restaurantStars.settings.emptyBorderWidth = 0
             restaurantStars.settings.emptyBorderColor = UIColor.clear
             restaurantStars.settings.emptyColor = UIColor.lightText
             restaurantStars.settings.updateOnTouch = false
-            restaurantStars.settings.starSize = 22
-            restaurantPriceRange.text = checkPrice(restaurant.priceRange)
-            restaurantDistance.text = convert(restaurant.distance)
+            restaurantStars.settings.starSize = 26
             
             let address = "\(restaurant.address) \n\(restaurant.city), \(restaurant.state) \n\(restaurant.country)"
             let phoneNumber = returnFormatted(restaurant.phone)
@@ -127,7 +100,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             returnTimings() // appends timings
             
             self.mainTableView.register(UINib(nibName: "RestaurantTableViewCell", bundle: nil), forCellReuseIdentifier: "RestaurantTableViewCell")
-            self.mainTableView.estimatedRowHeight = 400
+            self.mainTableView.estimatedRowHeight = 60
             self.mainTableView.rowHeight = UITableViewAutomaticDimension
             self.mainTableView.setNeedsLayout()
             self.mainTableView.layoutIfNeeded()
@@ -138,7 +111,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             self.mainTableView.dataSource = self
             
             self.mainTableView.backgroundColor = UIColor.clear
-            self.buttonsBlurBackground.bounds.origin.y -= self.buttonsBlurBackground.bounds.size.height
             
             DispatchQueue.main.async {
              
@@ -155,15 +127,12 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             self.gradientView.layoutSubviews()
             
-            restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
-            restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
-            restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
-            restaurantFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: .touchUpInside)
+            restaurantWebsite.addTarget(self, action: #selector(self.openWebsite), for: UIControlEvents.touchUpInside)
             
             tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
             // panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
             // mainView.addGestureRecognizer(panGesture)
-            containerMainView.addGestureRecognizer(tapGesture)
+            mainView.addGestureRecognizer(tapGesture)
             
         }
         
@@ -183,8 +152,8 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         self.gradient.frame = self.gradientView.bounds
         
-        let mainComponents = self.restaurantName.bounds.height + self.restaurantCategory.bounds.height + restaurantPriceRange.bounds.height + restaurantDistance.bounds.height
-        let mainConstraints = CGFloat(34)
+        let mainComponents = self.restaurantName.bounds.height + self.restaurantCategory.bounds.height
+        let mainConstraints = CGFloat(21) // constraints of title and category
         self.mainView.bounds.origin.y = (mainComponents + mainConstraints) - self.bounds.height
         self.distanceToMoveBy = self.mainView.bounds.origin.y
         
@@ -226,7 +195,11 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         var finalString = String()
         
-        if distance.value < 1 {
+        if distance.value == 0 {
+            
+            finalString = measurementFormatter.string(from: distance)
+            
+        } else if distance.value < 1 {
             
             numberFormatter.maximumFractionDigits = 2
             finalString = "0" + measurementFormatter.string(from: distance)
@@ -238,12 +211,23 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
         }
         
-        return finalString + " away from you"
+        return finalString
         
     }
     
     func checkPrice(_ range: String) -> String {
         
+        if range == "" {
+            
+            return "Price Unavailable"
+            
+        } else {
+            
+            return "\(range)"
+            
+        }
+        
+        /*
         if range.characters.count == 1 {
             
             return "\(range) - Relatively Cheap"
@@ -260,7 +244,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             return "Price Range Is Unknown"
             
-        }
+        } */
         
     }
     
@@ -341,7 +325,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             let parsedPhoneNumber = try phoneNumberKit.parse(phoneNumber)
             let formattedNumber = phoneNumberKit.format(parsedPhoneNumber, toType: .international)
-            return "Phone: \(formattedNumber)"
+            return "\(formattedNumber)"
             
         } catch {
             
@@ -467,7 +451,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                 
                 animator = UIViewPropertyAnimator(duration: 0.8, curve: .linear, animations: {
                     self.gradient.opacity = 1
-                    self.buttonsBlurBackground.alpha = 0.0
                     self.mainBlurView.effect = nil
                     self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: 335)
                 })
@@ -496,8 +479,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeOut, animations: {
                 self.gradient.opacity = 1
-                // self.buttonsBlurBackground.alpha = 0.0
-                self.buttonsBlurBackground.bounds.origin.y -= self.buttonsBlurBackground.bounds.size.height
                 self.mainBlurView.effect = nil
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * -1))
             })
@@ -508,8 +489,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeOut, animations: {
                 self.gradient.opacity = 0
-                // self.buttonsBlurBackground.alpha = 1.0
-                self.buttonsBlurBackground.bounds.origin.y += self.buttonsBlurBackground.bounds.size.height
                 self.mainBlurView.effect = UIBlurEffect(style: UIBlurEffectStyle.dark)
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * 1))
             })
@@ -778,6 +757,25 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "RestaurantTableViewCell", for: indexPath) as! RestaurantTableViewCell
+        
+        cell.buttonOptional.titleLabel?.numberOfLines = 1
+        cell.buttonOptional.setTitleColor(UIColor.black, for: UIControlState.normal)
+        
+        if headers[indexPath.row] == "ADDRESS" {
+            
+            cell.buttonOptional.setTitle("Directions", for: UIControlState.normal)
+            cell.buttonOptional.addTarget(self, action: #selector(self.openMaps), for: UIControlEvents.touchUpInside)
+            
+        } else if headers[indexPath.row] == "PHONE" {
+            
+            cell.buttonOptional.setTitle("Call", for: UIControlState.normal)
+            cell.buttonOptional.addTarget(self, action: #selector(self.callBusiness), for: UIControlEvents.touchUpInside)
+            
+        } else {
+            
+            cell.buttonOptional.isHidden = true
+            
+        }
         
         cell.backgroundColor = UIColor.clear
         cell.contentLabel?.text = "\(information[indexPath.row])"

@@ -16,8 +16,8 @@ protocol SettingsDelegate {
 
 class UIPickerCell: UITableViewCell {
     
+    @IBOutlet var cellName: UILabel!
     @IBOutlet var label: UILabel!
-    @IBOutlet var appIcon: UIImageView!
     @IBOutlet var picker: UIPickerView!
     
     var arr = [String]()
@@ -62,7 +62,7 @@ extension UIPickerCell: UIPickerViewDelegate, UIPickerViewDataSource {
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
         let name = arr[row]
-        appIcon.image = UIImage(named: name)
+        // appIcon.image = UIImage(named: name)
         label.text = name
         
         if arr.contains("Safari") {
@@ -262,8 +262,9 @@ class SettingsTableViewController: UITableViewController {
                 
                 defaults.set("Browser", forKey: "whichCell")
                 
+                cell.cellName.text = "Default Maps"
                 cell.label.text = defaults.object(forKey: "defaultMaps") as? String
-                cell.appIcon?.image = UIImage(named: defaults.object(forKey: "defaultMaps") as! String) ?? UIImage(named: "Apple Maps")
+                // cell.appIcon?.image = UIImage(named: defaults.object(forKey: "defaultMaps") as! String) ?? UIImage(named: "Apple Maps")
                 
                 return cell
                 
@@ -273,8 +274,9 @@ class SettingsTableViewController: UITableViewController {
                 
                 defaults.set("Maps", forKey: "whichCell")
                 
+                cell.cellName.text = "Default Browser"
                 cell.label.text = defaults.object(forKey: "defaultBrowser") as? String
-                cell.appIcon?.image = UIImage(named: defaults.object(forKey: "defaultBrowser") as! String) ?? UIImage(named: "Safari")
+                // cell.appIcon?.image = UIImage(named: defaults.object(forKey: "defaultBrowser") as! String) ?? UIImage(named: "Safari")
                 
                 return cell
                 

@@ -30,6 +30,22 @@ class KravingUITests: XCTestCase {
     
     func testExample() {
         // Use recording to get started writing UI tests.
+        
+        let app = XCUIApplication()
+        app.buttons["favourites"].tap()
+        
+        let rating24VotesElement = app.tables.otherElements["Rating 24 VOTES"]
+        rating24VotesElement.tap()
+        rating24VotesElement.swipeUp()
+        
+        let element = app.children(matching: .window).element(boundBy: 0).children(matching: .other).element(boundBy: 1)
+        element.tables.staticTexts["ADDRESS"].swipeUp()
+        
+        let reviewsButton = element.buttons["reviews"]
+        reviewsButton.tap()
+        reviewsButton.tap()
+        app.navigationBars["Kraving.FavouritesDetailContainerView"].buttons["Favourites"].tap()
+        app.navigationBars["Favourites"].buttons["Done"].tap()
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
     
