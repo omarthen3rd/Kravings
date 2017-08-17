@@ -188,6 +188,10 @@ SWIFT_CLASS("_TtC14PhoneNumberKit14PhoneNumberKit")
 SWIFT_CLASS("_TtC14PhoneNumberKit20PhoneNumberTextField")
 @interface PhoneNumberTextField : UITextField <UITextFieldDelegate>
 @property (nonatomic, readonly, strong) PhoneNumberKit * _Nonnull phoneNumberKit;
+/// Override setText so number will be automatically formatted when setting text by code
+@property (nonatomic, copy) NSString * _Nullable text;
+/// allows text to be set without formatting
+- (void)setTextUnformattedWithNewValue:(NSString * _Nullable)newValue;
 /// Override region to set a custom region. Automatically uses the default region code.
 @property (nonatomic, copy) NSString * _Nonnull defaultRegion;
 @property (nonatomic) BOOL withPrefix;

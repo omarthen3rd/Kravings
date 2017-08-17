@@ -12,7 +12,7 @@ import Alamofire
 import SDWebImage
 import SystemConfiguration
 import CoreLocation
-import MapKit
+import Cosmos
 
 extension UIButton {
     
@@ -25,6 +25,22 @@ extension UIButton {
         UIGraphicsEndImageContext()
         self.setBackgroundImage(colorImage, for: forState)
         
+    }
+    
+}
+
+extension UIView {
+    
+    func applyGradient(colours: [UIColor]) -> Void {
+        self.applyGradient(colours: colours, locations: nil)
+    }
+    
+    func applyGradient(colours: [UIColor], locations: [NSNumber]?) -> Void {
+        let gradient: CAGradientLayer = CAGradientLayer()
+        gradient.frame = self.bounds
+        gradient.colors = colours.map { $0.cgColor }
+        gradient.locations = locations
+        self.layer.insertSublayer(gradient, at: 0)
     }
     
 }
@@ -103,7 +119,7 @@ class ReviewsCell: UITableViewCell {
     
 }
 
-class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDataSource, UITableViewDelegate, SettingsDelegate {
+class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDataSource, UITableViewDelegate, SettingsDelegate, ShowReviewView {
     
     @IBOutlet var mainBackgroundImage: UIImageView!
     @IBOutlet var backButton: UIButton!
@@ -124,8 +140,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     @IBOutlet var bottomStackView: UIStackView!
     @IBOutlet var reviewsHeaderView: UIVisualEffectView!
-    @IBOutlet var reviewsHeaderLabel: UILabel!
-    @IBOutlet var reviewsSubHeaderLabel: UILabel!
+    @IBOutlet var reviewsDoneButton: UIButton!
+    @IBOutlet var reviewsStarView: CosmosView!
     @IBOutlet var categoryContainerView: UIView!
     @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
@@ -134,6 +150,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     var delegate: CallAlert?
     
+    var animator: UIViewPropertyAnimator!
     var card = RestaurantCardALT()
     var panGesture = UIPanGestureRecognizer()
     var defaults = UserDefaults.standard
@@ -222,6 +239,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.card = RestaurantCardALT(frame: CGRect(x: 16, y: 93, width: 343, height: 481))
         self.card.restaurant = self.restaurants[self.restaurantIndex]
         self.card.setDelegate(controller: self)
+        self.card.reviewDelegate = self
         self.getReviews()
         
         let imgURL = URL(string: self.restaurants[self.restaurantIndex].imageURL)
@@ -342,6 +360,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
         self.categoriesButton.addTarget(self, action: #selector(handleTap), for: .touchUpInside)
         self.forwardButton.addTarget(self, action: #selector(goForward), for: .touchUpInside)
+        
+        self.reviewsDoneButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
         
         // restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
         // restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
@@ -729,8 +749,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
         }
         
-        self.reviewsHeaderLabel.text = "\(self.restaurants[self.restaurantIndex].reviewCount) Votes"
-         self.reviewsSubHeaderLabel.text = "\(self.restaurants[self.restaurantIndex].rating) Stars Average"
+        self.reviewsStarView.rating = Double(self.restaurants[self.restaurantIndex].rating)
+        self.reviewsStarView.text = "\(self.restaurants[self.restaurantIndex].reviewCount) VOTES"
+        self.reviewsStarView.settings.emptyBorderWidth = 0
+        self.reviewsStarView.settings.emptyBorderColor = UIColor.clear
+        self.reviewsStarView.settings.emptyColor = UIColor.darkGray
+        self.reviewsStarView.settings.updateOnTouch = false
+        self.reviewsStarView.settings.starSize = 21
+        self.reviewsStarView.contentMode = .right
         
     }
     
@@ -804,26 +830,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
         }
         
-        
-    }
-    
-    func openReviews() {
-        
-        if reviewsContainerView.isHidden == true {
-            
-            self.reviewsContainerView.isHidden = false
-            self.card.isHidden = true
-            self.backButton.isEnabled = false
-            self.forwardButton.isEnabled = false
-            
-        } else {
-            
-            self.reviewsContainerView.isHidden = true
-            self.card.isHidden = false
-            self.backButton.isEnabled = true
-            self.forwardButton.isEnabled = true
-            
-        }
         
     }
     
@@ -1030,6 +1036,41 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
+    func newHandlePan(_ recognizer: UIPanGestureRecognizer) {
+        
+        let viewCard = recognizer.view!
+        let point = recognizer.translation(in: view)
+        let xFromCenter = viewCard.center.x - view.center.x
+        
+        switch recognizer.state {
+            
+        case .began:
+            print("began")
+            
+            if viewCard.center.x < 40 {
+                
+                // left
+                
+                animator = UIViewPropertyAnimator(duration: 0.8, curve: .linear, animations: { 
+                    
+                    viewCard.frame = viewCard.frame.offsetBy(dx: -400, dy: 0)
+                    viewCard.alpha = 0
+                    
+                })
+                
+            }
+            
+        case .changed:
+            let translation = recognizer.translation(in: view)
+            animator.fractionComplete = translation.x / view.frame.width
+         
+        default:
+            print("default stuff happened")
+            
+        }
+        
+    }
+    
     func handlePan(_ recognizer: UIPanGestureRecognizer) {
         
         let viewCard = recognizer.view!
@@ -1055,16 +1096,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         } else {
             UIView.animate(withDuration: 0.3, animations: {
                 self.statusBarBlur.effect = nil
-            })
-        }
-        
-        if viewCard.frame.intersects(self.buttonsBlurBackground.frame) {
-            UIView.animate(withDuration: 0.3, animations: {
-                self.buttonsBlurBackground.effect = UIBlurEffect(style: UIBlurEffectStyle.light)
-            })
-        } else {
-            UIView.animate(withDuration: 0.3, animations: {
-                self.buttonsBlurBackground.effect = nil
             })
         }
         
@@ -1212,6 +1243,26 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.forwardButton.isEnabled = false
                 
             }
+            
+        }
+        
+    }
+    
+    func openReviewView() {
+        
+        if reviewsContainerView.isHidden == true {
+            
+            self.reviewsContainerView.isHidden = false
+            self.card.isHidden = true
+            self.backButton.isEnabled = false
+            self.forwardButton.isEnabled = false
+            
+        } else {
+            
+            self.reviewsContainerView.isHidden = true
+            self.card.isHidden = false
+            self.backButton.isEnabled = true
+            self.forwardButton.isEnabled = true
             
         }
         
@@ -1455,9 +1506,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             cell.categoryLabel.text = categories[indexPath.row]
             
+            let selView = UIView(frame: cell.bounds)
+            selView.backgroundColor = UIColor.blue
+            
             let newSelectionView = UIVisualEffectView(frame: cell.bounds)
             newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
-            cell.selectedBackgroundView = newSelectionView
+            cell.selectedBackgroundView = selView
             
             return cell
             
@@ -1493,9 +1547,22 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         if tableView == categoriesTableView {
             
             let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
+            cell.categoryLabel.textColor = UIColor.white
+            
             
             self.selectedCategory = cell.categoryLabel.text!
             self.handleSelectedRestaurant(self.selectedCategory)
+            
+        }
+        
+    }
+    
+    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        
+        if tableView == categoriesTableView {
+            
+            let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
+            cell.categoryLabel.textColor = UIColor.darkGray
             
         }
         

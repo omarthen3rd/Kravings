@@ -11,6 +11,7 @@ import Alamofire
 import SwiftyJSON
 import PhoneNumberKit
 import Cosmos
+import DeviceKit
 
 class Alert {
     
@@ -24,10 +25,17 @@ class Alert {
     
 }
 
+protocol ShowReviewView {
+    
+    func openReviewView()
+    
+}
+
 class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, CallAlert {
     
     @IBOutlet var contentView: UIView!
     @IBOutlet var mainTableView: UITableView!
+    @IBOutlet var containerView: UIView!
     @IBOutlet var mainView: UIView!
     @IBOutlet var mainBlurView: UIVisualEffectView!
     @IBOutlet var gradientView: UIView!
@@ -35,8 +43,16 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     @IBOutlet var featuredImageView: UIImageView!
     @IBOutlet var restaurantName: UILabel!
     @IBOutlet var restaurantCategory: UILabel!
+    @IBOutlet var restaurantPriceAndDistance: UILabel!
     @IBOutlet var restaurantStars: CosmosView!
-    @IBOutlet var restaurantWebsite: UIButton!
+    
+    @IBOutlet var addToFavouritesButton: UIButton!
+    @IBOutlet var websiteButton: UIButton!
+    @IBOutlet var reviewsButton: UIButton!
+    @IBOutlet var directionsButton: UIButton!
+    @IBOutlet var callButton: UIButton!
+    @IBOutlet var bottomStackView: UIStackView!
+    @IBOutlet var stackViewBlur: UIVisualEffectView!
     
     @IBOutlet var alertView: UIVisualEffectView!
     @IBOutlet var alertViewLabel: UILabel!
@@ -46,6 +62,8 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     
     var defaults = UserDefaults.standard
     
+    var reviewDelegate: ShowReviewView?
+    
     var panGesture = UIPanGestureRecognizer()
     var tapGesture = UITapGestureRecognizer()
     
@@ -53,6 +71,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     var gradient = CAGradientLayer()
     
     let phoneNumberKit = PhoneNumberKit()
+    let device = Device()
     var information = [String]()
     var headers = ["ADDRESS", "PHONE", "TRANSACTIONS"]
     var distanceToMoveBy = CGFloat()
@@ -69,20 +88,57 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             featuredImageView.sd_setImage(with: URL(string: restaurant.imageURL))
             featuredImageView.contentMode = .scaleAspectFill
             
+            let image1 = #imageLiteral(resourceName: "btn_addToFavourites").withRenderingMode(.alwaysTemplate)
+            let image2 = #imageLiteral(resourceName: "btn_openWebsite").withRenderingMode(.alwaysTemplate)
+            let image3 = #imageLiteral(resourceName: "btn_reviews").withRenderingMode(.alwaysTemplate)
+            let image4 = #imageLiteral(resourceName: "btn_directions").withRenderingMode(.alwaysTemplate)
+            let image5 = #imageLiteral(resourceName: "btn_call").withRenderingMode(.alwaysTemplate)
+            
+            addToFavouritesButton.setImage(image1, for: .normal)
+            addToFavouritesButton.imageView?.tintColor = UIColor.white
+            addToFavouritesButton.imageView?.contentMode = .scaleAspectFit
+            
+            websiteButton.setImage(image2, for: .normal)
+            websiteButton.imageView?.tintColor = UIColor.white
+            websiteButton.imageView?.contentMode = .scaleAspectFit
+            
+            reviewsButton.setImage(image3, for: .normal)
+            reviewsButton.imageView?.tintColor = UIColor.white
+            reviewsButton.imageView?.contentMode = .scaleAspectFit
+            
+            directionsButton.setImage(image4, for: .normal)
+            directionsButton.imageView?.tintColor = UIColor.white
+            directionsButton.imageView?.contentMode = .scaleAspectFit
+            
+            callButton.setImage(image5, for: .normal)
+            callButton.imageView?.tintColor = UIColor.white
+            callButton.imageView?.contentMode = .scaleAspectFit
+            
+            if device.diagonal == 4 {
+                
+                setInsets(5)
+                
+            } else {
+                
+                setInsets(3)
+                
+            }
+            
             restaurantName.text = restaurant.name
             
             // start attributed label
             
             let priceText = checkPrice(restaurant.priceRange)
-            let multipleText = checkPrice(restaurant.priceRange) + " · " + restaurant.category + " · " + convert(restaurant.distance)
+            let multipleText = checkPrice(restaurant.priceRange) + " · " + convert(restaurant.distance)
             
             let attributedString = NSMutableAttributedString(string: multipleText)
             attributedString.setColorForText(priceText, with: UIColor.green)
-            attributedString.setBoldForText(priceText)
             
-            restaurantCategory.attributedText = attributedString
+            restaurantPriceAndDistance.attributedText = attributedString
             
             // end attributed label
+            
+            restaurantCategory.text = restaurant.category
             
             restaurantStars.rating = Double(restaurant.rating)
             restaurantStars.settings.emptyBorderWidth = 0
@@ -127,12 +183,27 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             self.gradientView.layoutSubviews()
             
-            restaurantWebsite.addTarget(self, action: #selector(self.openWebsite), for: UIControlEvents.touchUpInside)
+            websiteButton.addTarget(self, action: #selector(self.openWebsite), for: UIControlEvents.touchUpInside)
+            addToFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: UIControlEvents.touchUpInside)
+            reviewsButton.addTarget(self, action: #selector(self.openReviewsThatCallsAnotherFunction), for: UIControlEvents.touchUpInside)
+            directionsButton.addTarget(self, action: #selector(self.openMaps), for: UIControlEvents.touchUpInside)
+            callButton.addTarget(self, action: #selector(self.callBusiness), for: UIControlEvents.touchUpInside)
             
             tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
             // panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
             // mainView.addGestureRecognizer(panGesture)
-            mainView.addGestureRecognizer(tapGesture)
+            containerView.addGestureRecognizer(tapGesture)
+            
+            if device.diagonal == 4 {
+                
+                restaurantName.numberOfLines = 1
+                restaurantStars.settings.starSize = 22
+                
+            } else {
+                
+                restaurantName.numberOfLines = 0
+                
+            }
             
         }
         
@@ -152,6 +223,12 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         self.gradient.frame = self.gradientView.bounds
         
+        UIView.animate(withDuration: 0.3) {
+            
+            self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * 1)
+            
+        }
+        
         let mainComponents = self.restaurantName.bounds.height + self.restaurantCategory.bounds.height
         let mainConstraints = CGFloat(21) // constraints of title and category
         self.mainView.bounds.origin.y = (mainComponents + mainConstraints) - self.bounds.height
@@ -167,6 +244,16 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         self.layer.cornerRadius = 15.0
         
         addSubview(contentView)
+        
+    }
+    
+    func setInsets(_ number: CGFloat) {
+        
+        addToFavouritesButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        websiteButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        reviewsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        directionsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        callButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
         
     }
     
@@ -199,7 +286,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             finalString = measurementFormatter.string(from: distance)
             
-        } else if distance.value < 1 {
+        } else if distance.value <= 1 {
             
             numberFormatter.maximumFractionDigits = 2
             finalString = "0" + measurementFormatter.string(from: distance)
@@ -211,7 +298,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
         }
         
-        return finalString
+        return finalString + " away"
         
     }
     
@@ -343,11 +430,11 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
             if transaction == "restaurant_reservation" {
                 
-                restaurantTransactions = restaurantTransactions + "Restaurant Reservation ✓ \n"
+                restaurantTransactions = restaurantTransactions + "Restaurant Reservation ✓ "
                 
             } else {
                 
-                restaurantTransactions = restaurantTransactions + "\(transaction.uppercaseFirst) ✓ \n"
+                restaurantTransactions = restaurantTransactions + "\(transaction.uppercaseFirst) ✓ "
                 
             }
             
@@ -481,9 +568,12 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                 self.gradient.opacity = 1
                 self.mainBlurView.effect = nil
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * -1))
+                self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * 1)
             })
             animator.startAnimation()
             didAnimateView = false
+            
+            // view just closed
             
         } else {
             
@@ -491,9 +581,12 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                 self.gradient.opacity = 0
                 self.mainBlurView.effect = UIBlurEffect(style: UIBlurEffectStyle.dark)
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * 1))
+                self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * -1)
             })
             animator.startAnimation()
             didAnimateView = true
+            
+            // view just opened
             
         }
         
@@ -750,6 +843,54 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
     }
     
+    func openReviewsThatCallsAnotherFunction() {
+        
+        if let del = reviewDelegate {
+            del.openReviewView()
+        }
+        
+    }
+    
+    /*
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        
+        if (addToFavouritesButton.frame).contains(point) {
+            
+            print("touch in point")
+            
+            return false
+            
+        } else {
+            
+            return true
+            
+        }
+        
+        /*
+        
+        let touch = event?.allTouches?.first
+        print(touch)
+
+        let location = touch?.location(in: addToFavouritesButton)
+        print(location)
+        
+        let inside = addToFavouritesButton.frame.contains(location!)
+        
+        if inside {
+            print("is inside")
+            return false
+        } else {
+            print("is not inside")
+            return true
+        }
+        
+        */
+        
+    }
+    
+    */
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return headers.count
     }
@@ -758,22 +899,17 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "RestaurantTableViewCell", for: indexPath) as! RestaurantTableViewCell
         
-        cell.buttonOptional.titleLabel?.numberOfLines = 1
-        cell.buttonOptional.setTitleColor(UIColor.black, for: UIControlState.normal)
-        
         if headers[indexPath.row] == "ADDRESS" {
             
-            cell.buttonOptional.setTitle("Directions", for: UIControlState.normal)
-            cell.buttonOptional.addTarget(self, action: #selector(self.openMaps), for: UIControlEvents.touchUpInside)
+            cell.isUserInteractionEnabled = true
             
         } else if headers[indexPath.row] == "PHONE" {
             
-            cell.buttonOptional.setTitle("Call", for: UIControlState.normal)
-            cell.buttonOptional.addTarget(self, action: #selector(self.callBusiness), for: UIControlEvents.touchUpInside)
+            cell.isUserInteractionEnabled = true
             
         } else {
             
-            cell.buttonOptional.isHidden = true
+            cell.isUserInteractionEnabled = false
             
         }
         
@@ -797,5 +933,11 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         return UITableViewAutomaticDimension
         
     }
+    
+    /*
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        return false
+    }
+    */
 
 }

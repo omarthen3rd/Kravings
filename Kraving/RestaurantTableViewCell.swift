@@ -12,6 +12,5 @@ class RestaurantTableViewCell: UITableViewCell {
 
     @IBOutlet var headerLabel: UILabel!
     @IBOutlet var contentLabel: UILabel!
-    @IBOutlet var buttonOptional: UIButton!
     
 }

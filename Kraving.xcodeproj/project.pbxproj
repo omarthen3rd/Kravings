@@ -15,6 +15,8 @@
 		560F1DF21F117E3D00B85521 /* RestaurantCardALT.xib in Resources */ = {isa = PBXBuildFile; fileRef = 560F1DF11F117E3D00B85521 /* RestaurantCardALT.xib */; };
 		560F1DF61F117F2100B85521 /* RestaurantTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 560F1DF51F117F2100B85521 /* RestaurantTableViewCell.xib */; };
 		560F1DF81F117FCE00B85521 /* RestaurantTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560F1DF71F117FCE00B85521 /* RestaurantTableViewCell.swift */; };
+		5615101B1F40E85E0095F7C7 /* DeviceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5615101A1F40E85E0095F7C7 /* DeviceKit.framework */; };
+		5615101C1F40E85E0095F7C7 /* DeviceKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5615101A1F40E85E0095F7C7 /* DeviceKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		562DB8611F168DE80058696A /* FavouritesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562DB8601F168DE80058696A /* FavouritesTableViewController.swift */; };
 		562DB8631F168EB90058696A /* FavouritesDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562DB8621F168EB90058696A /* FavouritesDetailTableViewController.swift */; };
 		5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */; };
@@ -65,6 +67,7 @@
 				56F5FC191F10311E00AF0B18 /* SDWebImage.framework in Embed Frameworks */,
 				56F5FC171F10311E00AF0B18 /* Alamofire.framework in Embed Frameworks */,
 				56F5FC1B1F10311E00AF0B18 /* SwiftyJSON.framework in Embed Frameworks */,
+				5615101C1F40E85E0095F7C7 /* DeviceKit.framework in Embed Frameworks */,
 				560F1DF01F117C4700B85521 /* Cosmos.framework in Embed Frameworks */,
 				560F1DED1F11798E00B85521 /* PhoneNumberKit.framework in Embed Frameworks */,
 			);
@@ -80,6 +83,8 @@
 		560F1DF11F117E3D00B85521 /* RestaurantCardALT.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RestaurantCardALT.xib; sourceTree = "<group>"; };
 		560F1DF51F117F2100B85521 /* RestaurantTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RestaurantTableViewCell.xib; sourceTree = "<group>"; };
 		560F1DF71F117FCE00B85521 /* RestaurantTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestaurantTableViewCell.swift; sourceTree = "<group>"; };
+		561510181F40E84F0095F7C7 /* DeviceKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceKit.framework; path = Carthage/Build/iOS/DeviceKit.framework; sourceTree = "<group>"; };
+		5615101A1F40E85E0095F7C7 /* DeviceKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceKit.framework; path = Carthage/Build/iOS/DeviceKit.framework; sourceTree = "<group>"; };
 		562DB8601F168DE80058696A /* FavouritesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavouritesTableViewController.swift; sourceTree = "<group>"; };
 		562DB8621F168EB90058696A /* FavouritesDetailTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavouritesDetailTableViewController.swift; sourceTree = "<group>"; };
 		5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
@@ -115,6 +120,7 @@
 				56F5FC181F10311E00AF0B18 /* SDWebImage.framework in Frameworks */,
 				56F5FC161F10311E00AF0B18 /* Alamofire.framework in Frameworks */,
 				56F5FC1A1F10311E00AF0B18 /* SwiftyJSON.framework in Frameworks */,
+				5615101B1F40E85E0095F7C7 /* DeviceKit.framework in Frameworks */,
 				560F1DEF1F117C4700B85521 /* Cosmos.framework in Frameworks */,
 				560F1DEC1F11798E00B85521 /* PhoneNumberKit.framework in Frameworks */,
 			);
@@ -170,6 +176,8 @@
 		567F26761F14555B001B90BF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5615101A1F40E85E0095F7C7 /* DeviceKit.framework */,
+				561510181F40E84F0095F7C7 /* DeviceKit.framework */,
 				560F1DEE1F117C4700B85521 /* Cosmos.framework */,
 				560F1DEB1F11798E00B85521 /* PhoneNumberKit.framework */,
 				56F5FC131F10311E00AF0B18 /* Alamofire.framework */,

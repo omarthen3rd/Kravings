@@ -40,45 +40,26 @@
                     </vibrancyEffect>
                 </visualEffectView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Content" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qbs-WD-bBH">
-                    <rect key="frame" x="8" y="21" width="225" height="23"/>
+                    <rect key="frame" x="8" y="21" width="327" height="23"/>
                     <fontDescription key="fontDescription" type="system" pointSize="19"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oKm-do-Lj7">
-                    <rect key="frame" x="241" y="18" width="94" height="29"/>
-                    <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="29" id="K6V-Kp-k1m"/>
-                        <constraint firstAttribute="width" constant="94" id="kyw-Do-Xye"/>
-                    </constraints>
-                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                    <state key="normal" title="Directions"/>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
-                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                            <integer key="value" value="6"/>
-                        </userDefinedRuntimeAttribute>
-                    </userDefinedRuntimeAttributes>
-                </button>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="klB-WS-DjN" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="0gO-q6-Khu"/>
-                <constraint firstItem="oKm-do-Lj7" firstAttribute="centerY" secondItem="Qbs-WD-bBH" secondAttribute="centerY" id="5D6-Er-Xc6"/>
-                <constraint firstItem="oKm-do-Lj7" firstAttribute="leading" secondItem="Qbs-WD-bBH" secondAttribute="trailing" constant="8" id="MgU-4h-8tC"/>
                 <constraint firstAttribute="bottom" secondItem="Qbs-WD-bBH" secondAttribute="bottom" constant="8" id="Qe7-ZL-sdQ"/>
                 <constraint firstItem="Qbs-WD-bBH" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="8" id="S2b-1p-Mb1"/>
                 <constraint firstItem="Qbs-WD-bBH" firstAttribute="top" secondItem="seY-nd-89L" secondAttribute="bottom" constant="3" id="VYV-ZW-Iho"/>
+                <constraint firstAttribute="trailing" secondItem="Qbs-WD-bBH" secondAttribute="trailing" constant="8" id="cW5-Ad-Eog"/>
                 <constraint firstItem="klB-WS-DjN" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="hiU-wm-Ia6"/>
                 <constraint firstItem="klB-WS-DjN" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" id="lRC-P0-f8h"/>
-                <constraint firstAttribute="trailing" secondItem="oKm-do-Lj7" secondAttribute="trailing" constant="8" id="wto-Bq-cuM"/>
                 <constraint firstItem="klB-WS-DjN" firstAttribute="width" secondItem="iN0-l3-epB" secondAttribute="width" id="xnV-os-9dB"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
-                <outlet property="buttonOptional" destination="oKm-do-Lj7" id="zkP-Lf-Tgw"/>
                 <outlet property="contentLabel" destination="Qbs-WD-bBH" id="5Rb-7I-6A8"/>
                 <outlet property="headerLabel" destination="seY-nd-89L" id="bQ6-XQ-c5F"/>
             </connections>
