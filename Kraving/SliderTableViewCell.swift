@@ -72,9 +72,7 @@ class SliderTableViewCell: UITableViewCell {
         } else {
             
             // discreteValue is in miles
-            
-            let searchMiles = Measurement(value: Double(discreteValue), unit: UnitLength.miles)
-            
+                        
             defaults.set(Int(discreteValue), forKey: "searchRadius")
             radiusLabel.text = "\(Int(discreteValue)) mi"
             sender.value = discreteValue

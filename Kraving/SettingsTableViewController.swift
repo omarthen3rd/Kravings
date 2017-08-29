@@ -273,7 +273,7 @@ class SettingsTableViewController: UITableViewController {
                 
                 defaults.set("Browser", forKey: "whichCell")
                 
-                cell.cellName.text = "Default Maps"
+                cell.cellName.text = "Maps"
                 cell.label.text = defaults.object(forKey: "defaultMaps") as? String
                 // cell.appIcon?.image = UIImage(named: defaults.object(forKey: "defaultMaps") as! String) ?? UIImage(named: "Apple Maps")
                 
@@ -285,7 +285,7 @@ class SettingsTableViewController: UITableViewController {
                 
                 defaults.set("Maps", forKey: "whichCell")
                 
-                cell.cellName.text = "Default Browser"
+                cell.cellName.text = "Browser"
                 cell.label.text = defaults.object(forKey: "defaultBrowser") as? String
                 // cell.appIcon?.image = UIImage(named: defaults.object(forKey: "defaultBrowser") as! String) ?? UIImage(named: "Safari")
                 

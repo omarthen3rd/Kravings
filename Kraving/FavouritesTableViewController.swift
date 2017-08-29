@@ -99,7 +99,7 @@ class FavouritesTableViewController: UITableViewController {
     func loadSadView() {
         
         noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.tableView.bounds.width, height: self.tableView.bounds.height))
-        noDataLabel.font = UIFont.systemFont(ofSize: 50, weight: UIFontWeightLight)
+        noDataLabel.font = UIFont.systemFont(ofSize: 40, weight: UIFontWeightLight)
         noDataLabel.text = "No Favourites"
         noDataLabel.textColor = UIColor.black
         noDataLabel.textAlignment = .center

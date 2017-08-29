@@ -10,6 +10,7 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import DeviceKit
+import Cosmos
 
 class FavouritesDetailContainerViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
@@ -25,6 +26,9 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
     @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var reviewsTableView: UITableView!
     @IBOutlet var reviewsHeaderLabel: UILabel!
+    @IBOutlet var reviewsHeaderView: UIVisualEffectView!
+    @IBOutlet var reviewsDoneButton: UIButton!
+    @IBOutlet var reviewsStarView: CosmosView!
     
     var defaults = UserDefaults.standard
     var currentReviews = [RestaurantReviews]()
@@ -56,24 +60,32 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
         getReviews()
         setupView()
         
-        let image1 = #imageLiteral(resourceName: "btn_call").withRenderingMode(.alwaysTemplate)
-        let image2 = #imageLiteral(resourceName: "btn_openWebsite").withRenderingMode(.alwaysTemplate)
-        let image3 = #imageLiteral(resourceName: "btn_reviews").withRenderingMode(.alwaysTemplate)
-        let image4 = #imageLiteral(resourceName: "btn_directions").withRenderingMode(.alwaysTemplate)
+        let image1 = #imageLiteral(resourceName: "btn_openWebsite").withRenderingMode(.alwaysTemplate)
+        let image1S = #imageLiteral(resourceName: "btn_openWebsite_selected").withRenderingMode(.alwaysTemplate)
+        let image2 = #imageLiteral(resourceName: "btn_reviews").withRenderingMode(.alwaysTemplate)
+        let image2S = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
+        let image3 = #imageLiteral(resourceName: "btn_directions").withRenderingMode(.alwaysTemplate)
+        let image3S = #imageLiteral(resourceName: "btn_directions_selected").withRenderingMode(.alwaysTemplate)
+        let image4 = #imageLiteral(resourceName: "btn_call").withRenderingMode(.alwaysTemplate)
+        let image4S = #imageLiteral(resourceName: "btn_call_selected").withRenderingMode(.alwaysTemplate)
         
-        restaurantPhoneButton.setImage(image1, for: .normal)
+        restaurantPhoneButton.setImage(image4, for: .normal)
+        restaurantPhoneButton.setImage(image4S, for: .highlighted)
         restaurantPhoneButton.imageView?.tintColor = UIColor.white
         restaurantPhoneButton.imageView?.contentMode = .scaleAspectFit
         
-        restaurantWebsiteButton.setImage(image2, for: .normal)
+        restaurantWebsiteButton.setImage(image1, for: .normal)
+        restaurantWebsiteButton.setImage(image1S, for: .highlighted)
         restaurantWebsiteButton.imageView?.tintColor = UIColor.white
         restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
         
-        restaurantReviewsButton.setImage(image3, for: .normal)
+        restaurantReviewsButton.setImage(image2, for: .normal)
+        restaurantReviewsButton.setImage(image2S, for: .highlighted)
         restaurantReviewsButton.imageView?.tintColor = UIColor.white
         restaurantReviewsButton.imageView?.contentMode = .scaleAspectFit
         
-        restaurantMapsButton.setImage(image4, for: .normal)
+        restaurantMapsButton.setImage(image3, for: .normal)
+        restaurantMapsButton.setImage(image3S, for: .highlighted)
         restaurantMapsButton.imageView?.tintColor = UIColor.white
         restaurantMapsButton.imageView?.contentMode = .scaleAspectFit
         
@@ -97,12 +109,7 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
         reviewsContainerView.layer.cornerRadius = 15
         reviewsContainerView.clipsToBounds = true
         reviewsContainerView.isHidden = true
-        
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
-        let blurEffectView2 = UIVisualEffectView(effect: blurEffect)
-        blurEffectView2.frame = reviewsTableView.bounds
-        reviewsTableView.backgroundView = blurEffectView2
-        reviewsTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
+        reviewsTableView.backgroundColor = UIColor.white
         
         restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
         restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
@@ -175,7 +182,14 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             
         }
         
-        self.reviewsHeaderLabel.text = "\(self.restaurant.reviewCount) VOTES"
+        self.reviewsStarView.rating = Double(self.restaurant.rating)
+        self.reviewsStarView.text = "\(self.restaurant.reviewCount) VOTES"
+        self.reviewsStarView.settings.emptyBorderWidth = 0
+        self.reviewsStarView.settings.emptyBorderColor = UIColor.clear
+        self.reviewsStarView.settings.emptyColor = UIColor.darkGray
+        self.reviewsStarView.settings.updateOnTouch = false
+        self.reviewsStarView.settings.starSize = 21
+        self.reviewsStarView.contentMode = .right
         
     }
     
@@ -365,6 +379,16 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             self.backgroundBlur.effect = nil
             
         }
+        noBlurAnimator.addCompletion({ (postion) in
+            self.reviewsContainerView.isHidden = true
+            self.backgroundBlur.isHidden = true
+            self.restaurantWebsiteButton.isEnabled = true
+            self.restaurantMapsButton.isEnabled = true
+            self.restaurantPhoneButton.isEnabled = true
+        })
+        
+        let image1 = #imageLiteral(resourceName: "btn_reviews").withRenderingMode(.alwaysTemplate)
+        let image1S = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
         
         if reviewsContainerView.isHidden == true {
             
@@ -375,14 +399,13 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             self.restaurantPhoneButton.isEnabled = false
             blurAnimator.startAnimation()
             
+            self.restaurantReviewsButton.setImage(image1S, for: UIControlState.normal)
+            
         } else {
             
             noBlurAnimator.startAnimation()
-            self.reviewsContainerView.isHidden = true
-            self.backgroundBlur.isHidden = true
-            self.restaurantWebsiteButton.isEnabled = true
-            self.restaurantMapsButton.isEnabled = true
-            self.restaurantPhoneButton.isEnabled = true
+            
+            self.restaurantReviewsButton.setImage(image1, for: UIControlState.normal)
             
         }
         

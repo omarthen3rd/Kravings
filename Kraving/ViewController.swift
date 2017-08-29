@@ -1595,6 +1595,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
             cell.categoryLabel.textColor = UIColor.white
             
+            self.noresultsLabel.text = "Loading..."
+            self.noresultsLabel.isHidden = false
             
             self.selectedCategory = cell.categoryLabel.text!
             self.handleSelectedRestaurant(self.selectedCategory)
