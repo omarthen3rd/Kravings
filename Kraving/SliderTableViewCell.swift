@@ -39,10 +39,10 @@ class SliderTableViewCell: UITableViewCell {
     
     func setSearchRadius(_ sender: UISlider) {
         
-        let discreteValue = roundf(sender.value)
+        let locale = Locale.current
+        let isMetric = locale.usesMetricSystem
         
-        let searchKm = Measurement(value: Double(discreteValue), unit: UnitLength.kilometers)
-        let searchMeters = searchKm.converted(to: UnitLength.meters)
+        let discreteValue = roundf(sender.value)
         
         let numberFormatter = NumberFormatter()
         numberFormatter.maximumFractionDigits = 0
@@ -50,13 +50,33 @@ class SliderTableViewCell: UITableViewCell {
         measurementFormatter.unitOptions = .providedUnit
         measurementFormatter.numberFormatter = numberFormatter
         
-        let searchToUse = measurementFormatter.string(from: searchMeters)
-        let oneReplaced = searchToUse.replacingOccurrences(of: " m", with: "")
-        
-        if let intVal = Int(oneReplaced) {
+        if isMetric {
             
-            defaults.set(intVal, forKey: "searchRadius")
-            radiusLabel.text = "\(Int(discreteValue)) km"
+            // discreteValue is in km
+            
+            let searchKm = Measurement(value: Double(discreteValue), unit: UnitLength.kilometers)
+            let searchMeters = searchKm.converted(to: UnitLength.meters)
+            
+            let searchToUse = measurementFormatter.string(from: searchMeters)
+            let oneReplaced = searchToUse.replacingOccurrences(of: " m", with: "")
+            
+            if let intVal = Int(oneReplaced) {
+                
+                defaults.set(intVal, forKey: "searchRadius")
+                radiusLabel.text = "\(Int(discreteValue)) km"
+                sender.value = discreteValue
+                
+            }
+            
+            
+        } else {
+            
+            // discreteValue is in miles
+            
+            let searchMiles = Measurement(value: Double(discreteValue), unit: UnitLength.miles)
+            
+            defaults.set(Int(discreteValue), forKey: "searchRadius")
+            radiusLabel.text = "\(Int(discreteValue)) mi"
             sender.value = discreteValue
             
         }

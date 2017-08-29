@@ -19,7 +19,6 @@ class FavouritesDetailTableViewController: UITableViewController {
     @IBOutlet var restaurantCategory: UILabel!
     @IBOutlet var restaurantStars: CosmosView!
     @IBOutlet var restaurantPriceRange: UILabel!
-    @IBOutlet var restaurantDistance: UILabel!
     @IBOutlet var restaurantAddress: UILabel!
     @IBOutlet var restaurantPhoneNumber: UILabel!
     @IBOutlet var restaurantTimings: UILabel!
@@ -34,6 +33,7 @@ class FavouritesDetailTableViewController: UITableViewController {
         
         didSet {
             
+            print("ran this")
             setupView()
             
         }
@@ -81,6 +81,19 @@ class FavouritesDetailTableViewController: UITableViewController {
             
             cellImage.sd_setImage(with: url)
             
+            // start attributed label
+            
+            let priceText = checkPrice(restaurant.priceRange)
+            let multipleText = checkPrice(restaurant.priceRange) + " · " + convert(restaurant.distance)
+            
+            let attributedString = NSMutableAttributedString(string: multipleText)
+            attributedString.setColorForText(priceText, with: UIColor.green)
+            
+            restaurantPriceRange.attributedText = attributedString
+            
+            // end attributed label
+
+            
             restaurantTitle.text = restaurant.name
             restaurantCategory.text = restaurant.category
             restaurantStars.rating = Double(restaurant.rating)
@@ -88,8 +101,6 @@ class FavouritesDetailTableViewController: UITableViewController {
             restaurantStars.settings.textColor = UIColor.lightGray
             restaurantAddress.text = "\(restaurant.address) \n\(restaurant.city), \(restaurant.state) \n\(restaurant.country)"
             restaurantPhoneNumber.text = returnFormatted(restaurant.phone)
-            restaurantPriceRange.text = checkPrice(restaurant.priceRange)
-            restaurantDistance.text = convert(restaurant.distance)
             doTimings()
             
             setColor(UIColor.white)
@@ -116,7 +127,6 @@ class FavouritesDetailTableViewController: UITableViewController {
         restaurantTitle.textColor = color
         restaurantCategory.textColor = color
         restaurantAddress.textColor = color
-        restaurantDistance.textColor = color
         restaurantTimings.textColor = color
         restaurantPhoneNumber.textColor = color
         restaurantStars.settings.emptyColor = UIColor.lightText
@@ -160,27 +170,19 @@ class FavouritesDetailTableViewController: UITableViewController {
             
         }
         
-        return finalString + " away from you"
+        return finalString + " away"
         
     }
     
     func checkPrice(_ range: String) -> String {
         
-        if range.characters.count == 1 {
+        if range == "" {
             
-            return "\(range) - Relatively Cheap"
-            
-        } else if range.characters.count == 2 {
-            
-            return "\(range) - Not That Expensive"
-            
-        } else if range.characters.count == 3 {
-            
-            return "\(range) - Quite Expensive"
+            return "Price Unavailable"
             
         } else {
             
-            return "Price Range Is Unknown"
+            return "\(range)"
             
         }
         
@@ -253,7 +255,7 @@ class FavouritesDetailTableViewController: UITableViewController {
             
             let parsedPhoneNumber = try phoneNumberKit.parse(phoneNumber)
             let formattedNumber = phoneNumberKit.format(parsedPhoneNumber, toType: .international)
-            return "Phone: \(formattedNumber)"
+            return "\(formattedNumber)"
             
         } catch {
             

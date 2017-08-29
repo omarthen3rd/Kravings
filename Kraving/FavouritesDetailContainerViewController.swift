@@ -9,6 +9,7 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
+import DeviceKit
 
 class FavouritesDetailContainerViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
@@ -27,6 +28,7 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
     
     var defaults = UserDefaults.standard
     var currentReviews = [RestaurantReviews]()
+    let device = Device()
     
     var restaurant: Restaurant! {
         
@@ -53,6 +55,38 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
         
         getReviews()
         setupView()
+        
+        let image1 = #imageLiteral(resourceName: "btn_call").withRenderingMode(.alwaysTemplate)
+        let image2 = #imageLiteral(resourceName: "btn_openWebsite").withRenderingMode(.alwaysTemplate)
+        let image3 = #imageLiteral(resourceName: "btn_reviews").withRenderingMode(.alwaysTemplate)
+        let image4 = #imageLiteral(resourceName: "btn_directions").withRenderingMode(.alwaysTemplate)
+        
+        restaurantPhoneButton.setImage(image1, for: .normal)
+        restaurantPhoneButton.imageView?.tintColor = UIColor.white
+        restaurantPhoneButton.imageView?.contentMode = .scaleAspectFit
+        
+        restaurantWebsiteButton.setImage(image2, for: .normal)
+        restaurantWebsiteButton.imageView?.tintColor = UIColor.white
+        restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
+        
+        restaurantReviewsButton.setImage(image3, for: .normal)
+        restaurantReviewsButton.imageView?.tintColor = UIColor.white
+        restaurantReviewsButton.imageView?.contentMode = .scaleAspectFit
+        
+        restaurantMapsButton.setImage(image4, for: .normal)
+        restaurantMapsButton.imageView?.tintColor = UIColor.white
+        restaurantMapsButton.imageView?.contentMode = .scaleAspectFit
+        
+        
+        if device.diagonal == 4 {
+            
+            // setInsets(5)
+            
+        } else {
+            
+            // setInsets(4)
+            
+        }
         
         backgroundBlur.effect = nil
         self.reviewsContainerView.alpha = 0.0
@@ -92,6 +126,15 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             }
             
         }
+        
+    }
+    
+    func setInsets(_ number: CGFloat) {
+        
+        restaurantMapsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        restaurantPhoneButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        restaurantReviewsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        restaurantWebsiteButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
         
     }
     
@@ -327,6 +370,9 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             
             self.reviewsContainerView.isHidden = false
             self.backgroundBlur.isHidden = false
+            self.restaurantWebsiteButton.isEnabled = false
+            self.restaurantMapsButton.isEnabled = false
+            self.restaurantPhoneButton.isEnabled = false
             blurAnimator.startAnimation()
             
         } else {
@@ -334,6 +380,9 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             noBlurAnimator.startAnimation()
             self.reviewsContainerView.isHidden = true
             self.backgroundBlur.isHidden = true
+            self.restaurantWebsiteButton.isEnabled = true
+            self.restaurantMapsButton.isEnabled = true
+            self.restaurantPhoneButton.isEnabled = true
             
         }
         

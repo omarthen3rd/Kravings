@@ -45,6 +45,20 @@ extension UIView {
     
 }
 
+extension UIColor {
+    
+    static let aquafina = UIColor(red:0.03, green:0.93, blue:0.84, alpha:1.0)
+    static let hotPonk = UIColor(red:1.00, green:0.38, blue:0.68, alpha:1.0)
+    static let grayTwoPointO = UIColor(red:0.44, green:0.44, blue:0.44, alpha:1.0)
+    
+    static let websiteBlue = UIColor(red:0.00, green:0.48, blue:1.00, alpha:1.0)
+    static let favouritesPink = UIColor(red:1.00, green:0.20, blue:0.61, alpha:1.0)
+    static let reviewsYellow = UIColor(red:1.00, green:0.58, blue:0.00, alpha:1.0)
+    static let directionsRed = UIColor(red:1.00, green:0.24, blue:0.24, alpha:1.0)
+    static let callGreen = UIColor(red:0.09, green:0.86, blue:0.07, alpha:1.0)
+    
+}
+
 extension NSMutableAttributedString {
     
     func setColorForText(_ textToFind: String, with color: UIColor) {
@@ -127,16 +141,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     @IBOutlet var forwardButton: UIButton!
     @IBOutlet var settingsButton: UIButton!
     @IBOutlet var favouritesButton: UIButton!
+    
     @IBOutlet var noresultsLabel: UILabel!
     @IBOutlet var spinningView: UIActivityIndicatorView!
     
     @IBOutlet var statusBarBlur: UIVisualEffectView!
-    @IBOutlet var buttonsBlurBackground: UIVisualEffectView!
-    @IBOutlet var restaurantPhoneButton: UIButton!
-    @IBOutlet var restaurantMapsButton: UIButton!
-    @IBOutlet var restaurantWebsiteButton: UIButton!
-    @IBOutlet var restaurantReviewsButton: UIButton!
-    @IBOutlet var restaurantFavouritesButton: UIButton!
     
     @IBOutlet var bottomStackView: UIStackView!
     @IBOutlet var reviewsHeaderView: UIVisualEffectView!
@@ -192,10 +201,22 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
         divisor = (view.frame.width / 2) / 0.61
         
+        let locale = Locale.current
+        let isMetric = locale.usesMetricSystem
+        
         if defaults.integer(forKey: "searchRadius") == 0 {
             
-            // searchRadius is in meters
-            defaults.set(5000, forKey: "searchRadius")
+            if isMetric {
+                
+                // searchRadius is in meters because metric (duh doi)
+                defaults.set(5000, forKey: "searchRadius")
+                
+            } else {
+                
+                // searchRadius is in miles because screw the got damn freedom country equivalents
+                defaults.set(3, forKey: "searchRadius")
+                
+            }
             
         }
         
@@ -228,11 +249,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             locationManager.startUpdatingLocation()
             locationManager.requestLocation()
             
+        } else {
+            
+            self.noresultsLabel.text = "No Internet Connection"
+            self.noresultsLabel.isHidden = false
+            
         }
         
     }
     
-    func loadCard(_ button: UIButton) {
+    func loadCard(_ button: Int) {
     
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
         
@@ -251,7 +277,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.card.translatesAutoresizingMaskIntoConstraints = false
         self.card.addGestureRecognizer(panGesture)
 
-        if button.tag == 1 {
+        if button == 1 {
             
             // like / right button
             
@@ -266,11 +292,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 let margins = self.view.layoutMarginsGuide
                 
-                self.card.bottomAnchor.constraint(equalTo: self.bottomStackView.topAnchor, constant: -1).isActive = true
+                self.card.bottomAnchor.constraint(equalTo: self.bottomStackView.topAnchor, constant: -16).isActive = true
                 self.card.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 0).isActive = true
                 self.card.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: 0).isActive = true
                 self.card.topAnchor.constraint(equalTo: margins.topAnchor, constant: 30).isActive = true
-                // self.card.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -156).isActive = true
                 self.card.centerXAnchor.constraint(equalTo: margins.centerXAnchor, constant: 16)
                 self.card.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: 0)
                 
@@ -287,7 +312,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 }
                 
                 self.spinningView.stopAnimating()
-                button.isUserInteractionEnabled = true
+                // button.isUserInteractionEnabled = true
                 self.categoriesButton.isUserInteractionEnabled = true
                 self.backButton.isUserInteractionEnabled = true
                 
@@ -308,7 +333,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 let margins = self.view.layoutMarginsGuide
                 
-                self.card.bottomAnchor.constraint(equalTo: self.bottomStackView.topAnchor, constant: -1).isActive = true
+                self.card.bottomAnchor.constraint(equalTo: self.bottomStackView.topAnchor, constant: -16).isActive = true
                 self.card.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 0).isActive = true
                 self.card.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: 0).isActive = true
                 self.card.topAnchor.constraint(equalTo: margins.topAnchor, constant: 30).isActive = true
@@ -321,7 +346,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
             }, completion: { (success) in
                 
-                button.isUserInteractionEnabled = true
+                // button.isUserInteractionEnabled = true
                 self.categoriesButton.isUserInteractionEnabled = true
                 self.forwardButton.isUserInteractionEnabled = true
                 
@@ -330,7 +355,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         }
         
         self.cardCenter = self.card.center
-        self.view.bringSubview(toFront: self.buttonsBlurBackground)
         self.view.bringSubview(toFront: self.statusBarBlur)
         
         if self.restaurantIndex == 0 {
@@ -351,7 +375,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     func loadInterface(completionHandler: @escaping (Bool) -> ()) {
         
         self.statusBarBlur.effect = nil
-        self.buttonsBlurBackground.effect = nil
         
         self.spinningView.hidesWhenStopped = true
         
@@ -361,13 +384,38 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.categoriesButton.addTarget(self, action: #selector(handleTap), for: .touchUpInside)
         self.forwardButton.addTarget(self, action: #selector(goForward), for: .touchUpInside)
         
-        self.reviewsDoneButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
+        self.categoriesButton.backgroundColor = UIColor.clear
+        self.favouritesButton.backgroundColor = UIColor.clear
+        self.settingsButton.backgroundColor = UIColor.clear
         
-        // restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
-        // restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
-        // restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
-        // restaurantFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: .touchUpInside)
-        // restaurantReviewsButton.addTarget(self, action: #selector(self.openReviews), for: .touchUpInside)
+        setInsets(6)
+        
+        let image1 = #imageLiteral(resourceName: "btn_categories").withRenderingMode(.alwaysTemplate)
+        let image1S = #imageLiteral(resourceName: "btn_categories_selected").withRenderingMode(.alwaysTemplate)
+        let image2 = #imageLiteral(resourceName: "btn_openFavourites").withRenderingMode(.alwaysTemplate)
+        let image2S = #imageLiteral(resourceName: "btn_openFavourites_selected").withRenderingMode(.alwaysTemplate)
+        let image3 = #imageLiteral(resourceName: "btn_settings").withRenderingMode(.alwaysTemplate)
+        let image3S = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
+        
+        categoriesButton.setImage(image1, for: .normal)
+        categoriesButton.setImage(image1S, for: UIControlState.highlighted)
+        categoriesButton.imageView?.tintColor = UIColor.black
+        categoriesButton.imageView?.contentMode = .scaleAspectFit
+        categoriesButton.tintColor = UIColor.black
+
+        favouritesButton.setImage(image2, for: .normal)
+        favouritesButton.setImage(image2S, for: UIControlState.highlighted)
+        favouritesButton.imageView?.tintColor = UIColor.black
+        favouritesButton.imageView?.contentMode = .scaleAspectFit
+        favouritesButton.tintColor = UIColor.black
+        
+        settingsButton.setImage(image3, for: .normal)
+        settingsButton.setImage(image3S, for: UIControlState.highlighted)
+        settingsButton.imageView?.tintColor = UIColor.black
+        settingsButton.imageView?.contentMode = .scaleAspectFit
+        settingsButton.tintColor = UIColor.black
+        
+        self.reviewsDoneButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
         
         forwardButton.tag = 1
         backButton.tag = 0
@@ -396,8 +444,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         reviewsTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
         let indexPath = IndexPath(row: 0, section: 0)
-        self.categoriesTableView.selectRow(at: indexPath, animated: true, scrollPosition: .bottom)
+        self.categoriesTableView.selectRow(at: indexPath, animated: true, scrollPosition: .top)
         
+        self.categoriesTableView.reloadData()
         completionHandler(true)
         
     }
@@ -447,7 +496,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                             
                             self.loadInterface(completionHandler: { (success) in
                                 
-                                self.loadCard(self.forwardButton)
+                                self.loadCard(1)
                                 
                             })
                             
@@ -477,6 +526,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             let locality = (containsPlacemark.locality != nil) ? containsPlacemark.locality : ""
             self.locationToUse = locality!
         }
+    }
+    
+    func setInsets(_ number: CGFloat) {
+        
+        settingsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        categoriesButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        favouritesButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        
     }
     
     func getAccessToken() {
@@ -544,7 +601,34 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         let headers: HTTPHeaders = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
         
-        let searchRadius = defaults.integer(forKey: "searchRadius")
+        var searchRadius = defaults.integer(forKey: "searchRadius")
+        
+        let locale = Locale.current
+        let isMetric = locale.usesMetricSystem
+
+        if !isMetric {
+            
+            // convert searchRadius to meteres here
+            
+            let numberFormatter = NumberFormatter()
+            numberFormatter.maximumFractionDigits = 0
+            let measurementFormatter = MeasurementFormatter()
+            measurementFormatter.unitOptions = .providedUnit
+            measurementFormatter.numberFormatter = numberFormatter
+            
+            let searchMiles = Measurement(value: Double(searchRadius), unit: UnitLength.miles)
+            let searchMeters = searchMiles.converted(to: UnitLength.meters)
+            
+            let searchToUse = measurementFormatter.string(from: searchMeters)
+            let oneReplaced = searchToUse.replacingOccurrences(of: " m", with: "")
+            
+            if let intVal = Int(oneReplaced) {
+                
+                searchRadius = intVal
+                
+            }
+            
+        }
         
         var url = ""
         
@@ -810,7 +894,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                         DispatchQueue.global(qos: .userInitiated).async {
                             DispatchQueue.main.async {
                                 self.noresultsLabel.isHidden = true
-                                self.loadCard(self.forwardButton)
+                                self.loadCard(1)
                             }
                         }
                         
@@ -835,6 +919,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     func handleTap() {
         
+        let image1 = #imageLiteral(resourceName: "btn_categories").withRenderingMode(.alwaysTemplate)
+        let image1S = #imageLiteral(resourceName: "btn_categories_selected").withRenderingMode(.alwaysTemplate)
+        
         if reviewsContainerView.isHidden == false && categoryContainerView.isHidden == true {
             
             // deal with it here
@@ -851,6 +938,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.backButton.isEnabled = false
                 self.forwardButton.isEnabled = false
                 
+                self.categoriesButton.setImage(image1S, for: .normal)
+                
             } else {
                 
                 self.categoryContainerView.isHidden = true
@@ -858,61 +947,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.backButton.isEnabled = true
                 self.forwardButton.isEnabled = true
                 
+                self.categoriesButton.setImage(image1, for: .normal)
+                
             }
             
         }
-        
-        /*
-        
-        if viewIsOpen {
-            
-            UIView.animate(withDuration: 0.3, animations: { 
-                
-                self.categoryContainerView.isHidden = true
-                self.forwardButton.isEnabled = true
-                
-                if self.restaurantIndex == 0 || self.restaurants.isEmpty {
-                    
-                    self.backButton.isEnabled = false
-                    if self.restaurants.isEmpty {
-                       self.forwardButton.isEnabled = false
-                    }
-                    
-                } else if self.restaurants.endIndex == self.restaurantIndex {
-                    
-                    self.backButton.isEnabled = true
-                    self.forwardButton.isEnabled = false
-                    
-                } else {
-                    
-                    self.backButton.isEnabled = true
-                    
-                }
-                self.card.isHidden = false
-                
-            })
-            
-            self.viewIsOpen = false
-            
-        } else {
-            
-            UIView.animate(withDuration: 0.3, animations: { 
-                
-                self.categoryContainerView.isHidden = false
-                
-            }, completion: { (success) in
-                
-                self.view.bringSubview(toFront: self.card)
-                self.card.isHidden = true
-                self.backButton.isEnabled = false
-                self.backButton.isEnabled = false
-                
-            })
-            
-            self.viewIsOpen = true
-            
-        }
-         */
         
     }
     
@@ -985,7 +1024,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 DispatchQueue.global(qos: .userInitiated).async {
                     DispatchQueue.main.async {
-                        self.loadCard(self.backButton)
+                        self.loadCard(0)
                     }
                 }
                 
@@ -1025,7 +1064,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
                 DispatchQueue.global(qos: .userInitiated).async {
                     DispatchQueue.main.async {
-                        self.loadCard(self.forwardButton)
+                        self.loadCard(1)
                     }
                 }
                 
@@ -1109,7 +1148,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             UIView.animate(withDuration: 0.3, animations: {
                 self.statusBarBlur.effect = nil
-                self.buttonsBlurBackground.effect = nil
             })
             
             if viewCard.center.x < 40 {
@@ -1140,7 +1178,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                             
                             DispatchQueue.global(qos: .userInitiated).async {
                                 DispatchQueue.main.async {
-                                    self.loadCard(self.forwardButton)
+                                    self.loadCard(1)
                                 }
                             }
                             
@@ -1179,7 +1217,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                             
                             DispatchQueue.global(qos: .userInitiated).async {
                                 DispatchQueue.main.async {
-                                    self.loadCard(self.backButton)
+                                    self.loadCard(0)
                                 }
                             }
                             
@@ -1199,6 +1237,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     }
     
     func dataChanged() {
+        
+        print("ran this")
         
         self.spinningView.startAnimating()
         self.noresultsLabel.text = "Loading New Results"
@@ -1228,7 +1268,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     DispatchQueue.global(qos: .userInitiated).async {
                         DispatchQueue.main.async {
                             self.noresultsLabel.isHidden = true
-                            self.loadCard(self.forwardButton)
+                            self.loadCard(1)
                         }
                     }
                     
@@ -1256,6 +1296,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             self.card.isHidden = true
             self.backButton.isEnabled = false
             self.forwardButton.isEnabled = false
+            self.categoriesButton.isEnabled = false
+            self.settingsButton.isEnabled = false
+            self.favouritesButton.isEnabled = false
             
         } else {
             
@@ -1263,6 +1306,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             self.card.isHidden = false
             self.backButton.isEnabled = true
             self.forwardButton.isEnabled = true
+            self.categoriesButton.isEnabled = true
+            self.settingsButton.isEnabled = true
+            self.favouritesButton.isEnabled = true
             
         }
         
@@ -1507,7 +1553,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             cell.categoryLabel.text = categories[indexPath.row]
             
             let selView = UIView(frame: cell.bounds)
-            selView.backgroundColor = UIColor.blue
+            selView.backgroundColor = UIColor.darkGray
             
             let newSelectionView = UIVisualEffectView(frame: cell.bounds)
             newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)

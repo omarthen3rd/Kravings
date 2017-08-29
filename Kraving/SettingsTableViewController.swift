@@ -116,9 +116,8 @@ class SettingsTableViewController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
+
         if self.previousRadius != defaults.integer(forKey: "searchRadius") {
-                        
             if let del = delegate {
                 del.dataChanged()
             }
@@ -243,14 +242,26 @@ class SettingsTableViewController: UITableViewController {
             
             cell.selectionStyle = .none
             
-            cell.slider.maximumValue = 40
+            let locale = Locale.current
+            let isMetric = locale.usesMetricSystem
+            
             cell.slider.minimumValue = 1
             
-            cell.slider.value = Float(defaultsValue / 1000)
+            if isMetric {
+                
+                cell.slider.maximumValue = 40
+                cell.radiusLabel.text = "\(defaultsValue / 1000) km"
+                cell.slider.value = Float(defaultsValue / 1000)
+                
+            } else {
+                
+                cell.slider.maximumValue = 24
+                cell.radiusLabel.text = "\(defaultsValue) mi"
+                cell.slider.value = Float(defaultsValue)
+                
+            }
             
             cell.slider.addTarget(cell, action: #selector(cell.setSearchRadius(_:)), for: .valueChanged)
-            
-            cell.radiusLabel.text = "\(defaultsValue / 1000) km"
             
             return cell
             

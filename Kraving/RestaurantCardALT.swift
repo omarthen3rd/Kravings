@@ -89,38 +89,54 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             featuredImageView.contentMode = .scaleAspectFill
             
             let image1 = #imageLiteral(resourceName: "btn_addToFavourites").withRenderingMode(.alwaysTemplate)
+            let image1S = #imageLiteral(resourceName: "btn_addToFavourites_selected").withRenderingMode(.alwaysTemplate)
             let image2 = #imageLiteral(resourceName: "btn_openWebsite").withRenderingMode(.alwaysTemplate)
+            let image2S = #imageLiteral(resourceName: "btn_openWebsite_selected").withRenderingMode(.alwaysTemplate)
             let image3 = #imageLiteral(resourceName: "btn_reviews").withRenderingMode(.alwaysTemplate)
+            let image3S = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
             let image4 = #imageLiteral(resourceName: "btn_directions").withRenderingMode(.alwaysTemplate)
+            let image4S = #imageLiteral(resourceName: "btn_directions_selected").withRenderingMode(.alwaysTemplate)
             let image5 = #imageLiteral(resourceName: "btn_call").withRenderingMode(.alwaysTemplate)
+            let image5S = #imageLiteral(resourceName: "btn_call_selected").withRenderingMode(.alwaysTemplate)
             
             addToFavouritesButton.setImage(image1, for: .normal)
+            addToFavouritesButton.setImage(image1S, for: .highlighted)
             addToFavouritesButton.imageView?.tintColor = UIColor.white
             addToFavouritesButton.imageView?.contentMode = .scaleAspectFit
             
             websiteButton.setImage(image2, for: .normal)
+            websiteButton.setImage(image2S, for: .highlighted)
             websiteButton.imageView?.tintColor = UIColor.white
             websiteButton.imageView?.contentMode = .scaleAspectFit
             
             reviewsButton.setImage(image3, for: .normal)
+            reviewsButton.setImage(image3S, for: .highlighted)
             reviewsButton.imageView?.tintColor = UIColor.white
             reviewsButton.imageView?.contentMode = .scaleAspectFit
             
             directionsButton.setImage(image4, for: .normal)
+            directionsButton.setImage(image4S, for: .highlighted)
             directionsButton.imageView?.tintColor = UIColor.white
             directionsButton.imageView?.contentMode = .scaleAspectFit
             
             callButton.setImage(image5, for: .normal)
+            callButton.setImage(image5S, for: .highlighted)
             callButton.imageView?.tintColor = UIColor.white
             callButton.imageView?.contentMode = .scaleAspectFit
             
+            addToFavouritesButton.backgroundColor = UIColor.clear
+            websiteButton.backgroundColor = UIColor.clear
+            reviewsButton.backgroundColor = UIColor.clear
+            directionsButton.backgroundColor = UIColor.clear
+            callButton.backgroundColor = UIColor.clear
+            
             if device.diagonal == 4 {
                 
-                setInsets(5)
+                setInsets(2)
                 
             } else {
                 
-                setInsets(3)
+                setInsets(2)
                 
             }
             
@@ -254,6 +270,12 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         reviewsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
         directionsButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
         callButton.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
+        
+        addToFavouritesButton.backgroundColor = UIColor.clear
+        websiteButton.backgroundColor = UIColor.clear
+        reviewsButton.backgroundColor = UIColor.clear
+        directionsButton.backgroundColor = UIColor.clear
+        callButton.backgroundColor = UIColor.clear
         
     }
     
