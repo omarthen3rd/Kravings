@@ -1,0 +1,34 @@
+PODS:
+  - Alamofire (4.5.0)
+  - Cosmos (11.0.3)
+  - DeviceKit (1.2.3)
+  - PhoneNumberKit (1.3.0):
+    - PhoneNumberKit/PhoneNumberKitCore (= 1.3.0)
+    - PhoneNumberKit/UIKit (= 1.3.0)
+  - PhoneNumberKit/PhoneNumberKitCore (1.3.0)
+  - PhoneNumberKit/UIKit (1.3.0):
+    - PhoneNumberKit/PhoneNumberKitCore
+  - SDWebImage (4.1.0):
+    - SDWebImage/Core (= 4.1.0)
+  - SDWebImage/Core (4.1.0)
+  - SwiftyJSON (3.1.4)
+
+DEPENDENCIES:
+  - Alamofire (~> 4.4)
+  - Cosmos (~> 11.0)
+  - DeviceKit (~> 1.0)
+  - PhoneNumberKit (~> 1.3)
+  - SDWebImage (~> 4.0)
+  - SwiftyJSON
+
+SPEC CHECKSUMS:
+  Alamofire: f28cdffd29de33a7bfa022cbd63ae95a27fae140
+  Cosmos: eb506859929f4add2d2aec822a27efb2f718a95d
+  DeviceKit: f33cbc6e67d9bb416e42dedc647557c7c2f6d3d7
+  PhoneNumberKit: 08aaf1968ea41a114327e9223cbb0391d76ae145
+  SDWebImage: 0e435c14e402a6730315a0fb79f95e68654d55a4
+  SwiftyJSON: c2842d878f95482ffceec5709abc3d05680c0220
+
+PODFILE CHECKSUM: 5c9e41dde1ec97a7fe523aa4930bb38ecf91aa8b
+
+COCOAPODS: 1.2.1

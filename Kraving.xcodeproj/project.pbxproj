@@ -8,15 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		5601F7441F191C4600A22454 /* FavouritesDetailContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5601F7431F191C4600A22454 /* FavouritesDetailContainerViewController.swift */; };
-		560F1DEC1F11798E00B85521 /* PhoneNumberKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 560F1DEB1F11798E00B85521 /* PhoneNumberKit.framework */; };
-		560F1DED1F11798E00B85521 /* PhoneNumberKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 560F1DEB1F11798E00B85521 /* PhoneNumberKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		560F1DEF1F117C4700B85521 /* Cosmos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 560F1DEE1F117C4700B85521 /* Cosmos.framework */; };
-		560F1DF01F117C4700B85521 /* Cosmos.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 560F1DEE1F117C4700B85521 /* Cosmos.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		560F1DF21F117E3D00B85521 /* RestaurantCardALT.xib in Resources */ = {isa = PBXBuildFile; fileRef = 560F1DF11F117E3D00B85521 /* RestaurantCardALT.xib */; };
 		560F1DF61F117F2100B85521 /* RestaurantTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 560F1DF51F117F2100B85521 /* RestaurantTableViewCell.xib */; };
 		560F1DF81F117FCE00B85521 /* RestaurantTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560F1DF71F117FCE00B85521 /* RestaurantTableViewCell.swift */; };
-		5615101B1F40E85E0095F7C7 /* DeviceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5615101A1F40E85E0095F7C7 /* DeviceKit.framework */; };
-		5615101C1F40E85E0095F7C7 /* DeviceKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5615101A1F40E85E0095F7C7 /* DeviceKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		562DB8611F168DE80058696A /* FavouritesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562DB8601F168DE80058696A /* FavouritesTableViewController.swift */; };
 		562DB8631F168EB90058696A /* FavouritesDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562DB8621F168EB90058696A /* FavouritesDetailTableViewController.swift */; };
 		5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */; };
@@ -24,6 +18,8 @@
 		5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */; };
 		566DBC931F142D2C00A8D3E8 /* CategoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566DBC921F142D2C00A8D3E8 /* CategoryTableViewCell.swift */; };
 		566ECE131F145AA6000273F3 /* RestaurantCardALT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566ECE121F145AA6000273F3 /* RestaurantCardALT.swift */; };
+		56BF7BDC1F58AC170098644B /* StartUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BF7BDB1F58AC170098644B /* StartUpViewController.swift */; };
+		56BF7BDE1F58FAF50098644B /* AddressViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BF7BDD1F58FAF50098644B /* AddressViewController.swift */; };
 		56D99D9F1F102F35000FA4F8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */; };
 		56D99DA11F102F35000FA4F8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DA01F102F35000FA4F8 /* ViewController.swift */; };
 		56D99DA41F102F35000FA4F8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 56D99DA21F102F35000FA4F8 /* Main.storyboard */; };
@@ -31,13 +27,8 @@
 		56D99DA91F102F35000FA4F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */; };
 		56D99DB41F102F36000FA4F8 /* KravingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DB31F102F36000FA4F8 /* KravingTests.swift */; };
 		56D99DBF1F102F36000FA4F8 /* KravingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */; };
-		56F5FC161F10311E00AF0B18 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56F5FC131F10311E00AF0B18 /* Alamofire.framework */; };
-		56F5FC171F10311E00AF0B18 /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 56F5FC131F10311E00AF0B18 /* Alamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		56F5FC181F10311E00AF0B18 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56F5FC141F10311E00AF0B18 /* SDWebImage.framework */; };
-		56F5FC191F10311E00AF0B18 /* SDWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 56F5FC141F10311E00AF0B18 /* SDWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		56F5FC1A1F10311E00AF0B18 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56F5FC151F10311E00AF0B18 /* SwiftyJSON.framework */; };
-		56F5FC1B1F10311E00AF0B18 /* SwiftyJSON.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 56F5FC151F10311E00AF0B18 /* SwiftyJSON.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		56F5FC221F1037F600AF0B18 /* Restaurant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F5FC211F1037F600AF0B18 /* Restaurant.swift */; };
+		92173DA19AA1B589E344C490 /* Pods_Kraving.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C58A34F87F39BAA98E839963 /* Pods_Kraving.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,34 +48,11 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		56F5FC1C1F10311F00AF0B18 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				56F5FC191F10311E00AF0B18 /* SDWebImage.framework in Embed Frameworks */,
-				56F5FC171F10311E00AF0B18 /* Alamofire.framework in Embed Frameworks */,
-				56F5FC1B1F10311E00AF0B18 /* SwiftyJSON.framework in Embed Frameworks */,
-				5615101C1F40E85E0095F7C7 /* DeviceKit.framework in Embed Frameworks */,
-				560F1DF01F117C4700B85521 /* Cosmos.framework in Embed Frameworks */,
-				560F1DED1F11798E00B85521 /* PhoneNumberKit.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		5601F7431F191C4600A22454 /* FavouritesDetailContainerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavouritesDetailContainerViewController.swift; sourceTree = "<group>"; };
-		560F1DEB1F11798E00B85521 /* PhoneNumberKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhoneNumberKit.framework; path = Carthage/Build/iOS/PhoneNumberKit.framework; sourceTree = "<group>"; };
-		560F1DEE1F117C4700B85521 /* Cosmos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cosmos.framework; path = Carthage/Build/iOS/Cosmos.framework; sourceTree = "<group>"; };
 		560F1DF11F117E3D00B85521 /* RestaurantCardALT.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RestaurantCardALT.xib; sourceTree = "<group>"; };
 		560F1DF51F117F2100B85521 /* RestaurantTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RestaurantTableViewCell.xib; sourceTree = "<group>"; };
 		560F1DF71F117FCE00B85521 /* RestaurantTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestaurantTableViewCell.swift; sourceTree = "<group>"; };
-		561510181F40E84F0095F7C7 /* DeviceKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceKit.framework; path = Carthage/Build/iOS/DeviceKit.framework; sourceTree = "<group>"; };
-		5615101A1F40E85E0095F7C7 /* DeviceKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceKit.framework; path = Carthage/Build/iOS/DeviceKit.framework; sourceTree = "<group>"; };
 		562DB8601F168DE80058696A /* FavouritesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavouritesTableViewController.swift; sourceTree = "<group>"; };
 		562DB8621F168EB90058696A /* FavouritesDetailTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavouritesDetailTableViewController.swift; sourceTree = "<group>"; };
 		5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
@@ -93,6 +61,8 @@
 		566DBC921F142D2C00A8D3E8 /* CategoryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryTableViewCell.swift; sourceTree = "<group>"; };
 		566ECE121F145AA6000273F3 /* RestaurantCardALT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestaurantCardALT.swift; sourceTree = "<group>"; };
 		567F26771F14555B001B90BF /* CallKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CallKit.framework; path = System/Library/Frameworks/CallKit.framework; sourceTree = SDKROOT; };
+		56BF7BDB1F58AC170098644B /* StartUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartUpViewController.swift; sourceTree = "<group>"; };
+		56BF7BDD1F58FAF50098644B /* AddressViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressViewController.swift; sourceTree = "<group>"; };
 		56D99D9B1F102F35000FA4F8 /* Kraving.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kraving.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		56D99DA01F102F35000FA4F8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -106,10 +76,10 @@
 		56D99DBA1F102F36000FA4F8 /* KravingUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KravingUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KravingUITests.swift; sourceTree = "<group>"; };
 		56D99DC01F102F36000FA4F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		56F5FC131F10311E00AF0B18 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
-		56F5FC141F10311E00AF0B18 /* SDWebImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDWebImage.framework; path = Carthage/Build/iOS/SDWebImage.framework; sourceTree = "<group>"; };
-		56F5FC151F10311E00AF0B18 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
 		56F5FC211F1037F600AF0B18 /* Restaurant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Restaurant.swift; sourceTree = "<group>"; };
+		B5079E98A63B6DE71865389C /* Pods-Kraving.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kraving.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Kraving/Pods-Kraving.debug.xcconfig"; sourceTree = "<group>"; };
+		C58A34F87F39BAA98E839963 /* Pods_Kraving.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Kraving.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4A5D7620A674E5AE5DB1976 /* Pods-Kraving.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kraving.release.xcconfig"; path = "Pods/Target Support Files/Pods-Kraving/Pods-Kraving.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,12 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56F5FC181F10311E00AF0B18 /* SDWebImage.framework in Frameworks */,
-				56F5FC161F10311E00AF0B18 /* Alamofire.framework in Frameworks */,
-				56F5FC1A1F10311E00AF0B18 /* SwiftyJSON.framework in Frameworks */,
-				5615101B1F40E85E0095F7C7 /* DeviceKit.framework in Frameworks */,
-				560F1DEF1F117C4700B85521 /* Cosmos.framework in Frameworks */,
-				560F1DEC1F11798E00B85521 /* PhoneNumberKit.framework in Frameworks */,
+				92173DA19AA1B589E344C490 /* Pods_Kraving.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -167,8 +132,10 @@
 		56515EC01F30E7E3006F2719 /* Main View */ = {
 			isa = PBXGroup;
 			children = (
+				56BF7BDB1F58AC170098644B /* StartUpViewController.swift */,
 				566DBC921F142D2C00A8D3E8 /* CategoryTableViewCell.swift */,
 				56D99DA01F102F35000FA4F8 /* ViewController.swift */,
+				56BF7BDD1F58FAF50098644B /* AddressViewController.swift */,
 			);
 			name = "Main View";
 			sourceTree = "<group>";
@@ -176,14 +143,8 @@
 		567F26761F14555B001B90BF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				5615101A1F40E85E0095F7C7 /* DeviceKit.framework */,
-				561510181F40E84F0095F7C7 /* DeviceKit.framework */,
-				560F1DEE1F117C4700B85521 /* Cosmos.framework */,
-				560F1DEB1F11798E00B85521 /* PhoneNumberKit.framework */,
-				56F5FC131F10311E00AF0B18 /* Alamofire.framework */,
-				56F5FC141F10311E00AF0B18 /* SDWebImage.framework */,
-				56F5FC151F10311E00AF0B18 /* SwiftyJSON.framework */,
 				567F26771F14555B001B90BF /* CallKit.framework */,
+				C58A34F87F39BAA98E839963 /* Pods_Kraving.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -206,6 +167,7 @@
 				56D99DBD1F102F36000FA4F8 /* KravingUITests */,
 				56D99D9C1F102F35000FA4F8 /* Products */,
 				567F26761F14555B001B90BF /* Frameworks */,
+				D582FD87D91C19117521EB83 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -254,6 +216,15 @@
 			path = KravingUITests;
 			sourceTree = "<group>";
 		};
+		D582FD87D91C19117521EB83 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				B5079E98A63B6DE71865389C /* Pods-Kraving.debug.xcconfig */,
+				F4A5D7620A674E5AE5DB1976 /* Pods-Kraving.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -261,10 +232,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 56D99DC31F102F36000FA4F8 /* Build configuration list for PBXNativeTarget "Kraving" */;
 			buildPhases = (
+				3F2C339C032B192B6E54D31F /* [CP] Check Pods Manifest.lock */,
 				56D99D971F102F35000FA4F8 /* Sources */,
 				56D99D981F102F35000FA4F8 /* Frameworks */,
 				56D99D991F102F35000FA4F8 /* Resources */,
-				56F5FC1C1F10311F00AF0B18 /* Embed Frameworks */,
+				F8B18C8230813C064E024C66 /* [CP] Embed Pods Frameworks */,
+				219B280D2A04637BA74B32C9 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -390,6 +363,54 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		219B280D2A04637BA74B32C9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Kraving/Pods-Kraving-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3F2C339C032B192B6E54D31F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		F8B18C8230813C064E024C66 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Kraving/Pods-Kraving-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		56D99D971F102F35000FA4F8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -399,6 +420,7 @@
 				56D99DA11F102F35000FA4F8 /* ViewController.swift in Sources */,
 				5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */,
 				566ECE131F145AA6000273F3 /* RestaurantCardALT.swift in Sources */,
+				56BF7BDC1F58AC170098644B /* StartUpViewController.swift in Sources */,
 				5601F7441F191C4600A22454 /* FavouritesDetailContainerViewController.swift in Sources */,
 				562DB8631F168EB90058696A /* FavouritesDetailTableViewController.swift in Sources */,
 				566DBC931F142D2C00A8D3E8 /* CategoryTableViewCell.swift in Sources */,
@@ -406,6 +428,7 @@
 				56D99D9F1F102F35000FA4F8 /* AppDelegate.swift in Sources */,
 				5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */,
 				562DB8611F168DE80058696A /* FavouritesTableViewController.swift in Sources */,
+				56BF7BDE1F58FAF50098644B /* AddressViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -555,6 +578,7 @@
 		};
 		56D99DC41F102F36000FA4F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B5079E98A63B6DE71865389C /* Pods-Kraving.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 7CSTNGA4CB;
@@ -566,7 +590,7 @@
 				INFOPLIST_FILE = Kraving/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.Kraving;
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.Kravings;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -574,6 +598,7 @@
 		};
 		56D99DC51F102F36000FA4F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F4A5D7620A674E5AE5DB1976 /* Pods-Kraving.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 7CSTNGA4CB;
@@ -585,7 +610,7 @@
 				INFOPLIST_FILE = Kraving/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.Kraving;
+				PRODUCT_BUNDLE_IDENTIFIER = com.omarabbasi.Kravings;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};

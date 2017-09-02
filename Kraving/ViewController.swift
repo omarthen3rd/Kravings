@@ -154,6 +154,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     @IBOutlet var categoryContainerView: UIView!
     @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
+    @IBOutlet var sortByTableView: UITableView!
     @IBOutlet var reviewsTableView: UITableView!
     @IBAction func unwindToMenu(segue: UIStoryboardSegue) {}
     
@@ -176,6 +177,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     var restaurants = [Restaurant]()
     var favouriteRestaurants = [Restaurant]()
     var currentReviews = [RestaurantReviews]()
+    var sortByItems = ["Best Match", "Rating", "Review Count", "Distance"]
     var restaurantIndex = 0
     
     var locationManager = CLLocationManager()
@@ -189,11 +191,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // self.navigationController?.isNavigationBarHidden = false
-        self.reviewsTableView.estimatedRowHeight = 400
-        self.reviewsTableView.rowHeight = UITableViewAutomaticDimension
-        self.reviewsTableView.setNeedsLayout()
-        self.reviewsTableView.layoutIfNeeded()
-        self.reviewsTableView.reloadData()
+        
     }
 
     override func viewDidLoad() {
@@ -242,12 +240,56 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         if internetIsAvailable {
             
-            locationManager.delegate = self
-            locationManager.distanceFilter = 100
-            locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-            locationManager.requestWhenInUseAuthorization()
-            locationManager.startUpdatingLocation()
-            locationManager.requestLocation()
+            if defaults.bool(forKey: "usesLocationServices") == true {
+                
+                locationManager.delegate = self
+                locationManager.distanceFilter = 100
+                locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+                locationManager.requestWhenInUseAuthorization()
+                locationManager.startUpdatingLocation()
+                locationManager.requestLocation()
+                
+            } else {
+                
+                print("ran other")
+                
+                self.restaurants.removeAll()
+                self.restaurantIndex = 0
+                self.getCategories(completionHandler: { (success) in
+                    
+                    if success {
+                        
+                        self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
+                            
+                            if success {
+                                
+                                self.loadInterface(completionHandler: { (success) in
+                                    
+                                    self.loadCard(1)
+                                    
+                                })
+                                
+                            } else {
+                                
+                                self.loadInterface(completionHandler: { (success) in
+                                    
+                                    self.spinningView.stopAnimating()
+                                    self.noresultsLabel.text = "No Results In Your Search Radius"
+                                    self.noresultsLabel.isHidden = false
+                                    
+                                })
+                                
+                            }
+                        })
+                        
+                        
+                    }
+                    
+                })
+                
+            }
+            
+            
             
         } else {
             
@@ -374,6 +416,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     func loadInterface(completionHandler: @escaping (Bool) -> ()) {
         
+        self.reviewsTableView.estimatedRowHeight = 400
+        self.reviewsTableView.rowHeight = UITableViewAutomaticDimension
+        self.reviewsTableView.setNeedsLayout()
+        self.reviewsTableView.layoutIfNeeded()
+        self.reviewsTableView.reloadData()
+        
         self.statusBarBlur.effect = nil
         
         self.spinningView.hidesWhenStopped = true
@@ -428,9 +476,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         categoriesTableView.tableFooterView = UIView(frame: .zero)
         categoriesTableView.backgroundColor = UIColor.clear
+        categoriesTableView.layer.cornerRadius = 15
         
         reviewsTableView.tableFooterView = UIView(frame: .zero)
         reviewsTableView.backgroundColor = UIColor.clear
+        
+        sortByTableView.tableFooterView = UIView(frame: .zero)
+        sortByTableView.backgroundColor = UIColor.clear
+        sortByTableView.layer.cornerRadius = 15
         
         let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
@@ -443,10 +496,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         reviewsTableView.backgroundView = blurEffectView2
         reviewsTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
+        let blurEffectView3 = UIVisualEffectView(effect: blurEffect)
+        blurEffectView3.frame = reviewsTableView.bounds
+        sortByTableView.backgroundView = blurEffectView3
+        sortByTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
+        
         let indexPath = IndexPath(row: 0, section: 0)
         self.categoriesTableView.selectRow(at: indexPath, animated: true, scrollPosition: .top)
         
         self.categoriesTableView.reloadData()
+        self.sortByTableView.reloadData()
         completionHandler(true)
         
     }
@@ -455,13 +514,41 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         // add some kind of error view telling user to allow location
         
-        if error != nil {
-            
-            let alrt = UIAlertController(title: "Please Enable Location Services", message: "This application cannot work without enabling Location Services.", preferredStyle: .alert)
-            let alrtAction = UIAlertAction(title: "Okay", style: .default, handler: nil)
-            alrt.addAction(alrtAction)
-            self.present(alrt, animated: true, completion: nil)
-            
+        print("error happened")
+        
+        let alrt = UIAlertController(title: "Please Enable Location Services", message: "This application cannot work without enabling Location Services.", preferredStyle: .alert)
+        let alrtAction = UIAlertAction(title: "Okay", style: .default, handler: nil)
+        alrt.addAction(alrtAction)
+        self.present(alrt, animated: true, completion: nil)
+        
+        self.noresultsLabel.isHidden = true
+
+        let btnToOpenSettings = UIButton(frame: self.noresultsLabel.bounds)
+        btnToOpenSettings.titleLabel?.font = UIFont.systemFont(ofSize: 25)
+        btnToOpenSettings.titleLabel?.text = "Open Settings"
+        btnToOpenSettings.addTarget(self, action: #selector(self.openSettings(_:)), for: UIControlEvents.touchUpInside)
+        
+        
+    }
+    
+    func openSettings(_ sender: UIButton) {
+        
+        print("ran this")
+        
+        if let settingsURL = URL(string: UIApplicationOpenSettingsURLString + Bundle.main.bundleIdentifier!) {
+            UIApplication.shared.open(settingsURL, options: [:], completionHandler: { (success) in
+                
+                if !success {
+                    
+                    print("wtf")
+                    
+                } else {
+                    
+                    sender.isHidden = true
+                    
+                }
+                
+            })
         }
         
     }
@@ -582,6 +669,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.categories.insert("All Types", at: 0)
                 DispatchQueue.main.async {
                     self.categoriesTableView.reloadData()
+                    self.sortByTableView.reloadData()
                 }
                 self.selectedCategory = "All Types"
                 
@@ -882,7 +970,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     
                     if self.restaurants.isEmpty {
                         
-                        self.noresultsLabel.text = "No Results"
+                        self.noresultsLabel.text = "No Results \n Try Increasing The Search Radius In Settings"
                         self.spinningView.stopAnimating()
                         self.backButton.isEnabled = false
                         self.forwardButton.isEnabled = false
@@ -902,7 +990,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     
                 } else {
                     
-                    self.noresultsLabel.text = "No Results"
+                    self.noresultsLabel.text = "No Results \n Try Increasing The Search Radius In Settings"
                     self.noresultsLabel.isHidden = false
                     self.spinningView.stopAnimating()
                     self.backButton.isEnabled = false
@@ -1072,41 +1160,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
         }
         animator.startAnimation()
-        
-    }
-    
-    func newHandlePan(_ recognizer: UIPanGestureRecognizer) {
-        
-        let viewCard = recognizer.view!
-        let point = recognizer.translation(in: view)
-        let xFromCenter = viewCard.center.x - view.center.x
-        
-        switch recognizer.state {
-            
-        case .began:
-            print("began")
-            
-            if viewCard.center.x < 40 {
-                
-                // left
-                
-                animator = UIViewPropertyAnimator(duration: 0.8, curve: .linear, animations: { 
-                    
-                    viewCard.frame = viewCard.frame.offsetBy(dx: -400, dy: 0)
-                    viewCard.alpha = 0
-                    
-                })
-                
-            }
-            
-        case .changed:
-            let translation = recognizer.translation(in: view)
-            animator.fractionComplete = translation.x / view.frame.width
-         
-        default:
-            print("default stuff happened")
-            
-        }
         
     }
     
@@ -1536,9 +1589,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             return self.categories.count
             
-        } else {
+        } else if tableView == reviewsTableView {
          
             return self.currentReviews.count
+            
+        } else {
+            
+            return self.sortByItems.count
             
         }
         
@@ -1561,7 +1618,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             return cell
             
-        } else {
+        } else if tableView == reviewsTableView {
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "ReviewsCell", for: indexPath) as! ReviewsCell
             
@@ -1584,6 +1641,20 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             return cell
             
+        } else {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "sortCell", for: indexPath) as! CategoryTableViewCell
+            
+            cell.categoryLabel.text = sortByItems[indexPath.row]
+            
+            let selView = UIView(frame: cell.bounds)
+            selView.backgroundColor = UIColor.darkGray
+            
+            let newSelectionView = UIVisualEffectView(frame: cell.bounds)
+            newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
+            cell.selectedBackgroundView = selView
+            
+            return cell
         }
         
     }
@@ -1608,6 +1679,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         
         if tableView == categoriesTableView {
+            
+            let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
+            cell.categoryLabel.textColor = UIColor.darkGray
+            
+        } else if tableView == sortByTableView {
             
             let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
             cell.categoryLabel.textColor = UIColor.darkGray
