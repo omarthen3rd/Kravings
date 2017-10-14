@@ -19,18 +19,37 @@ class FavouritesCell: UITableViewCell {
         self.layoutIfNeeded()
     }
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.layoutIfNeeded()
+    }
+    
 }
 
-class FavouritesTableViewController: UITableViewController {
+class FavouritesTableViewController: UITableViewController, UISearchBarDelegate {
     
     var favourites = [Restaurant]()
+    var favouritesFiltered = [Restaurant]()
     var blurEffectView = UIVisualEffectView()
     var noDataLabel = UILabel()
     let defaults = UserDefaults.standard
     
+    var resultSearchController = UISearchController(searchResultsController: nil)
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        UIView.performWithoutAnimation {
+            tableView.beginUpdates()
+            tableView.endUpdates()
+        }
+        
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.tableView.estimatedRowHeight = 280
+                
+        self.tableView.estimatedRowHeight = UITableViewAutomaticDimension
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.setNeedsLayout()
         self.tableView.layoutIfNeeded()
@@ -40,13 +59,17 @@ class FavouritesTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = true
+        }
+        
         if traitCollection.forceTouchCapability == .available {
             
             registerForPreviewing(with: self, sourceView: tableView)
             
         }
         
-        addBlur()
+        setupView()
         loadFavourites()
         
     }
@@ -58,7 +81,7 @@ class FavouritesTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    func addBlur() {
+    func setupView() {
         
         tableView.tableFooterView = UIView(frame: .zero)
         
@@ -68,6 +91,21 @@ class FavouritesTableViewController: UITableViewController {
         tableView.separatorEffect = UIVibrancyEffect(blurEffect: UIBlurEffect(style: UIBlurEffectStyle.regular))
         
         self.tableView.backgroundView = blurEffectView
+        
+        resultSearchController.searchResultsUpdater = self
+        resultSearchController.dimsBackgroundDuringPresentation = false
+        resultSearchController.searchBar.sizeToFit()
+        resultSearchController.searchBar.searchBarStyle = UISearchBarStyle.minimal
+        definesPresentationContext = true
+        
+        if #available(iOS 11.0, *) {
+            self.navigationItem.searchController = resultSearchController
+        } else {
+            let searchOffset = CGPoint(x: 0, y: 44)
+            tableView.setContentOffset(searchOffset, animated: false)
+            tableView.tableHeaderView = resultSearchController.searchBar
+        }
+        
     }
     
     func loadFavourites() {
@@ -105,8 +143,19 @@ class FavouritesTableViewController: UITableViewController {
         noDataLabel.textAlignment = .center
         self.tableView.separatorColor = UIColor.clear
         self.tableView.separatorEffect = nil
-        self.blurEffectView.addSubview(noDataLabel)
+        self.blurEffectView.contentView.addSubview(noDataLabel)
         // self.tableView.backgroundView = noDataLabel
+        
+    }
+    
+    // Search bar func
+    
+    func filterContentForSearchText(searchText: String) {
+        
+        favouritesFiltered = favourites.filter({ (restaurant) -> Bool in
+            return restaurant.name.lowercased().contains(searchText.lowercased())
+        })
+        self.tableView.reloadData()
         
     }
     
@@ -132,16 +181,29 @@ class FavouritesTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+     
+        if resultSearchController.isActive {
+            return favouritesFiltered.count
+        } else {
+            return favourites.count
+        }
         
-        return favourites.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! FavouritesCell
         
-        cell.restaurantTitle?.text = favourites[indexPath.row].name
-        cell.restaurantStars.rating = Double(favourites[indexPath.row].rating)
-        cell.restaurantStars.text = "\(favourites[indexPath.row].reviewCount)" + " VOTES"
+        let favourite: Restaurant
+        
+        if resultSearchController.isActive {
+            favourite = favouritesFiltered[indexPath.row]
+        } else {
+            favourite = favourites[indexPath.row]
+        }
+        
+        cell.restaurantTitle?.text = favourite.name
+        cell.restaurantStars.rating = Double(favourite.rating)
+        cell.restaurantStars.text = "\(favourite.reviewCount)" + " VOTES"
         
         let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.regular)
         let newSelectedView = UIVisualEffectView(effect: blurEffect)
@@ -149,15 +211,13 @@ class FavouritesTableViewController: UITableViewController {
         
         cell.selectedBackgroundView = newSelectedView
         
-        if let url = URL(string: favourites[indexPath.row].imageURL) {
-            
-            cell.restaurantImage.sd_setImage(with: url)
-            cell.restaurantImage.clipsToBounds = true
-            cell.restaurantImage.layer.cornerRadius = 5
-            
-        }
+        let img = favourite.image
         
-        cell.layoutIfNeeded()
+        cell.restaurantImage.image = img
+        cell.restaurantImage.clipsToBounds = true
+        cell.restaurantImage.layer.cornerRadius = 5
+        
+        cell.layoutSubviews()
         
         return cell
     }
@@ -166,17 +226,38 @@ class FavouritesTableViewController: UITableViewController {
         
         let del = UITableViewRowAction(style: .destructive, title: "Delete") { (action, index) in
             
-            self.favourites.remove(at: indexPath.row)
+            if self.resultSearchController.isActive {
+                
+                let favIndex = self.favourites.index(of: self.favouritesFiltered[indexPath.row])
+                if let intIndex = favIndex as? Int {
+                    self.favourites.remove(at: intIndex)
+                }
+                
+            } else {
+                
+                self.favourites.remove(at: indexPath.row)
+                
+            }
             
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: self.favourites)
             self.defaults.set(encodedData, forKey: "favourites")
             self.defaults.synchronize()
             
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                
+                self.tableView.reloadData()
+                
+            }
             
         }
         
         return [del]
+        
+    }
+    
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return UITableViewAutomaticDimension
         
     }
     
@@ -244,6 +325,14 @@ extension FavouritesTableViewController: UIViewControllerPreviewingDelegate {
         
         self.navigationController?.pushViewController(viewControllerToCommit, animated: true)
         
+    }
+    
+}
+
+extension FavouritesTableViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        filterContentForSearchText(searchText: searchController.searchBar.text!)
     }
     
 }

@@ -12,16 +12,12 @@ import SwiftyJSON
 import PhoneNumberKit
 import Cosmos
 import DeviceKit
+import SDWebImage
+import Hero
 
-class Alert {
+protocol OpenDetailView {
     
-    func msg(title: String, message: String) {
-        
-        let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alertView.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        UIApplication.shared.keyWindow?.rootViewController?.show(alertView, sender: self)
-        
-    }
+    func showDetailView()
     
 }
 
@@ -31,7 +27,13 @@ protocol ShowReviewView {
     
 }
 
-class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, CallAlert {
+protocol ShowAlert {
+    
+    func showAlertController(_ title: String, _ message: String, _ url: String?)
+    
+}
+
+class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet var contentView: UIView!
     @IBOutlet var mainTableView: UITableView!
@@ -59,10 +61,13 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     @IBOutlet var alertViewImage: UIImageView!
     
     var didAnimateView = false
+    var feedbackGenerator = UIImpactFeedbackGenerator()
     
     var defaults = UserDefaults.standard
     
     var reviewDelegate: ShowReviewView?
+    var showAlertDelegate: ShowAlert?
+    var openDetailView: OpenDetailView?
     
     var panGesture = UIPanGestureRecognizer()
     var tapGesture = UITapGestureRecognizer()
@@ -75,18 +80,29 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
     var information = [String]()
     var headers = ["ADDRESS", "PHONE", "TRANSACTIONS"]
     var distanceToMoveBy = CGFloat()
+    var photos = [UIImage]()
     
     var restaurant: Restaurant! {
         
         didSet {
+            
+            let restID = restaurant.id
+            
+            mainTableView.register(UINib(nibName: "PhotosCell", bundle: nil), forCellReuseIdentifier: "PhotosCell")
             
             alertView.effect = nil
             
             alertView.layer.cornerRadius = 10
             alertView.clipsToBounds = true
             
-            featuredImageView.sd_setImage(with: URL(string: restaurant.imageURL))
+            let img = restaurant.image
+            
+            featuredImageView.image = img
             featuredImageView.contentMode = .scaleAspectFill
+            featuredImageView.layer.cornerRadius = 8
+            featuredImageView.clipsToBounds = true
+            featuredImageView.heroID = "\(restID)_image"
+            featuredImageView.heroModifiers = [.zPosition(2)]
             
             let image1 = #imageLiteral(resourceName: "btn_addToFavourites").withRenderingMode(.alwaysTemplate)
             let image1S = #imageLiteral(resourceName: "btn_addToFavourites_selected").withRenderingMode(.alwaysTemplate)
@@ -141,27 +157,42 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             }
             
             restaurantName.text = restaurant.name
+            restaurantName.heroID = "\(restID)_name"
+            restaurantName.heroModifiers = [.zPosition(4)]
             
             // start attributed label
             
-            let priceText = checkPrice(restaurant.priceRange)
-            let multipleText = checkPrice(restaurant.priceRange) + " · " + convert(restaurant.distance)
+            // get range of text to colour
+            let textColorRange = NSRange(location: 0, length: restaurant.priceRange.count)
+            // get location of text to have a darker colour (4 is highest price)
+            let nonColor = 4 - restaurant.priceRange.count
+            // get range of text to have a darker colour
+            let nonTextColorRange = NSRange(location: restaurant.priceRange.count, length: nonColor)
+            let multipleText = "$$$$ · " + convert(restaurant.distance)
             
             let attributedString = NSMutableAttributedString(string: multipleText)
-            attributedString.setColorForText(priceText, with: UIColor.green)
+            attributedString.setColorForRange(textColorRange, with: UIColor.green)
+            attributedString.setColorForRange(nonTextColorRange, with: UIColor.green.withAlphaComponent(0.3))
             
             restaurantPriceAndDistance.attributedText = attributedString
+            restaurantPriceAndDistance.heroID = "\(restID)_priceDistance"
+            restaurantPriceAndDistance.heroModifiers = [.zPosition(4)]
             
             // end attributed label
             
             restaurantCategory.text = restaurant.category
+            restaurantCategory.heroID = "\(restID)_category"
+            restaurantCategory.heroModifiers = [.zPosition(4)]
             
+            restaurantStars.contentMode = .right
             restaurantStars.rating = Double(restaurant.rating)
             restaurantStars.settings.emptyBorderWidth = 0
             restaurantStars.settings.emptyBorderColor = UIColor.clear
             restaurantStars.settings.emptyColor = UIColor.lightText
             restaurantStars.settings.updateOnTouch = false
-            restaurantStars.settings.starSize = 26
+            restaurantStars.settings.starSize = 23
+            restaurantStars.heroID = "\(restID)_rating"
+            restaurantStars.heroModifiers = [.zPosition(2)]
             
             let address = "\(restaurant.address) \n\(restaurant.city), \(restaurant.state) \n\(restaurant.country)"
             let phoneNumber = returnFormatted(restaurant.phone)
@@ -191,27 +222,33 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             }
             
             gradient.frame = gradientView.bounds
-            gradient.colors = [UIColor(red: 0, green: 0, blue: 0, alpha: 0.0).cgColor, UIColor(red: 0, green: 0, blue: 0, alpha: 0.9).cgColor]
-            gradient.locations = [0, 1.0]
+            gradient.colors = [UIColor(red: 0, green: 0, blue: 0, alpha: 0).cgColor, UIColor(red: 0, green: 0, blue: 0, alpha: 0.9).cgColor]
+            gradient.locations = [0.5, 1.0] // halfway point to endpoint
             gradientView.layer.insertSublayer(gradient, at: 0)
             
             mainBlurView.effect = nil
             
             self.gradientView.layoutSubviews()
             
+            gradientView.heroModifiers = [.fade]
+            gradientView.layer.cornerRadius = 8
+            gradientView.heroID = "\(restID)_gradient"
+            self.heroID = "\(restID)_view"
+            
             websiteButton.addTarget(self, action: #selector(self.openWebsite), for: UIControlEvents.touchUpInside)
             addToFavouritesButton.addTarget(self, action: #selector(self.addToFavourites), for: UIControlEvents.touchUpInside)
             reviewsButton.addTarget(self, action: #selector(self.openReviewsThatCallsAnotherFunction), for: UIControlEvents.touchUpInside)
             directionsButton.addTarget(self, action: #selector(self.openMaps), for: UIControlEvents.touchUpInside)
             callButton.addTarget(self, action: #selector(self.callBusiness), for: UIControlEvents.touchUpInside)
+
+            checkIfInFavourites()
             
-            tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
-            // panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-            // mainView.addGestureRecognizer(panGesture)
+            tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap2(_:)))
             containerView.addGestureRecognizer(tapGesture)
             
             if device.diagonal == 4 {
                 
+                // restaurantName.font
                 restaurantName.numberOfLines = 1
                 restaurantStars.settings.starSize = 22
                 
@@ -241,12 +278,14 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         UIView.animate(withDuration: 0.3) {
             
-            self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * 1)
+            // self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * 1)
+            self.stackViewBlur.alpha = 0.0
+            self.stackViewBlur.effect = nil
             
         }
         
         let mainComponents = self.restaurantName.bounds.height + self.restaurantCategory.bounds.height
-        let mainConstraints = CGFloat(21) // constraints of title and category
+        let mainConstraints = CGFloat(19 ) // constraints of title and category
         self.mainView.bounds.origin.y = (mainComponents + mainConstraints) - self.bounds.height
         self.distanceToMoveBy = self.mainView.bounds.origin.y
         
@@ -257,7 +296,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         Bundle.main.loadNibNamed("RestaurantCardALT", owner: self, options: nil)
         
         self.clipsToBounds = true
-        self.layer.cornerRadius = 15.0
+        self.layer.cornerRadius = 8
         
         addSubview(contentView)
         
@@ -336,25 +375,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
         }
         
-        /*
-        if range.characters.count == 1 {
-            
-            return "\(range) - Relatively Cheap"
-            
-        } else if range.characters.count == 2 {
-            
-            return "\(range) - Not That Expensive"
-            
-        } else if range.characters.count == 3 {
-            
-            return "\(range) - Quite Expensive"
-            
-        } else {
-            
-            return "Price Range Is Unknown"
-            
-        } */
-        
     }
     
     func returnTimings() {
@@ -378,13 +398,9 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                             self.mainTableView.reloadData()
                             
                         }
-                        
                     }
-                    
                 }
-                
             }
-            
         }
         
     }
@@ -523,6 +539,33 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
     }
     
+    func getBusinessPhotos(_ id: String, completionHandler: @escaping ([URL]) -> ()) {
+        
+        let headers = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        
+        Alamofire.request("https://api.yelp.com/v3/businesses/\(id)", headers: headers).responseJSON { (Response) in
+            
+            if let value = Response.result.value {
+                
+                let json = JSON(value)
+                
+                var photoURL = [URL]()
+                
+                for link in json["photos"].arrayValue {
+                    
+                    let photoLink = link.stringValue
+                    let url = URL(string: photoLink)
+                    photoURL.append(url!)
+                    
+                }
+                
+                completionHandler(photoURL)
+            }
+            
+        }
+        
+    }
+    
     func timeConverter(_ time: String) -> String {
         
         var timeToUse = time
@@ -576,39 +619,133 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             animator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
             
         default:
-            print("default")
+            break
             
+        }
+        
+    }
+    
+    func handleTap2(_ recognizer: UITapGestureRecognizer) {
+        
+        if let del = openDetailView {
+            del.showDetailView()
         }
         
     }
     
     func handleTap(_ recognizer: UITapGestureRecognizer) {
         
+        feedbackGenerator = UIImpactFeedbackGenerator()
+        feedbackGenerator.prepare()
+        
         if didAnimateView {
             
-            animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeOut, animations: {
-                self.gradient.opacity = 1
+            animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeInOut, animations: {
+                self.gradientView.alpha = 1
                 self.mainBlurView.effect = nil
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * -1))
-                self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * 1)
+                // self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * 1)
+                self.stackViewBlur.alpha = 0.0
+                self.stackViewBlur.effect = nil
+            })
+            animator.addCompletion({ (position) in
+                
+              self.feedbackGenerator.impactOccurred()
+                
             })
             animator.startAnimation()
             didAnimateView = false
+            
+            checkIfInFavourites()
             
             // view just closed
             
         } else {
             
-            animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeOut, animations: {
-                self.gradient.opacity = 0
+            animator = UIViewPropertyAnimator(duration: 0.4, curve: .easeInOut, animations: {
+                self.gradientView.alpha = 0
                 self.mainBlurView.effect = UIBlurEffect(style: UIBlurEffectStyle.dark)
                 self.mainView.frame = self.mainView.frame.offsetBy(dx: 0, dy: (self.distanceToMoveBy * 1))
-                self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * -1)
+                // self.stackViewBlur.frame = self.stackViewBlur.frame.offsetBy(dx: 0, dy: (self.stackViewBlur.bounds.size.height) * -1)
+                self.stackViewBlur.alpha = 1.0
+                self.stackViewBlur.effect = UIBlurEffect(style: .dark)
+            })
+            animator.addCompletion({ (position) in
+                
+                self.feedbackGenerator.impactOccurred()
+                
             })
             animator.startAnimation()
             didAnimateView = true
             
+            checkIfInFavourites()
+            
             // view just opened
+            
+        }
+        
+    }
+    
+    func attributeText(_ text: String, _ textToAttribute: String, _ attributes: [Attributes], _ color: UIColor?) -> NSMutableAttributedString {
+        
+        let attributedString = NSMutableAttributedString(string: text)
+        
+        if attributes.contains(.bold) && attributes.contains(.color) {
+            
+            // attributes has both bold and color
+            attributedString.setBoldForText(textToAttribute)
+            attributedString.setColorForText(textToAttribute, with: color!)
+            
+        } else if attributes.contains(.bold) {
+            
+            // attributes only has bold
+            attributedString.setBoldForText(textToAttribute)
+            
+        } else {
+            
+            // attributes only has color
+            attributedString.setColorForText(textToAttribute, with: color!)
+            
+        }
+        
+        return attributedString
+        
+    }
+    
+    func checkIfInFavourites() {
+        
+        if let decodedArr = defaults.object(forKey: "favourites") as? Data {
+            
+            if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                
+                if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
+                    
+                    // not in favourites -> show add button
+                    let image1 = #imageLiteral(resourceName: "btn_addToFavourites").withRenderingMode(.alwaysTemplate)
+                    let image1S = #imageLiteral(resourceName: "btn_addToFavourites_selected").withRenderingMode(.alwaysTemplate)
+                    
+                    // change button image
+                    addToFavouritesButton.setImage(image1, for: .normal)
+                    addToFavouritesButton.setImage(image1S, for: .highlighted)
+                    addToFavouritesButton.imageView?.tintColor = UIColor.white
+                    
+                    
+                } else {
+                    
+                    // already in favourites -> show remove button
+                    
+                    let image1 = #imageLiteral(resourceName: "btn_removeFavourites").withRenderingMode(.alwaysTemplate)
+                    let image1S = #imageLiteral(resourceName: "btn_removeFavourites_selected").withRenderingMode(.alwaysTemplate)
+                    
+                    // change button image
+                    addToFavouritesButton.setImage(image1, for: .normal)
+                    addToFavouritesButton.setImage(image1S, for: .highlighted)
+                    addToFavouritesButton.imageView?.tintColor = UIColor.white
+
+                    
+                }
+                
+            }
             
         }
         
@@ -627,6 +764,8 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             defaults.set(encodedData, forKey: "favourites")
             defaults.synchronize()
             
+            showAlertView(false)
+            
         } else {
             
             if let decodedArr = defaults.object(forKey: "favourites") as? Data {
@@ -635,15 +774,36 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                     
                     if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
                         
-                        // not in favourites
+                        // not in favourites -> add to favourites
                         decodedRestaurants.append(restaurant)
+                        
+                        showAlertView(false)
+                        
+                        let image1 = #imageLiteral(resourceName: "btn_removeFavourites").withRenderingMode(.alwaysTemplate)
+                        let image1S = #imageLiteral(resourceName: "btn_removeFavourites_selected").withRenderingMode(.alwaysTemplate)
+                        
+                        // change button image
+                        addToFavouritesButton.setImage(image1, for: .normal)
+                        addToFavouritesButton.setImage(image1S, for: .highlighted)
+                        addToFavouritesButton.imageView?.tintColor = UIColor.white
                         
                     } else {
                         
-                        // already in favourites
+                        // already in favourites -> remove from favourites
                         
-                        let alert = Alert()
-                        alert.msg(title: "Already In Favourites", message: "The restaurant you favourited is already in your favourites.")
+                        let indexToRemove = decodedRestaurants.index(where: { $0.id == restaurant.id } )
+                        
+                        decodedRestaurants.remove(at: indexToRemove!)
+                        
+                        showAlertView(true)
+                        
+                        let image1 = #imageLiteral(resourceName: "btn_addToFavourites").withRenderingMode(.alwaysTemplate)
+                        let image1S = #imageLiteral(resourceName: "btn_addToFavourites_selected").withRenderingMode(.alwaysTemplate)
+                        
+                        // change button image
+                        addToFavouritesButton.setImage(image1, for: .normal)
+                        addToFavouritesButton.setImage(image1S, for: .highlighted)
+                        addToFavouritesButton.imageView?.tintColor = UIColor.white
                         
                     }
                     
@@ -666,8 +826,10 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                 
                 if !success {
                     
-                    let alert = Alert()
-                    alert.msg(title: "Failed To Call", message: "There's been a slight complication. The call cannot be made, make sure you are using an iPhone or a compatible device.")
+                    if let del = self.showAlertDelegate {
+                        del.showAlertController("Failed To Call", "There's been a slight complication. The call cannot be made, make sure you are using an iPhone or a compatible device.", nil)
+                    }
+                    
                 }
                 
             })
@@ -683,14 +845,17 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         if defaults.object(forKey: "defaultMaps") == nil {
             
+            // if defaults is nothing, Apple Maps
+            
             if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
                 
                 UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
                     
                     if !success {
                         
-                        let alert = Alert()
-                        alert.msg(title: "Failed To Open Maps", message: "There's been a slight complication. Make sure you have Maps installed on your iPhone.")
+                        if let del = self.showAlertDelegate {
+                            del.showAlertController("Failed To Open Maps", "There's been a slight complication. Make sure you have Maps installed on your iPhone.", nil)
+                        }
                         
                     }
                     
@@ -699,7 +864,9 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             
         } else if let appName = defaults.object(forKey: "defaultMaps") as? String {
             
-            if appName == "Apple Maps" {
+            switch appName {
+                
+            case "Apple Maps":
                 
                 if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
                     
@@ -707,31 +874,15 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Maps", message: "There's been a slight complication. Make sure you have Maps installed on your iPhone.")
+                            if let del = self.showAlertDelegate {
+                                del.showAlertController("Failed To Open Maps", "There's been a slight complication. Make sure you have Maps installed on your iPhone.", nil)
+                            }
                         }
                         
                     })
                 }
-                
-            } else if appName == "Waze" {
-                
-                if let url = URL(string: "waze://?q=\(addressString!)") {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Waze", message: "There's been a slight complication. Waze isn't installed on your iPhone.")
-                            
-                        }
-                        
-                    })
-                    
-                }
-                
-            } else if appName == "Google Maps" {
+            
+            case "Google Maps":
                 
                 if let url = URL(string: "comgooglemaps://?q=\(addressString!)") {
                     
@@ -739,13 +890,49 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Google Maps", message: "There's been a slight complication. Google Maps isn't installed on your iPhone.")
+                            if let del = self.showAlertDelegate {
+                                del.showAlertController("Failed To Open Google Maps", "There's been a slight complication. Make sure you have Google Maps installed on your iPhone.", "https://itunes.apple.com/ca/app/google-maps/id585027354?mt=8")
+                            }
                         }
                         
                     })
                     
+                }
+                
+            case "Waze":
+                
+                if let url = URL(string: "waze://?q=\(addressString!)") {
                     
+                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
+                        
+                        if !success {
+                            
+                            if let del = self.showAlertDelegate {
+                                del.showAlertController("Failed To Open Waze", "There's been a slight complication. Make sure you have Waze installed on your iPhone.", "https://itunes.apple.com/us/app/waze-social-gps-maps-traffic/id323229106?mt=8")
+                            }
+                            
+                        }
+                        
+                    })
+                    
+                }
+                
+            default:
+                
+                // default is Apple Maps
+                
+                if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
+                    
+                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
+                        
+                        if !success {
+                            
+                            if let del = self.showAlertDelegate {
+                                del.showAlertController("Failed To Open Maps", "There's been a slight complication. Make sure you have Maps installed on your iPhone.", nil)
+                            }
+                        }
+                        
+                    })
                 }
                 
             }
@@ -764,8 +951,9 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                     
                     if !success {
                         
-                        let alert = Alert()
-                        alert.msg(title: "Failed To Open Safari", message: "There's been a slight complication. This shouldn't be happening.")
+                        if let del = self.showAlertDelegate {
+                            del.showAlertController("Failed To Open Safari", "There's been a slight complication. Make sure you have Safari installed on your iPhone.", nil)
+                        }
                         
                     }
                     
@@ -783,8 +971,9 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Safari", message: "There's been a slight complication. This shouldn't be happening.")
+                            if let del = self.showAlertDelegate {
+                                del.showAlertController("Failed To Open Safari", "There's been a slight complication. Make sure you have Safari installed on your iPhone.", nil)
+                            }
                             
                         }
                         
@@ -794,14 +983,21 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                 
             } else if browserName == "Google Chrome" {
                 
-                if let url = URL(string: "googlechromes://\(restaurant.website)") {
+                // use everything after the "https" as url because Google Chrome ¯\_(ツ)_/¯
+                let rangeOfScheme = (restaurant.website as NSString).range(of: ":")
+                let urlNoScheme = (restaurant.website as NSString).substring(from: rangeOfScheme.location)
+                let chromeURLString = "googlechromes" + (urlNoScheme)
+                let chromeURL = URL(string: chromeURLString)
+                
+                if let url = chromeURL {
                     
                     UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Google Chrome", message: "There's been a slight complication. Google Chrome isn't installed on your iPhone.")
+                            if let del = self.showAlertDelegate {
+                                del.showAlertController("Failed To Open Google Chrome", "There's been a slight complication. Make sure you have Google Chrome installed on your iPhone.", "https://itunes.apple.com/us/app/google-chrome/id535886823?mt=8")
+                            }
                             
                         }
                         
@@ -811,14 +1007,6 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
                 
             }
             
-        }
-        
-    }
-    
-    func setDelegate(controller: UIViewController) {
-        
-        if let control = controller as? ViewController {
-            control.delegate = self
         }
         
     }
@@ -844,6 +1032,7 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
             }, completion: { (success) in
                 
                 self.alertView.isHidden = true
+                self.addToFavouritesButton.isUserInteractionEnabled = true
                 
             })
             
@@ -851,12 +1040,14 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
         if alreadyInFav {
             
+            addToFavouritesButton.isUserInteractionEnabled = false
             alertViewImage.image = UIImage(named: "favouritesAlreadyIn")?.withRenderingMode(.alwaysTemplate)
-            alertViewLabel.text = "Already In Favourites"
+            alertViewLabel.text = "Removed From Favourites"
             blurAnimator.startAnimation()
-
+            
         } else {
             
+            addToFavouritesButton.isUserInteractionEnabled = false
             alertViewImage.image = UIImage(named: "favouritesAddedIn")?.withRenderingMode(.alwaysTemplate)
             alertViewLabel.text = "Added To Favourites"
             blurAnimator.startAnimation()
@@ -873,80 +1064,128 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         
     }
     
-    /*
-    
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+    func numberOfSections(in tableView: UITableView) -> Int {
         
-        if (addToFavouritesButton.frame).contains(point) {
+        if device.diagonal > 4.0 || device.diagonal < 0 {
             
-            print("touch in point")
-            
-            return false
+            return 2
             
         } else {
             
-            return true
+            return 1
             
         }
-        
-        /*
-        
-        let touch = event?.allTouches?.first
-        print(touch)
-
-        let location = touch?.location(in: addToFavouritesButton)
-        print(location)
-        
-        let inside = addToFavouritesButton.frame.contains(location!)
-        
-        if inside {
-            print("is inside")
-            return false
-        } else {
-            print("is not inside")
-            return true
-        }
-        
-        */
         
     }
     
-    */
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        
+        return 0
+        
+    }
+    
+    /*
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        
+        if section == 1 {
+            
+            let blurEffect = UIBlurEffect(style: .dark)
+            let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
+            let vibrancyEffectView = UIVisualEffectView(effect: vibrancyEffect)
+            vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 20)
+            vibrancyEffectView.autoresizingMask = .flexibleWidth
+            
+            // Create header label
+            let vibrantLabel = UILabel()
+            vibrantLabel.frame = CGRect(x: 15, y: 30, width: tableView.bounds.size.width, height: 20)
+            vibrantLabel.autoresizingMask = .flexibleWidth
+            vibrantLabel.text = "PHOTOS"
+            vibrantLabel.font = UIFont.systemFont(ofSize: 13)
+            vibrantLabel.textColor = UIColor(white: 0.64, alpha: 1)
+            
+            vibrancyEffectView.contentView.addSubview(vibrantLabel)
+            
+            return vibrancyEffectView
+            
+        } else {
+            
+            return UIView()
+            
+        }
+        
+    }
+ 
+     */
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return headers.count
+        
+        if section == 0 {
+            return headers.count
+        } else {
+            return 1
+        }
+        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "RestaurantTableViewCell", for: indexPath) as! RestaurantTableViewCell
-        
-        if headers[indexPath.row] == "ADDRESS" {
+        if indexPath.section == 0 {
             
-            cell.isUserInteractionEnabled = true
+            let cell = tableView.dequeueReusableCell(withIdentifier: "RestaurantTableViewCell", for: indexPath) as! RestaurantTableViewCell
             
-        } else if headers[indexPath.row] == "PHONE" {
+            cell.backgroundColor = UIColor.clear
+            cell.contentLabel?.text = "\(information[indexPath.row])"
+            cell.headerLabel?.text = "\(headers[indexPath.row])"
+            cell.selectionStyle = .none
             
-            cell.isUserInteractionEnabled = true
+            if cell.headerLabel.text == "TRANSACTIONS" && cell.contentLabel.text == "" {
+                
+                let indexThing = self.headers.index(of: "TRANSACTIONS")
+                self.headers.remove(at: indexThing as! Int)
+                
+                DispatchQueue.main.async {
+                    self.mainTableView.reloadData()
+                }
+                
+            }
+            
+            return cell
             
         } else {
             
-            cell.isUserInteractionEnabled = false
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PhotosCell", for: indexPath) as! PhotosTableViewCell
+            
+            self.getBusinessPhotos(restaurant.id) { (urlArr) in
+                
+                switch urlArr.count {
+                    
+                case 1:
+                    cell.photo1.sd_setImage(with: urlArr[0], completed: nil)
+                    cell.photo2.isHidden = true
+                    cell.photo3.isHidden = true
+                    
+                case 2:
+                    cell.photo1.sd_setImage(with: urlArr[0], completed: nil)
+                    cell.photo2.sd_setImage(with: urlArr[1], completed: nil)
+                    cell.photo3.isHidden = true
+                    
+                case 3:
+                    cell.photo1.sd_setImage(with: urlArr[0], completed: nil)
+                    cell.photo2.sd_setImage(with: urlArr[1], completed: nil)
+                    cell.photo3.sd_setImage(with: urlArr[2], completed: nil)
+                
+                default:
+                    cell.isHidden = true
+                    break
+                
+                }
+                
+            }
+            
+            return cell
             
         }
-        
-        cell.backgroundColor = UIColor.clear
-        cell.contentLabel?.text = "\(information[indexPath.row])"
-        cell.headerLabel?.text = "\(headers[indexPath.row])"
-        cell.selectionStyle = .none
-        
-        if cell.headerLabel.text == "TRANSACTIONS" && cell.contentLabel.text == "" {
-            
-            cell.isHidden = true
-            
-        }
-        
-        return cell
         
     }
     
@@ -955,11 +1194,5 @@ class RestaurantCardALT: UIView, UITableViewDelegate, UITableViewDataSource, Cal
         return UITableViewAutomaticDimension
         
     }
-    
-    /*
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        return false
-    }
-    */
 
 }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="17A344b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -26,7 +26,7 @@
                 <outlet property="mainTableView" destination="O5q-sI-ueP" id="sRg-dG-MZe"/>
                 <outlet property="mainView" destination="Tml-dK-uSj" id="5aO-du-Z6X"/>
                 <outlet property="restaurantCategory" destination="IG5-Bo-Czu" id="M6M-ib-VIG"/>
-                <outlet property="restaurantName" destination="TER-2v-epb" id="WEl-dz-frp"/>
+                <outlet property="restaurantName" destination="TER-2v-epb" id="2s5-as-aAc"/>
                 <outlet property="restaurantPriceAndDistance" destination="83g-E1-uqe" id="wWw-ci-dZG"/>
                 <outlet property="restaurantStars" destination="IIa-Xw-Ma6" id="blm-Kx-ppl"/>
                 <outlet property="reviewsButton" destination="AOD-Yp-HwY" id="jgM-pD-dYy"/>
@@ -62,6 +62,9 @@
                             <fontDescription key="fontDescription" type="boldSystem" pointSize="27"/>
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="heroID" value="name"/>
+                            </userDefinedRuntimeAttributes>
                         </label>
                         <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Kfu-as-KWu">
                             <rect key="frame" x="8" y="43.5" width="327" height="23"/>
@@ -81,6 +84,11 @@
                                     <constraints>
                                         <constraint firstAttribute="height" constant="23" id="j7v-Xu-uyG"/>
                                     </constraints>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="number" keyPath="starSize">
+                                            <real key="value" value="23"/>
+                                        </userDefinedRuntimeAttribute>
+                                    </userDefinedRuntimeAttributes>
                                 </view>
                             </subviews>
                             <constraints>
@@ -95,7 +103,7 @@
                         </label>
                         <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="O5q-sI-ueP">
                             <rect key="frame" x="0.0" y="103.5" width="343" height="377.5"/>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </tableView>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -104,19 +112,20 @@
                         <constraint firstItem="TER-2v-epb" firstAttribute="top" secondItem="Tml-dK-uSj" secondAttribute="top" constant="8" id="8ja-rY-h0V"/>
                         <constraint firstAttribute="trailing" secondItem="83g-E1-uqe" secondAttribute="trailing" constant="8" id="8sx-gi-NyK"/>
                         <constraint firstItem="83g-E1-uqe" firstAttribute="leading" secondItem="Tml-dK-uSj" secondAttribute="leading" constant="8" id="Mal-E7-u3M"/>
+                        <constraint firstAttribute="bottom" secondItem="O5q-sI-ueP" secondAttribute="bottom" id="Oqq-KZ-coN"/>
                         <constraint firstAttribute="trailing" secondItem="O5q-sI-ueP" secondAttribute="trailing" id="ZMt-v3-KwI"/>
                         <constraint firstAttribute="trailing" secondItem="Kfu-as-KWu" secondAttribute="trailing" constant="8" id="i17-35-YkX"/>
                         <constraint firstItem="TER-2v-epb" firstAttribute="leading" secondItem="Tml-dK-uSj" secondAttribute="leading" constant="8" id="rvX-M9-wJK"/>
                         <constraint firstAttribute="trailing" secondItem="TER-2v-epb" secondAttribute="trailing" constant="8" id="sFU-cu-hPe"/>
                         <constraint firstItem="Kfu-as-KWu" firstAttribute="leading" secondItem="Tml-dK-uSj" secondAttribute="leading" constant="8" id="tuT-C1-Q2l"/>
                         <constraint firstItem="Kfu-as-KWu" firstAttribute="top" secondItem="TER-2v-epb" secondAttribute="bottom" constant="3" id="vTg-Ve-Xg8"/>
-                        <constraint firstAttribute="bottom" secondItem="O5q-sI-ueP" secondAttribute="bottom" id="x0I-6r-PZb"/>
                         <constraint firstItem="O5q-sI-ueP" firstAttribute="top" secondItem="83g-E1-uqe" secondAttribute="bottom" constant="8.5" id="xIO-bH-iDu"/>
                         <constraint firstItem="83g-E1-uqe" firstAttribute="top" secondItem="Kfu-as-KWu" secondAttribute="bottom" constant="6" id="yBg-Zj-mNq"/>
                     </constraints>
                 </view>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="F9a-wX-BVe">
+                <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="F9a-wX-BVe">
                     <rect key="frame" x="0.0" y="0.0" width="343" height="481"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </view>
                 <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HTc-rz-LAD">
@@ -249,7 +258,7 @@
                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fva-4X-58P">
                                             <rect key="frame" x="32" y="8" width="106" height="106"/>
                                             <constraints>
-                                                <constraint firstAttribute="width" secondItem="fva-4X-58P" secondAttribute="height" multiplier="1:1" id="2DZ-MF-JTl"/>
+                                                <constraint firstAttribute="height" constant="106" id="C8G-CY-6Uc"/>
                                             </constraints>
                                         </imageView>
                                     </subviews>
@@ -295,19 +304,15 @@
                 <constraint firstItem="9N1-sD-zzJ" firstAttribute="width" secondItem="iN0-l3-epB" secondAttribute="width" id="aKO-vO-HDZ"/>
                 <constraint firstItem="Tml-dK-uSj" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" id="b3m-sb-b4z"/>
                 <constraint firstItem="pYF-sa-Sov" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" id="b8U-E6-72W"/>
-                <constraint firstItem="F9a-wX-BVe" firstAttribute="width" secondItem="iN0-l3-epB" secondAttribute="width" id="brc-C6-v1g"/>
                 <constraint firstItem="HTc-rz-LAD" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="dve-aV-lEn"/>
-                <constraint firstItem="F9a-wX-BVe" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="eza-67-bYo"/>
                 <constraint firstItem="9N1-sD-zzJ" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="fOY-I0-EqD"/>
                 <constraint firstAttribute="bottom" secondItem="HTc-rz-LAD" secondAttribute="bottom" id="fSr-se-5dG"/>
                 <constraint firstItem="RK0-Gu-iEp" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="gOi-sO-gQ3"/>
                 <constraint firstItem="9N1-sD-zzJ" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" id="rf3-Bn-TRv"/>
-                <constraint firstItem="F9a-wX-BVe" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" id="tvN-qm-jfW"/>
                 <constraint firstItem="yJd-7H-dkc" firstAttribute="width" secondItem="iN0-l3-epB" secondAttribute="width" id="ujO-Hy-bDL"/>
                 <constraint firstItem="9N1-sD-zzJ" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="uxJ-Bo-kqL"/>
                 <constraint firstItem="Tml-dK-uSj" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="vSo-zR-kUI"/>
                 <constraint firstItem="pYF-sa-Sov" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="x45-di-wOR"/>
-                <constraint firstItem="F9a-wX-BVe" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="zED-lK-jLT"/>
                 <constraint firstItem="RK0-Gu-iEp" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="86" id="zpy-2x-slV"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>

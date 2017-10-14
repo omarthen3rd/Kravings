@@ -13,5 +13,7 @@ target 'Kraving' do
   pod 'Cosmos', '~> 11.0'
   pod 'SDWebImage', '~> 4.0'
   pod 'PhoneNumberKit', '~> 1.3'
+  pod 'Hero', '0.1.7'
+  pod 'ChameleonFramework'
 
 end

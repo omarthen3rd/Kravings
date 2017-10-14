@@ -16,6 +16,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        if let shortcutItem = launchOptions?[UIApplicationLaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
+            
+            if shortcutItem.type == "com.omar.kravings.openfavourites" {
+                
+                print("ran shortcut")
+                
+                self.window = UIWindow(frame: UIScreen.main.bounds)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let initialVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                self.window?.rootViewController = initialVC
+                self.window?.makeKeyAndVisible()
+                let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesTableViewController") as! FavouritesTableViewController
+                let nav = UINavigationController(rootViewController: favouritesVC)
+                initialVC.present(nav, animated: true, completion: {
+                    
+                    
+                    
+                })
+                
+            }
+            
+        }
+        
         return true
     }
 

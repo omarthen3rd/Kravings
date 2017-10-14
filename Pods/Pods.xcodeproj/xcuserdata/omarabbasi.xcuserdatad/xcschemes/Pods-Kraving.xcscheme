@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C36508FC3088C83D188E8782A967077D"
+               BlueprintIdentifier = "D13E5C7343F4E883A4C8693EB55B5249"
                BuildableName = "Pods_Kraving.framework"
                BlueprintName = "Pods-Kraving"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -36,6 +37,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -45,7 +47,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C36508FC3088C83D188E8782A967077D"
+            BlueprintIdentifier = "D13E5C7343F4E883A4C8693EB55B5249"
             BuildableName = "Pods_Kraving.framework"
             BlueprintName = "Pods-Kraving"
             ReferencedContainer = "container:Pods.xcodeproj">

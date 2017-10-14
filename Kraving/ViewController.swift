@@ -14,21 +14,6 @@ import SystemConfiguration
 import CoreLocation
 import Cosmos
 
-extension UIButton {
-    
-    func setBackgroundColor(color: UIColor, forState: UIControlState) {
-        
-        UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
-        UIGraphicsGetCurrentContext()!.setFillColor(color.cgColor)
-        UIGraphicsGetCurrentContext()!.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
-        let colorImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        self.setBackgroundImage(colorImage, for: forState)
-        
-    }
-    
-}
-
 extension UIView {
     
     func applyGradient(colours: [UIColor]) -> Void {
@@ -57,12 +42,22 @@ extension UIColor {
     static let directionsRed = UIColor(red:1.00, green:0.24, blue:0.24, alpha:1.0)
     static let callGreen = UIColor(red:0.09, green:0.86, blue:0.07, alpha:1.0)
     
+    static let silverBlue = UIColor(red:0.96, green:0.96, blue:0.98, alpha:1.0)
+    static let darkSilverBlue = UIColor(red:0.89, green:0.92, blue:0.95, alpha:1.0)
+    static let blue2 = UIColor(red:0.13, green:0.53, blue:1.00, alpha:1.0)
+    
 }
 
 extension NSMutableAttributedString {
     
     func setColorForText(_ textToFind: String, with color: UIColor) {
         let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
+        if range.location != NSNotFound {
+            addAttribute(NSForegroundColorAttributeName, value: color, range: range)
+        }
+    }
+    
+    func setColorForRange(_ range: NSRange, with color: UIColor) {
         if range.location != NSNotFound {
             addAttribute(NSForegroundColorAttributeName, value: color, range: range)
         }
@@ -109,20 +104,6 @@ extension String {
     
 }
 
-extension UIColor {
-    
-    static let silverBlue = UIColor(red:0.96, green:0.96, blue:0.98, alpha:1.0)
-    static let darkSilverBlue = UIColor(red:0.89, green:0.92, blue:0.95, alpha:1.0)
-    static let blue2 = UIColor(red:0.13, green:0.53, blue:1.00, alpha:1.0)
-    
-}
-
-protocol CallAlert {
-    
-    func showAlertView(_ alreadyInFav: Bool)
-    
-}
-
 class ReviewsCell: UITableViewCell {
     
     @IBOutlet var name: UILabel!
@@ -133,7 +114,7 @@ class ReviewsCell: UITableViewCell {
     
 }
 
-class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDataSource, UITableViewDelegate, SettingsDelegate, ShowReviewView {
+class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDataSource, UITableViewDelegate, SettingsDelegate, ShowReviewView, ShowAlert, OpenDetailView {
     
     @IBOutlet var mainBackgroundImage: UIImageView!
     @IBOutlet var backButton: UIButton!
@@ -154,21 +135,30 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     @IBOutlet var categoryContainerView: UIView!
     @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
+    @IBOutlet var sortByHeaderView: UIVisualEffectView!
     @IBOutlet var sortByTableView: UITableView!
     @IBOutlet var reviewsTableView: UITableView!
+    @IBAction func backToAddressAction(_ sender: UIButton) {
+        
+        self.dismiss(animated: true) {
+            
+        }
+        
+    }
+    
     @IBAction func unwindToMenu(segue: UIStoryboardSegue) {}
-    
-    var delegate: CallAlert?
-    
+        
     var animator: UIViewPropertyAnimator!
     var card = RestaurantCardALT()
     var panGesture = UIPanGestureRecognizer()
+    var feedbackGenerator = UIImpactFeedbackGenerator()
     var defaults = UserDefaults.standard
     
     var divisor: CGFloat!
     var selectedId = -100
     var categories = [String]()
     var selectedCategory = String()
+    var selectedSortBy = String()
 
     var accessToken = String()
     var viewIsOpen = false
@@ -188,6 +178,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     var restaurant: Restaurant!
     
+    override var prefersStatusBarHidden: Bool {
+        return false
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return UIStatusBarStyle.default
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // self.navigationController?.isNavigationBarHidden = false
@@ -196,6 +194,23 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        isHeroEnabled = true
+        
+        self.selectedSortBy = "best_match"
+        self.spinningView.startAnimating()
+        self.noresultsLabel.text = self.getLoadingLines()
+        self.noresultsLabel.alpha = 1.0
+        
+        DispatchQueue.main.async {
+            
+            self.categoriesTableView.contentOffset = CGPoint(x: 0, y: -50)
+            self.sortByTableView.contentOffset = CGPoint(x: 0, y: -50)
+            
+            self.categoriesTableView.reloadData()
+            self.sortByTableView.reloadData()
+            
+        }
                 
         divisor = (view.frame.width / 2) / 0.61
         
@@ -240,7 +255,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         if internetIsAvailable {
             
-            if defaults.bool(forKey: "usesLocationServices") == true {
+            if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
                 
                 locationManager.delegate = self
                 locationManager.distanceFilter = 100
@@ -250,8 +265,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 locationManager.requestLocation()
                 
             } else {
-                
-                print("ran other")
                 
                 self.restaurants.removeAll()
                 self.restaurantIndex = 0
@@ -275,7 +288,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                                     
                                     self.spinningView.stopAnimating()
                                     self.noresultsLabel.text = "No Results In Your Search Radius"
-                                    self.noresultsLabel.isHidden = false
+                                    self.noresultsLabel.alpha = 1.0
                                     
                                 })
                                 
@@ -294,8 +307,32 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         } else {
             
             self.noresultsLabel.text = "No Internet Connection"
-            self.noresultsLabel.isHidden = false
+            self.noresultsLabel.alpha = 1.0
             
+        }
+        
+    }
+    
+    func getLoadingLines() -> String {
+        
+        if let filePath = Bundle.main.url(forResource: "loadingLines", withExtension: "json") {
+            
+            do {
+                
+                let jsonData = try Data(contentsOf: filePath)
+                let json = JSON(data: jsonData)
+                let randomIndex = Int(arc4random_uniform(UInt32(json["lines"].arrayValue.count)))
+                
+                let loadingLine = json["lines"][randomIndex].stringValue
+                
+                return loadingLine
+                
+            } catch {
+                return "Loading..."
+            }
+            
+        } else {
+            return "Loading..."
         }
         
     }
@@ -306,18 +343,23 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         self.card = RestaurantCardALT(frame: CGRect(x: 16, y: 93, width: 343, height: 481))
         self.card.restaurant = self.restaurants[self.restaurantIndex]
-        self.card.setDelegate(controller: self)
         self.card.reviewDelegate = self
+        self.card.showAlertDelegate = self
+        self.card.openDetailView = self
         self.getReviews()
         
-        let imgURL = URL(string: self.restaurants[self.restaurantIndex].imageURL)
+        let img = self.restaurants[self.restaurantIndex].image
         
         UIView.transition(with: self.mainBackgroundImage, duration: 0.5, options: UIViewAnimationOptions.transitionCrossDissolve, animations: {
-            self.mainBackgroundImage.sd_setImage(with: imgURL!)
+            self.mainBackgroundImage.image = img
         }, completion: nil)
         
         self.card.translatesAutoresizingMaskIntoConstraints = false
         self.card.addGestureRecognizer(panGesture)
+        
+        if self.categoryContainerView.isHidden == false {
+            handleTap()
+        }
 
         if button == 1 {
             
@@ -357,6 +399,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 // button.isUserInteractionEnabled = true
                 self.categoriesButton.isUserInteractionEnabled = true
                 self.backButton.isUserInteractionEnabled = true
+                self.spinningView.stopAnimating()
                 
             })
             
@@ -391,6 +434,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 // button.isUserInteractionEnabled = true
                 self.categoriesButton.isUserInteractionEnabled = true
                 self.forwardButton.isUserInteractionEnabled = true
+                self.spinningView.stopAnimating()
                 
             })
             
@@ -400,13 +444,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.view.bringSubview(toFront: self.statusBarBlur)
         
         if self.restaurantIndex == 0 {
-            self.spinningView.stopAnimating()
-            self.noresultsLabel.isHidden = true
+            self.noresultsLabel.alpha = 0.0
             self.forwardButton.isEnabled = true
             self.backButton.isEnabled = false
         } else {
-            self.spinningView.stopAnimating()
-            self.noresultsLabel.isHidden = true
+            self.noresultsLabel.alpha = 0.0
             self.forwardButton.isEnabled = true
             self.backButton.isEnabled = true
         }
@@ -436,7 +478,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         self.favouritesButton.backgroundColor = UIColor.clear
         self.settingsButton.backgroundColor = UIColor.clear
         
-        setInsets(6)
+        self.mainBackgroundImage.contentMode = .scaleAspectFill
+        
+        setInsets(0)
         
         let image1 = #imageLiteral(resourceName: "btn_categories").withRenderingMode(.alwaysTemplate)
         let image1S = #imageLiteral(resourceName: "btn_categories_selected").withRenderingMode(.alwaysTemplate)
@@ -485,27 +529,34 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         sortByTableView.backgroundColor = UIColor.clear
         sortByTableView.layer.cornerRadius = 15
         
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
+        let indexPath = IndexPath(row: 0, section: 0)
+        self.categoriesTableView.selectRow(at: indexPath, animated: true, scrollPosition: .top)
+        self.sortByTableView.selectRow(at: indexPath, animated: true, scrollPosition: .top)
+        
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = categoriesTableView.bounds
         categoriesTableView.backgroundView = blurEffectView
         categoriesTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
-        let blurEffectView2 = UIVisualEffectView(effect: blurEffect)
+        let blurEffect2 = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
+        let blurEffectView2 = UIVisualEffectView(effect: blurEffect2)
         blurEffectView2.frame = reviewsTableView.bounds
         reviewsTableView.backgroundView = blurEffectView2
         reviewsTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
         let blurEffectView3 = UIVisualEffectView(effect: blurEffect)
-        blurEffectView3.frame = reviewsTableView.bounds
+        blurEffectView3.frame = sortByTableView.bounds
         sortByTableView.backgroundView = blurEffectView3
         sortByTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.prominent)
         
-        let indexPath = IndexPath(row: 0, section: 0)
-        self.categoriesTableView.selectRow(at: indexPath, animated: true, scrollPosition: .top)
+        // since app has run and been setup, setup 3D Touch Quick Actions
+        // Todo: fix when opening 3D touch shortcut when address choosing is there
         
-        self.categoriesTableView.reloadData()
-        self.sortByTableView.reloadData()
+        let icon = UIApplicationShortcutIcon(type: .love)
+        let shortcut = UIApplicationShortcutItem(type: "com.omar.kravings.openfavourites", localizedTitle: "Favourites", localizedSubtitle: "", icon: icon, userInfo: nil)
+        // UIApplication.shared.shortcutItems = [shortcut]
+        
         completionHandler(true)
         
     }
@@ -514,41 +565,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         // add some kind of error view telling user to allow location
         
-        print("error happened")
-        
-        let alrt = UIAlertController(title: "Please Enable Location Services", message: "This application cannot work without enabling Location Services.", preferredStyle: .alert)
-        let alrtAction = UIAlertAction(title: "Okay", style: .default, handler: nil)
-        alrt.addAction(alrtAction)
-        self.present(alrt, animated: true, completion: nil)
-        
-        self.noresultsLabel.isHidden = true
-
-        let btnToOpenSettings = UIButton(frame: self.noresultsLabel.bounds)
-        btnToOpenSettings.titleLabel?.font = UIFont.systemFont(ofSize: 25)
-        btnToOpenSettings.titleLabel?.text = "Open Settings"
-        btnToOpenSettings.addTarget(self, action: #selector(self.openSettings(_:)), for: UIControlEvents.touchUpInside)
-        
-        
-    }
-    
-    func openSettings(_ sender: UIButton) {
-        
-        print("ran this")
-        
-        if let settingsURL = URL(string: UIApplicationOpenSettingsURLString + Bundle.main.bundleIdentifier!) {
-            UIApplication.shared.open(settingsURL, options: [:], completionHandler: { (success) in
-                
-                if !success {
-                    
-                    print("wtf")
-                    
-                } else {
-                    
-                    sender.isHidden = true
-                    
-                }
-                
-            })
+        self.dismiss(animated: true) {
+            
         }
         
     }
@@ -593,7 +611,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                                 
                                 self.spinningView.stopAnimating()
                                 self.noresultsLabel.text = "No Results In Your Search Radius"
-                                self.noresultsLabel.isHidden = false
+                                self.noresultsLabel.alpha = 1.0
                                 
                             })
                             
@@ -723,17 +741,18 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         switch self.selectedCategory {
         case "All Types":
             
-            url = "https://api.yelp.com/v3/businesses/search?radius=\(searchRadius)&latitude=\(lat)&longitude=\(long)&limit=50"
+            url = "https://api.yelp.com/v3/businesses/search?radius=\(searchRadius)&latitude=\(lat)&longitude=\(long)&limit=50&sort_by=\(selectedSortBy)"
             
         default:
             
-            url = "https://api.yelp.com/v3/businesses/search?radius=\(searchRadius)&latitude=\(lat)&longitude=\(long)&limit=50&categories=\(selectedCategory.lowercased())"
+            url = "https://api.yelp.com/v3/businesses/search?radius=\(searchRadius)&latitude=\(lat)&longitude=\(long)&limit=50&categories=\(selectedCategory.lowercased())&sort_by=\(selectedSortBy)"
             
         }
         
         var name = String()
         var website = String()
-        var imageURL = String()
+        var image = UIImage()
+        
         var rating = Int()
         var priceRange = String()
         var phone = String()
@@ -769,7 +788,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                         
                         name = business["name"].stringValue
                         website = business["url"].stringValue
-                        imageURL = business["image_url"].stringValue
+                        let imageURL = business["image_url"].stringValue
                         rating = business["rating"].intValue
                         priceRange = business["price"].stringValue
                         phone = business["phone"].stringValue
@@ -785,6 +804,18 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                         zipCode = business["location"]["zip_code"].stringValue
                         
                         transactions = business["transactions"].arrayValue.map( { $0.string! } )
+                        
+                        let imageFinalURL = URL(string: imageURL)
+                        let posterData = try? Data(contentsOf: imageFinalURL!)
+                        if let pData = posterData {
+                            
+                            image = UIImage(data: pData)!
+                            
+                        } else {
+                            
+                            image = #imageLiteral(resourceName: "placeholderImage")
+                            
+                        }
                         
                         restaurantHoursToAppend = [RestaurantHours]()
                         
@@ -803,7 +834,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                             
                         }
                         
-                        let newRestaurant = Restaurant(name: name, website: website, imageURL: imageURL, rating: rating, priceRange: priceRange, phone: phone, id: id, isClosed: closedBool, category: restaurantCategory, reviewCount: reviewCount, distance: distance, city: city, country: country, state: state, address: address, zipCode: zipCode, transactions: transactions)
+                        let newRestaurant = Restaurant(name: name, website: website, image: image, rating: rating, priceRange: priceRange, phone: phone, id: id, isClosed: closedBool, category: restaurantCategory, reviewCount: reviewCount, distance: distance, city: city, country: country, state: state, address: address, zipCode: zipCode, transactions: transactions)
                         self.restaurants.append(newRestaurant)
                         
                     }
@@ -814,9 +845,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 
             } else {
                 
-                print("search failed")
-                
-                // TODO:
                 // add refresh type of button to try to reload results
                 
                 completetionHandler(false)
@@ -947,7 +975,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
-    func handleSelectedRestaurant(_ category: String, onlySelect: Bool = false) {
+    func handleSelectedRestaurant(_ onlySelect: Bool = false) {
         
         self.spinningView.startAnimating()
         self.backButton.isEnabled = false
@@ -961,42 +989,49 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             self.restaurants.removeAll()
             self.restaurantIndex = 0
             self.handleTap()
+            
+            self.noresultsLabel.text = self.getLoadingLines()
+            
             self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
                 
-                self.noresultsLabel.text = "Loading"
-                self.noresultsLabel.isHidden = false
+                self.noresultsLabel.alpha = 1.0
                 
-                if success {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5, execute: {
                     
-                    if self.restaurants.isEmpty {
+                    if success {
+                        
+                        if self.restaurants.isEmpty {
+                            
+                            self.noresultsLabel.text = "No Results \n \n Try Increasing The Search Radius In Settings"
+                            self.spinningView.stopAnimating()
+                            self.backButton.isEnabled = false
+                            self.forwardButton.isEnabled = false
+                            
+                        } else {
+                            
+                            self.noresultsLabel.text = ""
+                            
+                            DispatchQueue.global(qos: .userInitiated).async {
+                                DispatchQueue.main.async {
+                                    self.noresultsLabel.alpha = 0.0
+                                    self.loadCard(1)
+                                }
+                            }
+                            
+                        }
+                        
+                    } else {
                         
                         self.noresultsLabel.text = "No Results \n Try Increasing The Search Radius In Settings"
+                        self.noresultsLabel.alpha = 1.0
                         self.spinningView.stopAnimating()
                         self.backButton.isEnabled = false
                         self.forwardButton.isEnabled = false
                         
-                    } else {
-                        
-                        self.noresultsLabel.text = ""
-                        
-                        DispatchQueue.global(qos: .userInitiated).async {
-                            DispatchQueue.main.async {
-                                self.noresultsLabel.isHidden = true
-                                self.loadCard(1)
-                            }
-                        }
-                        
                     }
                     
-                } else {
                     
-                    self.noresultsLabel.text = "No Results \n Try Increasing The Search Radius In Settings"
-                    self.noresultsLabel.isHidden = false
-                    self.spinningView.stopAnimating()
-                    self.backButton.isEnabled = false
-                    self.forwardButton.isEnabled = false
-                    
-                }
+                })
                 
             })
             
@@ -1009,6 +1044,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         let image1 = #imageLiteral(resourceName: "btn_categories").withRenderingMode(.alwaysTemplate)
         let image1S = #imageLiteral(resourceName: "btn_categories_selected").withRenderingMode(.alwaysTemplate)
+        
+        let resultHidden = noresultsLabel.isHidden
         
         if reviewsContainerView.isHidden == false && categoryContainerView.isHidden == true {
             
@@ -1025,6 +1062,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.card.isHidden = true
                 self.backButton.isEnabled = false
                 self.forwardButton.isEnabled = false
+                self.noresultsLabel.alpha = 1.0
+                
+                self.noresultsLabel.alpha = 0.0
                 
                 self.categoriesButton.setImage(image1S, for: .normal)
                 
@@ -1034,6 +1074,17 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                 self.card.isHidden = false
                 self.backButton.isEnabled = true
                 self.forwardButton.isEnabled = true
+                self.noresultsLabel.isHidden = resultHidden
+                
+                if self.restaurants.isEmpty {
+                    
+                    self.noresultsLabel.alpha = 1.0
+                    
+                } else {
+                    
+                    self.noresultsLabel.alpha = 0.0
+                    
+                }
                 
                 self.categoriesButton.setImage(image1, for: .normal)
                 
@@ -1091,8 +1142,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         let animator = UIViewPropertyAnimator(duration: 0.2, curve: .easeOut) { 
             
-            self.card.center = CGPoint(x: 300, y: self.card.center.y)
-            self.card.alpha = 0
+            self.card.frame = self.card.frame.offsetBy(dx: 300, dy: 500)
+            // self.card.alpha = 0
             
         }
         animator.addCompletion { (postion) in
@@ -1103,7 +1154,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             if self.restaurants.endIndex == self.restaurantIndex {
                 
                 self.noresultsLabel.text = "No More Results"
-                self.noresultsLabel.isHidden = false
+                self.noresultsLabel.alpha = 1.0
                 
                 self.backButton.isEnabled = true
                 self.forwardButton.isEnabled = false
@@ -1130,8 +1181,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
         let animator = UIViewPropertyAnimator(duration: 0.2, curve: .easeOut) {
             
-            self.card.center = CGPoint(x: -300, y: self.card.center.y)
-            self.card.alpha = 0
+            self.card.center = CGPoint(x: -300, y: -500)
+            // self.card.alpha = 0
             
         }
         
@@ -1143,7 +1194,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             if self.restaurants.endIndex == self.restaurantIndex {
                 
                 self.noresultsLabel.text = "No More Results"
-                self.noresultsLabel.isHidden = false
+                self.noresultsLabel.alpha = 1.0
                 
                 self.backButton.isEnabled = true
                 self.forwardButton.isEnabled = false
@@ -1165,14 +1216,21 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
     
     func handlePan(_ recognizer: UIPanGestureRecognizer) {
         
+        feedbackGenerator.prepare()
+        
+        let xDistance = recognizer.translation(in: self.view).x
+        let yDistance = recognizer.translation(in: self.view).y
+        
         let viewCard = recognizer.view!
-        let point = recognizer.translation(in: view)
-        let xFromCenter = viewCard.center.x - view.center.x
         
-        viewCard.center = CGPoint(x: view.center.x + point.x, y: view.center.x + point.y)
+        let rotationStrength = min(xDistance / self.view.bounds.size.width, 1)
+        let fullCircle = CGFloat(2 * CGFloat.pi)
         
-        let scale = min(100/abs(xFromCenter), 1)
-        viewCard.transform = CGAffineTransform(rotationAngle: xFromCenter/divisor).scaledBy(x: scale, y: scale)
+        let rotationAngle: CGFloat = fullCircle * rotationStrength / 16
+        let scaleStrength = CGFloat(1 - fabsf(Float(rotationStrength)) / 2)
+        
+        let scale2 = max(scaleStrength, 0.93)
+        let transform = CGAffineTransform(rotationAngle: rotationAngle).scaledBy(x: scale2, y: scale2)
         
         let cardAnimator = UIViewPropertyAnimator(duration: 0.3, curve: .easeOut, animations: {
             
@@ -1180,38 +1238,69 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             viewCard.transform = CGAffineTransform.identity
             
         })
+        cardAnimator.addCompletion { (position) in
+            
+            self.feedbackGenerator.impactOccurred()
+            
+        }
         
-        if viewCard.frame.intersects(self.statusBarBlur.frame) {
-            UIView.animate(withDuration: 0.3, animations: { 
-                self.statusBarBlur.effect = UIBlurEffect(style: UIBlurEffectStyle.light)
-            })
-        } else {
+        switch recognizer.state {
+            
+        case .began:
+            break
+            
+        case .changed:
+            
+            let newX = self.cardCenter.x + xDistance
+            let newY = self.cardCenter.y + yDistance
+            
+            if self.cardCenter.y != newY {
+                
+                // only goes up, will be used for adding to favourites in future version
+                // viewCard.center = CGPoint(x: self.cardCenter.x, y: newY)
+                
+            }
+            
+            // card will only move horizontally, no vertical movement
+            viewCard.center = CGPoint(x: newX, y: self.cardCenter.y)
+            viewCard.transform = transform
+            
+            if let restCard = viewCard as? RestaurantCardALT {
+                
+                if restCard.didAnimateView == true {
+                    // prevent view from going crazy
+                    restCard.handleTap(restCard.tapGesture)
+                }
+                
+            }
+            
+            // status bar blur
+            if viewCard.frame.intersects(self.statusBarBlur.frame) {
+                UIView.animate(withDuration: 0.3, animations: {
+                    self.statusBarBlur.effect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
+                })
+            } else {
+                UIView.animate(withDuration: 0.3, animations: {
+                    self.statusBarBlur.effect = nil
+                })
+            }
+            
+        case .ended:
+            
+            // status bar effect is nil
             UIView.animate(withDuration: 0.3, animations: {
                 self.statusBarBlur.effect = nil
             })
-        }
-        
-        if xFromCenter > 0 {
-            // right
-        } else {
-            // left
-        }
-        
-        if recognizer.state == UIGestureRecognizerState.ended {
             
-            UIView.animate(withDuration: 0.3, animations: {
-                self.statusBarBlur.effect = nil
-            })
-            
-            if viewCard.center.x < 40 {
-                // move to left, go forward
-                if self.restaurants.endIndex == self.restaurantIndex {
+            if viewCard.center.x < 150 {
+                // move to left - go forward
+                if self.restaurants.endIndex - 1 == self.restaurantIndex {
                     
                     cardAnimator.startAnimation()
                     
                 } else {
                     
-                    UIView.animate(withDuration: 0.3, animations: { 
+                    UIView.animate(withDuration: 0.3, animations: {
                         viewCard.center = CGPoint(x: viewCard.center.x - 200, y: viewCard.center.y)
                         viewCard.alpha = 0
                     }, completion: { (success) in
@@ -1222,7 +1311,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                         if self.restaurants.endIndex == self.restaurantIndex {
                             
                             self.noresultsLabel.text = "No More Results"
-                            self.noresultsLabel.isHidden = false
+                            self.noresultsLabel.alpha = 1.0
                             
                             self.backButton.isEnabled = true
                             self.forwardButton.isEnabled = false
@@ -1241,8 +1330,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     
                 }
                 
-            } else if viewCard.center.x > (view.frame.width - 40) {
-                // move to right side, go back
+            } else if viewCard.center.x > (view.frame.width - 150) {
+                // move to right - go back
                 
                 if self.restaurantIndex == 0 {
                     
@@ -1261,7 +1350,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                         if self.restaurants.endIndex == self.restaurantIndex {
                             
                             self.noresultsLabel.text = "No More Results"
-                            self.noresultsLabel.isHidden = false
+                            self.noresultsLabel.alpha = 1.0
                             
                             self.backButton.isEnabled = true
                             self.forwardButton.isEnabled = false
@@ -1280,30 +1369,34 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     
                 }
                 
+            } else {
+                
+                cardAnimator.startAnimation()
+                
             }
             
-            cardAnimator.startAnimation()
+            break
+        
+        default:
+            break
             
         }
-        
         
     }
     
     func dataChanged() {
-        
-        print("ran this")
-        
+                
         self.spinningView.startAnimating()
-        self.noresultsLabel.text = "Loading New Results"
-        self.noresultsLabel.isHidden = false
+        self.noresultsLabel.text = "Are we there yet?"
+        self.noresultsLabel.alpha = 1.0
         
         self.card.removeFromSuperview()
         self.restaurants.removeAll()
         self.restaurantIndex = 0
         self.searchBusinesses(self.lat, self.long) { (success) in
             
-            self.noresultsLabel.text = "Loading"
-            self.noresultsLabel.isHidden = false
+            self.noresultsLabel.text = self.getLoadingLines()
+            self.noresultsLabel.alpha = 1.0
             
             if success {
                 
@@ -1320,7 +1413,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
                     
                     DispatchQueue.global(qos: .userInitiated).async {
                         DispatchQueue.main.async {
-                            self.noresultsLabel.isHidden = true
+                            self.noresultsLabel.alpha = 0.0
                             self.loadCard(1)
                         }
                     }
@@ -1330,7 +1423,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             } else {
                 
                 self.noresultsLabel.text = "No Results"
-                self.noresultsLabel.isHidden = false
+                self.noresultsLabel.alpha = 1.0
                 self.spinningView.stopAnimating()
                 self.backButton.isEnabled = false
                 self.forwardButton.isEnabled = false
@@ -1367,219 +1460,52 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         
     }
     
-    func addToFavourites() {
+    func showAlertController(_ title: String, _ message: String, _ url: String?) {
+            
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        let okayAction = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+        let alertAction = UIAlertAction(title: "Download App", style: .default, handler: { (action) in
+            
+            let url = URL(string: url!)
+            
+            if let urlUnwrapped = url {
+                
+                UIApplication.shared.open(urlUnwrapped, options: [:], completionHandler: { (success) in
+                    
+                    // do something with !success bool here
+                    
+                })
+                
+            } else {
+                
+                let alertError = UIAlertController(title: "Error Opening", message: "Please try again.", preferredStyle: UIAlertControllerStyle.alert)
+                let okayAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alertError.addAction(okayAction)
+                self.present(alertError, animated: true, completion: nil)
+                
+            }
+            
+        })
         
-        restaurant = self.restaurants[self.restaurantIndex]
-        
-        if defaults.object(forKey: "favourites") == nil {
-            
-            // no favs, create arr, encode and replace
-            
-            var favouriteRestaurants = [Restaurant]()
-            favouriteRestaurants.append(restaurant)
-            
-            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: favouriteRestaurants)
-            defaults.set(encodedData, forKey: "favourites")
-            defaults.synchronize()
-            
+        if url == nil {
+            alert.addAction(okayAction)
         } else {
-            
-            if let decodedArr = defaults.object(forKey: "favourites") as? Data {
-                
-                if var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
-                    
-                    if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
-                        
-                        // not in favourites
-                        decodedRestaurants.append(restaurant)
-                        if let del = delegate {
-                            del.showAlertView(false)
-                        }
-                        
-                    } else {
-                        
-                        // already in favourites
-                        
-                        if let del = delegate {
-                            del.showAlertView(true)
-                        }
-                        
-                        // let alert = Alert()
-                        // alert.msg(title: "Already In Favourites", message: "The restaurant you favourited is already in your favourites.")
-                        
-                    }
-                    
-                    let encode: Data = NSKeyedArchiver.archivedData(withRootObject: decodedRestaurants)
-                    defaults.set(encode, forKey: "favourites")
-                    defaults.synchronize()
-                    
-                }
-                
-            }
-            
+            alert.addAction(okayAction)
+            alert.addAction(alertAction)
         }
+        self.present(alert, animated: true, completion: nil)
         
     }
     
-    func callBusiness() {
+    func showDetailView() {
         
-        restaurant = self.restaurants[self.restaurantIndex]
+        let currentRestaurant = self.restaurants[self.restaurantIndex]
         
-        if let url = URL(string: "tel://\(restaurant.phone)") {
-            UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                
-                if !success {
-                    
-                    let alert = Alert()
-                    alert.msg(title: "Failed To Call", message: "There's been a slight complication. The call cannot be made, make sure you are using an iPhone or a compatible device.")
-                }
-                
-            })
-            
-        }
-        
-    }
-    
-    func openMaps() {
-        
-        restaurant = self.restaurants[self.restaurantIndex]
-        
-        let string = "\(restaurant.address),\(restaurant.city),\(restaurant.country)"
-        let addressString = string.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
-        
-        if defaults.object(forKey: "defaultMaps") == nil {
-            
-            if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
-                
-                UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                    
-                    if !success {
-                        
-                        let alert = Alert()
-                        alert.msg(title: "Failed To Open Maps", message: "There's been a slight complication. Make sure you have Maps installed on your iPhone.")
-                        
-                    }
-                    
-                })
-            }
-            
-        } else if let appName = defaults.object(forKey: "defaultMaps") as? String {
-            
-            if appName == "Apple Maps" {
-                
-                if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Maps", message: "There's been a slight complication. Make sure you have Maps installed on your iPhone.")
-                        }
-                        
-                    })
-                }
-                
-            } else if appName == "Waze" {
-                
-                if let url = URL(string: "waze://?q=\(addressString!)") {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Waze", message: "There's been a slight complication. Waze isn't installed on your iPhone.")
-                            
-                        }
-                        
-                    })
-                    
-                }
-                
-            } else if appName == "Google Maps" {
-                
-                if let url = URL(string: "comgooglemaps://?q=\(addressString!)") {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Google Maps", message: "There's been a slight complication. Google Maps isn't installed on your iPhone.")
-                        }
-                        
-                    })
-                    
-                    
-                }
-                
-            }
-            
-        }
-        
-    }
-    
-    func openWebsite() {
-        
-        restaurant = self.restaurants[self.restaurantIndex]
-        
-        if defaults.object(forKey: "defaultBrowser") == nil {
-            
-            if let url = URL(string: restaurant.website) {
-                
-                UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                    
-                    if !success {
-                        
-                        let alert = Alert()
-                        alert.msg(title: "Failed To Open Safari", message: "There's been a slight complication. This shouldn't be happening.")
-                        
-                    }
-                    
-                })
-                
-            }
-            
-        } else if let browserName = defaults.object(forKey: "defaultBrowser") as? String {
-            
-            if browserName == "Safari" {
-                
-                if let url = URL(string: restaurant.website) {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Safari", message: "There's been a slight complication. This shouldn't be happening.")
-                            
-                        }
-                        
-                    })
-                    
-                }
-                
-            } else if browserName == "Google Chrome" {
-                
-                if let url = URL(string: "googlechromes://\(restaurant.website)") {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Google Chrome", message: "There's been a slight complication. Google Chrome isn't installed on your iPhone.")
-                            
-                        }
-                        
-                    })
-                    
-                }
-                
-            }
-            
-        }
+        let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailTableViewController") as! RestaurantDetailTableViewController
+        vc.restaurant = currentRestaurant
+        self.present(vc, animated: true, completion: {
+            // self.feedbackGenerator.impactOccurred()
+        })
         
     }
     
@@ -1609,12 +1535,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             cell.categoryLabel.text = categories[indexPath.row]
             
-            let selView = UIView(frame: cell.bounds)
-            selView.backgroundColor = UIColor.darkGray
-            
             let newSelectionView = UIVisualEffectView(frame: cell.bounds)
             newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
-            cell.selectedBackgroundView = selView
+            cell.selectedBackgroundView = newSelectionView
             
             return cell
             
@@ -1647,12 +1570,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
             
             cell.categoryLabel.text = sortByItems[indexPath.row]
             
-            let selView = UIView(frame: cell.bounds)
-            selView.backgroundColor = UIColor.darkGray
-            
             let newSelectionView = UIVisualEffectView(frame: cell.bounds)
             newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
-            cell.selectedBackgroundView = selView
+            cell.selectedBackgroundView = newSelectionView
             
             return cell
         }
@@ -1664,29 +1584,39 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         if tableView == categoriesTableView {
             
             let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
-            cell.categoryLabel.textColor = UIColor.white
             
-            self.noresultsLabel.text = "Loading..."
-            self.noresultsLabel.isHidden = false
+            // self.noresultsLabel.text = self.getLoadingLines()
+            self.noresultsLabel.alpha = 1.0
             
             self.selectedCategory = cell.categoryLabel.text!
-            self.handleSelectedRestaurant(self.selectedCategory)
-            
-        }
-        
-    }
-    
-    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        
-        if tableView == categoriesTableView {
-            
-            let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
-            cell.categoryLabel.textColor = UIColor.darkGray
+            self.handleSelectedRestaurant()
             
         } else if tableView == sortByTableView {
             
             let cell = tableView.cellForRow(at: indexPath) as! CategoryTableViewCell
-            cell.categoryLabel.textColor = UIColor.darkGray
+            
+            self.noresultsLabel.text = self.getLoadingLines()
+            self.noresultsLabel.alpha = 1.0
+            
+            if cell.categoryLabel.text == "Best Match" {
+                
+                self.selectedSortBy = "best_match"
+                
+            } else if cell.categoryLabel.text == "Rating" {
+                
+                self.selectedSortBy = "rating"
+                
+            } else if cell.categoryLabel.text == "Review Count" {
+                
+                self.selectedSortBy = "review_count"
+                
+            } else {
+                
+                self.selectedSortBy = "distance"
+                
+            }
+            
+            self.handleSelectedRestaurant()
             
         }
         
@@ -1708,6 +1638,5 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITableViewDa
         }
         
     }
-
 }
 

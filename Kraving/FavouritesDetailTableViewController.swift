@@ -42,7 +42,7 @@ class FavouritesDetailTableViewController: UITableViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+                
         self.tableView.estimatedRowHeight = 400
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.setNeedsLayout()
@@ -64,49 +64,49 @@ class FavouritesDetailTableViewController: UITableViewController {
     
     func setupView() {
         
-        if let url = URL(string: restaurant.imageURL) {
-            
-            let backgroundImage = UIImageView()
-            backgroundImage.sd_setImage(with: url)
-            // self.tableView.backgroundView = backgroundImage
-            
-            tableView.tableFooterView = UIView()
-            
-            tableView.backgroundColor = UIColor.clear
-            
-            let blurEffect = UIBlurEffect(style: .dark)
-            blurView = UIVisualEffectView(effect: blurEffect)
-            blurView.frame = backgroundImage.bounds
-            // backgroundImage.addSubview(blurView)
-            
-            cellImage.sd_setImage(with: url)
-            
-            // start attributed label
-            
-            let priceText = checkPrice(restaurant.priceRange)
-            let multipleText = checkPrice(restaurant.priceRange) + " · " + convert(restaurant.distance)
-            
-            let attributedString = NSMutableAttributedString(string: multipleText)
-            attributedString.setColorForText(priceText, with: UIColor.green)
-            
-            restaurantPriceRange.attributedText = attributedString
-            
-            // end attributed label
-
-            
-            restaurantTitle.text = restaurant.name
-            restaurantCategory.text = restaurant.category
-            restaurantStars.rating = Double(restaurant.rating)
-            restaurantStars.text = "\(restaurant.reviewCount) VOTES"
-            restaurantStars.settings.textColor = UIColor.lightGray
-            restaurantAddress.text = "\(restaurant.address) \n\(restaurant.city), \(restaurant.state) \n\(restaurant.country)"
-            restaurantPhoneNumber.text = returnFormatted(restaurant.phone)
-            doTimings()
-            
-            setColor(UIColor.white)
-            
-            
+        guard let restaurant = restaurant else { return }
+        
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = false
+            self.navigationController?.navigationItem.largeTitleDisplayMode = .never
         }
+        
+        let backgroundImage = UIImageView()
+        backgroundImage.image = restaurant.image
+        // self.tableView.backgroundView = backgroundImage
+        
+        tableView.tableFooterView = UIView()
+        
+        tableView.backgroundColor = UIColor.clear
+        
+        let blurEffect = UIBlurEffect(style: .dark)
+        blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.frame = backgroundImage.bounds
+        
+        cellImage.image = restaurant.image
+        
+        // start attributed label
+        
+        let priceText = (restaurant.priceRange)
+        let multipleText = checkPrice(restaurant.priceRange) + " · " + convert(restaurant.distance)
+        
+        let attributedString = NSMutableAttributedString(string: multipleText)
+        attributedString.setColorForText(priceText, with: UIColor.green)
+        
+        restaurantPriceRange.attributedText = attributedString
+        
+        // end attributed label
+        
+        restaurantTitle.text = restaurant.name
+        restaurantCategory.text = restaurant.category
+        restaurantStars.rating = Double(restaurant.rating)
+        restaurantStars.text = "\(restaurant.reviewCount) VOTES"
+        restaurantStars.settings.textColor = UIColor.lightGray
+        restaurantAddress.text = "\(restaurant.address) \n\(restaurant.city), \(restaurant.state) \n\(restaurant.country)"
+        restaurantPhoneNumber.text = returnFormatted(restaurant.phone)
+        doTimings()
+        
+        setColor(UIColor.white)
         
         if defaults.object(forKey: "defaultMaps") == nil {
             
@@ -301,7 +301,6 @@ class FavouritesDetailTableViewController: UITableViewController {
         
         return date12
         
-        
     }
     
     func compareDates(_ time: String) {
@@ -386,20 +385,16 @@ class FavouritesDetailTableViewController: UITableViewController {
         
     }
     
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return UITableViewAutomaticDimension
+        
+    }
+    
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
         return UITableViewAutomaticDimension
         
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

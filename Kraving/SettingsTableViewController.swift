@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 protocol SettingsDelegate {
     
@@ -100,11 +101,17 @@ class SettingsTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = true
+        }
+        
         self.previousRadius = defaults.integer(forKey: "searchRadius")
         
         addBlur()
         
         tableView.register(UINib(nibName: "Slidercell", bundle: nil), forCellReuseIdentifier: "Slidercell")
+        tableView.register(UINib(nibName: "ButtonCell", bundle: nil), forCellReuseIdentifier: "ButtonCell")
+        
         tableView.tableFooterView = UIView(frame: .zero)
         
     }
@@ -137,6 +144,21 @@ class SettingsTableViewController: UITableViewController {
         
     }
     
+    func goBackToAddressView() {
+        
+        self.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: {
+            
+            if let vc = self.presentingViewController?.presentingViewController as? AddressViewController {
+                
+                let btn = vc.navigationController?.navigationItem.rightBarButtonItems?.first
+                btn?.isEnabled = false
+                
+            }
+            
+        })
+        
+    }
+    
     // MARK: - Table view data source
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -161,6 +183,27 @@ class SettingsTableViewController: UITableViewController {
             
             return vibrancyEffectView
             
+        } else if section == 1 {
+            
+            let blurEffect = UIBlurEffect(style: .extraLight)
+            let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
+            let vibrancyEffectView = UIVisualEffectView(effect: vibrancyEffect)
+            vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 30)
+            vibrancyEffectView.autoresizingMask = .flexibleWidth
+            
+            //Create header label
+            let vibrantLabel = UILabel()
+            vibrantLabel.frame = CGRect(x: 15, y: 0, width: tableView.bounds.size.width, height: 30)
+            vibrantLabel.autoresizingMask = .flexibleWidth
+            vibrantLabel.text = "DEFAULT APPS"
+            vibrantLabel.font = UIFont.systemFont(ofSize: 13)
+            vibrantLabel.textColor = UIColor(white: 0.64, alpha: 1)
+            
+            vibrancyEffectView.contentView.addSubview(vibrantLabel)
+            
+            return vibrancyEffectView
+
+            
         } else {
             
             
@@ -174,7 +217,7 @@ class SettingsTableViewController: UITableViewController {
             let vibrantLabel = UILabel()
             vibrantLabel.frame = CGRect(x: 15, y: 0, width: tableView.bounds.size.width, height: 30)
             vibrantLabel.autoresizingMask = .flexibleWidth
-            vibrantLabel.text = "DEFAULT APPS"
+            vibrantLabel.text = "LOCATION"
             vibrantLabel.font = UIFont.systemFont(ofSize: 13)
             vibrantLabel.textColor = UIColor(white: 0.64, alpha: 1)
             
@@ -201,20 +244,21 @@ class SettingsTableViewController: UITableViewController {
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
-    }
-    
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         
-        if section == 0 {
+        if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
             
-            return "SEARCH RADIUS"
+            if defaults.bool(forKey: "usesAddressServices") == true {
+                return 3
+            } else {
+                return 2
+            }
             
         } else {
             
-            return "DEFAULT APPS"
+            return 3
             
         }
+        
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -223,9 +267,13 @@ class SettingsTableViewController: UITableViewController {
             
             return 1
             
-        } else {
+        } else if section == 1 {
             
             return 2
+            
+        } else  {
+            
+            return 1
             
         }
         
@@ -265,7 +313,7 @@ class SettingsTableViewController: UITableViewController {
             
             return cell
             
-        } else {
+        } else if indexPath.section == 1 {
             
             if indexPath.row == 0 {
                 
@@ -292,6 +340,15 @@ class SettingsTableViewController: UITableViewController {
                 return cell
                 
             }
+            
+        } else {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ButtonCell", for: indexPath) as! ButtonTableViewCell
+            
+            print("ran cell")
+            cell.changeAddress.addTarget(self, action: #selector(self.goBackToAddressView), for: UIControlEvents.touchUpInside)
+            
+            return cell
             
         }
         

@@ -44,6 +44,15 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if #available(iOS 11.0, *) {
+            self.navigationItem.largeTitleDisplayMode = .never
+        }
+        
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
@@ -120,18 +129,14 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
     
     func setupView() {
         
-        if let url = URL(string: restaurant.imageURL) {
-                        
-            if let background = backgroundImageThingy {
-                background.sd_setImage(with: url)
-                background.contentMode = .scaleAspectFill
-                background.clipsToBounds = true
-                let blurEffect = UIBlurEffect(style: .dark)
-                let blurView = UIVisualEffectView(effect: blurEffect)
-                blurView.frame = background.bounds
-                background.addSubview(blurView)
-            }
-            
+        if let background = backgroundImageThingy {
+            background.image = restaurant.image
+            background.contentMode = .scaleAspectFill
+            background.clipsToBounds = true
+            let blurEffect = UIBlurEffect(style: .dark)
+            let blurView = UIVisualEffectView(effect: blurEffect)
+            blurView.frame = background.bounds
+            background.addSubview(blurView)
         }
         
     }
@@ -208,6 +213,38 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
         
     }
     
+    func showAlertController(_ title: String, _ message: String, _ url: String?) {
+        
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        let okayAction = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+        let alertAction = UIAlertAction(title: "Download App", style: .default, handler: { (action) in
+            
+            let url = URL(string: url!)
+            
+            if let urlUnwrapped = url {
+                
+                UIApplication.shared.open(urlUnwrapped, options: [:], completionHandler: { (success) in
+                    
+                    // do something with success bool here
+                    
+                })
+                
+            } else {
+                
+                let alertError = UIAlertController(title: "Error Opening", message: "Please try again.", preferredStyle: UIAlertControllerStyle.alert)
+                let okayAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alertError.addAction(okayAction)
+                self.present(alertError, animated: true, completion: nil)
+                
+            }
+            
+        })
+        alert.addAction(alertAction)
+        alert.addAction(okayAction)
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
     func callBusiness() {
         
         if let url = URL(string: "tel://\(restaurant.phone)") {
@@ -215,8 +252,7 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                 
                 if !success {
                     
-                    let alert = Alert()
-                    alert.msg(title: "Failed To Call", message: "There's been a slight complication. The call cannot be made, make sure you are using an iPhone or a compatible device.")
+                    self.showAlertController("Failed To Call", "There's been a slight complication. The call cannot be made, make sure you are using an iPhone or a compatible device.", nil)
                 }
                 
             })
@@ -238,8 +274,7 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                     
                     if !success {
                         
-                        let alert = Alert()
-                        alert.msg(title: "Failed To Open Maps", message: "There's been a slight complication. Make sure you have Maps installed on your iPhone.")
+                        self.showAlertController("Failed To Open Maps", "There's been a slight complication. Make sure you have Maps installed on your iPhone.", nil)
                         
                     }
                     
@@ -248,7 +283,9 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
             
         } else if let appName = defaults.object(forKey: "defaultMaps") as? String {
             
-            if appName == "Apple Maps" {
+            switch appName {
+                
+            case "Apple Maps":
                 
                 if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
                     
@@ -256,31 +293,13 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Maps", message: "There's been a slight complication. Make sure you have Maps installed on your iPhone.")
+                            self.showAlertController("Failed To Open Maps", "There's been a slight complication. Make sure you have Maps installed on your iPhone.", nil)
                         }
                         
                     })
                 }
                 
-            } else if appName == "Waze" {
-                
-                if let url = URL(string: "waze://?q=\(addressString!)") {
-                    
-                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                        
-                        if !success {
-                            
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Waze", message: "There's been a slight complication. Waze isn't installed on your iPhone.")
-                            
-                        }
-                        
-                    })
-                    
-                }
-                
-            } else if appName == "Google Maps" {
+            case "Google Maps":
                 
                 if let url = URL(string: "comgooglemaps://?q=\(addressString!)") {
                     
@@ -288,13 +307,43 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Google Maps", message: "There's been a slight complication. Google Maps isn't installed on your iPhone.")
+                            self.showAlertController("Failed To Open Google Maps", "There's been a slight complication. Make sure you have Google Maps installed on your iPhone.", "https://itunes.apple.com/ca/app/google-maps/id585027354?mt=8")
+                            
                         }
                         
                     })
                     
                     
+                }
+                
+            case "Waze":
+                
+                if let url = URL(string: "waze://?q=\(addressString!)") {
+                    
+                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
+                        
+                        if !success {
+                            
+                            self.showAlertController("Failed To Open Waze", "There's been a slight complication. Make sure you have Waze installed on your iPhone.", "https://itunes.apple.com/us/app/waze-social-gps-maps-traffic/id323229106?mt=8")
+                            
+                        }
+                        
+                    })
+                    
+                }
+                
+            default:
+                
+                if let url = URL(string: "http://maps.apple.com/?address=\(addressString!)") {
+                    
+                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
+                        
+                        if !success {
+                            
+                            self.showAlertController("Failed To Open Maps", "There's been a slight complication. Make sure you have Maps installed on your iPhone.", nil)
+                        }
+                        
+                    })
                 }
                 
             }
@@ -313,8 +362,7 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                     
                     if !success {
                         
-                        let alert = Alert()
-                        alert.msg(title: "Failed To Open Safari", message: "There's been a slight complication. This shouldn't be happening.")
+                        self.showAlertController("Failed To Open Safari", "There's been a slight complication. Make sure you have Safari installed on your iPhone.", nil)
                         
                     }
                     
@@ -332,8 +380,7 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Safari", message: "There's been a slight complication. This shouldn't be happening.")
+                            self.showAlertController("Failed To Open Safari", "There's been a slight complication. Make sure you have Safari installed on your iPhone.", nil)
                             
                         }
                         
@@ -343,14 +390,19 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
                 
             } else if browserName == "Google Chrome" {
                 
-                if let url = URL(string: "googlechromes://\(restaurant.website)") {
+                // use everything after the "https" as url because Google Chrome ¯\_(ツ)_/¯
+                let rangeOfScheme = (restaurant.website as NSString).range(of: ":")
+                let urlNoScheme = (restaurant.website as NSString).substring(from: rangeOfScheme.location)
+                let chromeURLString = "googlechromes" + (urlNoScheme)
+                let chromeURL = URL(string: chromeURLString)
+                
+                if let url = chromeURL {
                     
                     UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
                         
                         if !success {
                             
-                            let alert = Alert()
-                            alert.msg(title: "Failed To Open Google Chrome", message: "There's been a slight complication. Google Chrome isn't installed on your iPhone.")
+                            self.showAlertController("Failed To Open Google Chrome", "There's been a slight complication. Make sure you have Google Chrome installed on your iPhone.", "https://itunes.apple.com/us/app/google-chrome/id535886823?mt=8")
                             
                         }
                         
@@ -439,6 +491,12 @@ class FavouritesDetailContainerViewController: UIViewController, UITableViewData
         cell.timeOfReview.text = currentReview.reviewTime
         
         return cell
+        
+    }
+    
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return UITableViewAutomaticDimension
         
     }
     

@@ -7,12 +7,13 @@
 //
 
 import Foundation
+import UIKit
 
 class Restaurant: NSObject, NSCoding {
     
     var name: String
     var website: String
-    var imageURL: String
+    var image: UIImage?
     var rating: Int
     var priceRange: String
     var phone: String
@@ -30,11 +31,31 @@ class Restaurant: NSObject, NSCoding {
     
     var transactions: [String]
     
-    init(name: String, website: String, imageURL: String, rating: Int, priceRange: String, phone: String, id: String, isClosed: Bool, category: String, reviewCount: Int, distance: Double, city: String, country: String, state: String, address: String, zipCode: String, transactions: [String]) {
+    struct PropertyKey {
+        static let nameKey = "name"
+        static let websiteKey = "website"
+        static let photoKey = "photo"
+        static let ratingKey = "rating"
+        static let priceRangeKey = "priceRange"
+        static let phoneKey = "phone"
+        static let idKey = "id"
+        static let closedKey = "closed"
+        static let categoryKey = "category"
+        static let reviewCountKey = "reviewCount"
+        static let distanceKey = "distance"
+        static let cityKey = "city"
+        static let countryKey = "country"
+        static let stateKey = "state"
+        static let addressKey = "address"
+        static let zipcodeKey = "zipCode"
+        static let transactionsKey = "transactions"
+    }
+    
+    init(name: String, website: String, image: UIImage?, rating: Int, priceRange: String, phone: String, id: String, isClosed: Bool, category: String, reviewCount: Int, distance: Double, city: String, country: String, state: String, address: String, zipCode: String, transactions: [String]) {
         
         self.name = name
         self.website = website
-        self.imageURL = imageURL
+        self.image = image
         self.rating = rating
         self.priceRange = priceRange
         self.phone = phone
@@ -50,51 +71,53 @@ class Restaurant: NSObject, NSCoding {
         self.zipCode = zipCode
         self.transactions = transactions
         
+        super.init()
+        
     }
     
     required convenience init(coder aDecoder: NSCoder) {
         
-        let name = aDecoder.decodeObject(forKey: "name") as! String
-        let website = aDecoder.decodeObject(forKey: "website") as! String
-        let imageURL = aDecoder.decodeObject(forKey: "imageURL") as! String
-        let rating  = aDecoder.decodeInteger(forKey: "rating")
-        let priceRange = aDecoder.decodeObject(forKey: "priceRange") as! String
-        let phone = aDecoder.decodeObject(forKey: "phone") as! String
-        let id = aDecoder.decodeObject(forKey: "id") as! String
-        let isClosed = aDecoder.decodeBool(forKey: "isClosed")
-        let category = aDecoder.decodeObject(forKey: "category") as! String
-        let reviewCount = aDecoder.decodeInteger(forKey: "reviewCount")
-        let distance = aDecoder.decodeDouble(forKey: "distance")
-        let city = aDecoder.decodeObject(forKey: "city") as! String
-        let country = aDecoder.decodeObject(forKey: "country") as! String
-        let state = aDecoder.decodeObject(forKey: "state") as! String
-        let address = aDecoder.decodeObject(forKey: "address") as! String
-        let zipCode = aDecoder.decodeObject(forKey: "zipCode") as! String
-        let transactions = aDecoder.decodeObject(forKey: "transactions") as! [String]
+        let name1 = aDecoder.decodeObject(forKey: PropertyKey.nameKey) as! String
+        let website1 = aDecoder.decodeObject(forKey: PropertyKey.websiteKey) as! String
+        let image1 = aDecoder.decodeObject(forKey: PropertyKey.photoKey) as? UIImage
+        let rating1  = aDecoder.decodeInteger(forKey: PropertyKey.ratingKey)
+        let priceRange1 = aDecoder.decodeObject(forKey: PropertyKey.priceRangeKey) as! String
+        let phone1 = aDecoder.decodeObject(forKey: PropertyKey.phoneKey) as! String
+        let id1 = aDecoder.decodeObject(forKey: PropertyKey.idKey) as! String
+        let isClosed1 = aDecoder.decodeBool(forKey: PropertyKey.closedKey)
+        let category1 = aDecoder.decodeObject(forKey: PropertyKey.categoryKey) as! String
+        let reviewCount1 = aDecoder.decodeInteger(forKey: PropertyKey.reviewCountKey)
+        let distance1 = aDecoder.decodeDouble(forKey: PropertyKey.distanceKey)
+        let city1 = aDecoder.decodeObject(forKey: PropertyKey.cityKey) as! String
+        let country1 = aDecoder.decodeObject(forKey: PropertyKey.countryKey) as! String
+        let state1 = aDecoder.decodeObject(forKey: PropertyKey.stateKey) as! String
+        let address1 = aDecoder.decodeObject(forKey: PropertyKey.addressKey) as! String
+        let zipCode1 = aDecoder.decodeObject(forKey: PropertyKey.zipcodeKey) as! String
+        let transactions1 = aDecoder.decodeObject(forKey: PropertyKey.transactionsKey) as! [String]
         
-        self.init(name: name, website: website, imageURL: imageURL, rating: rating, priceRange: priceRange, phone: phone, id: id, isClosed: isClosed, category: category, reviewCount: reviewCount, distance: distance, city: city, country: country, state: state, address: address, zipCode: zipCode, transactions: transactions)
+        self.init(name: name1, website: website1, image: image1, rating: rating1, priceRange: priceRange1, phone: phone1, id: id1, isClosed: isClosed1, category: category1, reviewCount: reviewCount1, distance: distance1, city: city1, country: country1, state: state1, address: address1, zipCode: zipCode1, transactions: transactions1)
         
     }
     
     func encode(with aCoder: NSCoder) {
         
-        aCoder.encode(name, forKey: "name")
-        aCoder.encode(website, forKey: "website")
-        aCoder.encode(imageURL, forKey: "imageURL")
-        aCoder.encode(rating, forKey: "rating")
-        aCoder.encode(priceRange, forKey: "priceRange")
-        aCoder.encode(phone, forKey: "phone")
-        aCoder.encode(id, forKey: "id")
-        aCoder.encode(isClosed, forKey: "isClosed")
-        aCoder.encode(category, forKey: "category")
-        aCoder.encode(reviewCount, forKey: "reviewCount")
-        aCoder.encode(distance, forKey: "distance")
-        aCoder.encode(city, forKey: "city")
-        aCoder.encode(country, forKey: "country")
-        aCoder.encode(state, forKey: "state")
-        aCoder.encode(address, forKey: "address")
-        aCoder.encode(zipCode, forKey: "zipCode")
-        aCoder.encode(transactions, forKey: "transactions")
+        aCoder.encode(name, forKey: PropertyKey.nameKey)
+        aCoder.encode(website, forKey: PropertyKey.websiteKey)
+        aCoder.encode(image, forKey: PropertyKey.photoKey)
+        aCoder.encode(rating, forKey: PropertyKey.ratingKey)
+        aCoder.encode(priceRange, forKey: PropertyKey.priceRangeKey)
+        aCoder.encode(phone, forKey: PropertyKey.phoneKey)
+        aCoder.encode(id, forKey: PropertyKey.idKey)
+        aCoder.encode(isClosed, forKey: PropertyKey.closedKey)
+        aCoder.encode(category, forKey: PropertyKey.categoryKey)
+        aCoder.encode(reviewCount, forKey: PropertyKey.reviewCountKey)
+        aCoder.encode(distance, forKey: PropertyKey.distanceKey)
+        aCoder.encode(city, forKey: PropertyKey.cityKey)
+        aCoder.encode(country, forKey: PropertyKey.countryKey)
+        aCoder.encode(state, forKey: PropertyKey.stateKey)
+        aCoder.encode(address, forKey: PropertyKey.addressKey)
+        aCoder.encode(zipCode, forKey: PropertyKey.zipcodeKey)
+        aCoder.encode(transactions, forKey: PropertyKey.transactionsKey)
         
     }
     
@@ -145,5 +168,12 @@ struct RestaurantReviews {
     var imageURL: String
     var reviewText: String
     var reviewTime: String
+    
+}
+
+enum Attributes {
+    
+    case bold
+    case color
     
 }

@@ -9,16 +9,11 @@
 import UIKit
 import CoreLocation
 
-class AddressViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class AddressViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
 
     @IBOutlet var addressTextField: UITextField!
     @IBOutlet var addressDone: UIButton!
     @IBOutlet var searchesTableView: UITableView!
-    @IBAction func goBack(_ sender: Any) {
-        
-        self.navigationController?.popViewController(animated: true)
-        
-    }
     
     let defaults = UserDefaults.standard
     var searches = [String]()
@@ -26,19 +21,22 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addressDone.isUserInteractionEnabled = false
-
+        self.searchesTableView.isHidden = true
+        
         // Do any additional setup after loading the view.
         setupController()
         
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
     
     func setupController() {
+        
+        // set delegates
+        addressTextField.delegate = self
+        addressTextField.returnKeyType = .done
+        
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = true
+        }
         
         // create recent searches archive
         if defaults.object(forKey: "addressRecentSearches") == nil {
@@ -49,19 +47,39 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
             defaults.set(encodedData, forKey: "addressRecentSearches")
             defaults.synchronize()
             
+            self.searchesTableView.isHidden = true
+            
         } else {
             
+            // there are searches in archive
             // replace archived searches with current searches arr because archived will always be the most updated one at start
             
             if let decodedArr = defaults.object(forKey: "addressRecentSearches") as? Data {
                 
-                if let decodedSearches = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [String] {
+                if var decodedSearches = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [String] {
                     
+                    decodedSearches = decodedSearches.reversed()
                     self.searches = decodedSearches
+                    
+                    self.searchesTableView.isHidden = false
                     
                 }
             }
         }
+        
+        // ui things
+        
+        searchesTableView.backgroundColor = UIColor.clear
+        searchesTableView.layer.cornerRadius = 10
+        searchesTableView.clipsToBounds = true
+        searchesTableView.contentOffset = CGPoint(x: 0, y: -50)
+        
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = searchesTableView.bounds
+        // searchesTableView.backgroundView = blurEffectView
+        searchesTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.regular)
+        // searchesTableView.separatorColor = UIColor.lightText
         
         addressDone.addTarget(self, action: #selector(self.masterDone), for: UIControlEvents.touchUpInside)
         addressDone.isUserInteractionEnabled = true
@@ -70,8 +88,16 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func masterDone() {
         
+        // done button action
+        
         addToRecent()
         reverseGeocode()
+        
+        DispatchQueue.main.async {
+            
+            self.searchesTableView.reloadData()
+            
+        }
         
     }
     
@@ -90,16 +116,18 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
                     alert.addAction(action)
                     self.present(alert, animated: true, completion: nil)
                     
+                } else {
+                    
+                    let placemark = placemarks?.first
+                    let lat = placemark?.location?.coordinate.latitude
+                    let long = placemark?.location?.coordinate.longitude
+                    
+                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                    vc.lat = lat!
+                    vc.long = long!
+                    self.present(vc, animated: true, completion: nil)
+                    
                 }
-                
-                let placemark = placemarks?.first
-                let lat = placemark?.location?.coordinate.latitude
-                let long = placemark?.location?.coordinate.longitude
-                
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-                vc.lat = lat!
-                vc.long = long!
-                self.present(vc, animated: true, completion: nil)
                 
             }
             
@@ -109,13 +137,21 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func addToRecent() {
         
+        self.searchesTableView.isHidden = false
+        
         let currentAddress = addressTextField.text!
+        
+        DispatchQueue.main.async {
+            
+            self.searchesTableView.reloadData()
+            
+        }
         
         if !(searches.contains(currentAddress)) {
             
             // not in archived or current
-            
-            searches.append(currentAddress)
+                        
+            searches.insert(currentAddress, at: 0)
             
             DispatchQueue.main.async {
                 
@@ -135,54 +171,49 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
                     defaults.set(encode, forKey: "addressRecentSearches")
                     defaults.synchronize()
                     
+                    self.searchesTableView.isHidden = false
+                    
                 }
             }
         }
         
     }
     
-    func addToRecentSearches() {
+    // Text field delegate
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
-        let currentAddress = addressTextField.text!
+        textField.resignFirstResponder()
+        masterDone()
+        return true
         
-        if defaults.object(forKey: "addressRecentSearches") == nil {
-            
-            // no recent searches, create arr, encode and replace
-            
-            var recentSearches = [String]()
-            recentSearches.append(currentAddress)
-            
-            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: recentSearches)
-            defaults.set(encodedData, forKey: "addressRecentSearches")
-            defaults.synchronize()
-            
-        } else {
-            
-            if let decodedArr = defaults.object(forKey: "addressRecentSearches") as? Data {
-                
-                if var decodedSearches = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [String] {
-                    
-                    if !(decodedSearches.contains(where: { $0 == currentAddress } )) {
-                        
-                        // not in favourites 
-                        decodedSearches.append(currentAddress)
-                        
-                    } else {
-                        
-                        let alert = Alert()
-                        alert.msg(title: "Already In Favourites", message: "The restaurant you favourited is already in your favourites.")
-                        
-                    }
-                    
-                    let encode: Data = NSKeyedArchiver.archivedData(withRootObject: decodedSearches)
-                    defaults.set(encode, forKey: "addressRecentSearches")
-                    defaults.synchronize()
-                    
-                }
-                
-            }
-            
-        }
+    }
+    
+    // Table view delegate
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 20
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        
+        let headerView = UIView(frame: CGRect(x: 16, y: 0, width: tableView.bounds.width, height: 20))
+        headerView.autoresizingMask = .flexibleWidth
+        
+        let label = UILabel(frame: CGRect(x: 8, y: 0, width: headerView.bounds.width, height: 15))
+        label.text = "Recent Searches".uppercased()
+        label.autoresizingMask = .flexibleWidth
+        label.font = UIFont.systemFont(ofSize: 15, weight: UIFontWeightSemibold)
+        
+        headerView.addSubview(label)
+        
+        return headerView
+        
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        
+        return "Recent Searches"
         
     }
     
@@ -205,15 +236,49 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let currentAddress = searches[indexPath.row]
+        
+        addressTextField.text = currentAddress
+        masterDone()
+        
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "searchesCell", for: indexPath) as! CategoryTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "searchesCell", for: indexPath)
         
         let search = searches[indexPath.row]
         
-        cell.categoryLabel.text = search
+        cell.textLabel?.text = search
+        // cell.textLabel?.textColor = UIColor.white
+        cell.backgroundColor = UIColor.clear
+        
+        let newSelectionView = UIVisualEffectView(frame: cell.bounds)
+        newSelectionView.effect = UIBlurEffect(style: UIBlurEffectStyle.regular)
+        cell.selectedBackgroundView = newSelectionView
+        
+        cell.layer.cornerRadius = 10
         
         return cell
+        
+    }
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        let delAction = UITableViewRowAction(style: UITableViewRowActionStyle.destructive, title: "Delete") { (action, index) in
+            
+            self.searches.remove(at: indexPath.row)
+            
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: self.searches)
+            self.defaults.set(encodedData, forKey: "addressRecentSearches")
+            self.defaults.synchronize()
+            
+            self.searchesTableView.reloadData()
+        }
+        
+        return [delAction]
         
     }
 
