@@ -11,9 +11,16 @@ target 'Kraving' do
   pod 'Alamofire', '~> 4.4'
   pod 'DeviceKit', '~> 1.0'
   pod 'Cosmos', '~> 11.0'
-  pod 'SDWebImage', '~> 4.0'
   pod 'PhoneNumberKit', '~> 1.3'
-  pod 'Hero', '0.1.7'
-  pod 'ChameleonFramework'
+  pod 'ChameleonFramework/Swift', :git => 'https://github.com/ViccAlexander/Chameleon.git', :branch => 'wip/swift4'
+  pod 'SimpleImageViewer', '~> 1.1.1'
 
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+    end
+  end
 end
