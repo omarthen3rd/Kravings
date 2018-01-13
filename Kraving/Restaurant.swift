@@ -99,6 +99,10 @@ class Restaurant: NSObject, NSCoding {
         
     }
     
+    deinit {
+        print("\(name):\(id) is being deinitialized")
+    }
+    
     func encode(with aCoder: NSCoder) {
         
         aCoder.encode(name, forKey: PropertyKey.nameKey)
@@ -175,5 +179,12 @@ enum Attributes {
     
     case bold
     case color
+    
+}
+
+enum LoadingOpener {
+    
+    case unhide
+    case hide
     
 }

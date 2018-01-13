@@ -50,17 +50,15 @@ class StartUpViewController: UIViewController, CLLocationManagerDelegate {
 
                     // location has successfully been authenticated and it isn't first launch
                     
-                    print("ran this")
-                    
-                    let vc = storyboard?.instantiateViewController(withIdentifier: "MainViewController") as! MainViewController
+                    let vc = storyboard?.instantiateViewController(withIdentifier: "DefaultViewController") as! DefaultViewController
                     self.present(vc, animated: true, completion: nil)
                     
                 } else if (CLLocationManager.authorizationStatus() == .denied) || (CLLocationManager.authorizationStatus() == .restricted) || (CLLocationManager.authorizationStatus() == .notDetermined) {
                     
+                    // user has succesfully chosen addresses as their primary input of location, open address view
                     // .denied = user explicitly said no to using location or location services are off in settings
                     // .restricted = ¯\_(ツ)_/¯
                     // .notDetermined = user has not chosen option about Location Services (ie went driectly to "Use Address" option)
-                    // user has succesfully chosen addresses as their primary input of location, open address view
                     
                     let vc = storyboard?.instantiateViewController(withIdentifier: "AddressViewController") as! AddressViewController
                     let nav = UINavigationController(rootViewController: vc)
@@ -77,6 +75,8 @@ class StartUpViewController: UIViewController, CLLocationManagerDelegate {
             useAddress.isEnabled = true
             
         } else {
+            
+            // no internet connection
             
             useLocation.isEnabled = false
             useAddress.isEnabled = false
@@ -103,7 +103,7 @@ class StartUpViewController: UIViewController, CLLocationManagerDelegate {
             locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
             locationManager.requestWhenInUseAuthorization()
             locationManager.startUpdatingLocation()
-            locationManager.requestLocation()
+            locationManager.requestLocation() // didUpdateLocations
             
         } else {
             
@@ -181,7 +181,7 @@ class StartUpViewController: UIViewController, CLLocationManagerDelegate {
             
             let coord = location.coordinate
             
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "DefaultViewController") as! DefaultViewController
             vc.lat = coord.latitude
             vc.long = coord.latitude
             self.present(vc, animated: true, completion: {
@@ -195,8 +195,6 @@ class StartUpViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        
-        print("did fail with error")
         
         let alrt = UIAlertController(title: "Please Enable Location Services", message: "This option cannot work without enabling Location Services.", preferredStyle: .alert)
         let alrtAction = UIAlertAction(title: "Ok", style: .default, handler: nil)

@@ -123,7 +123,7 @@ class SettingsTableViewController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-
+        
         if self.previousRadius != defaults.integer(forKey: "searchRadius") {
             if let del = delegate {
                 del.dataChanged()
@@ -171,7 +171,7 @@ class SettingsTableViewController: UITableViewController {
             vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 60)
             vibrancyEffectView.autoresizingMask = .flexibleWidth
             
-            //Create header label
+            // Create header label
             let vibrantLabel = UILabel()
             vibrantLabel.frame = CGRect(x: 15, y: 30, width: tableView.bounds.size.width, height: 30)
             vibrantLabel.autoresizingMask = .flexibleWidth
@@ -191,7 +191,7 @@ class SettingsTableViewController: UITableViewController {
             vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 30)
             vibrancyEffectView.autoresizingMask = .flexibleWidth
             
-            //Create header label
+            // Create header label
             let vibrantLabel = UILabel()
             vibrantLabel.frame = CGRect(x: 15, y: 0, width: tableView.bounds.size.width, height: 30)
             vibrantLabel.autoresizingMask = .flexibleWidth
@@ -213,7 +213,7 @@ class SettingsTableViewController: UITableViewController {
             vibrancyEffectView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 30)
             vibrancyEffectView.autoresizingMask = .flexibleWidth
             
-            //Create header label
+            // Create header label
             let vibrantLabel = UILabel()
             vibrantLabel.frame = CGRect(x: 15, y: 0, width: tableView.bounds.size.width, height: 30)
             vibrantLabel.autoresizingMask = .flexibleWidth

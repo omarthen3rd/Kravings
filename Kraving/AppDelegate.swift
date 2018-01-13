@@ -7,13 +7,13 @@
 //
 
 import UIKit
+import CoreLocation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
@@ -21,20 +21,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             if shortcutItem.type == "com.omar.kravings.openfavourites" {
                 
-                print("ran shortcut")
-                
                 self.window = UIWindow(frame: UIScreen.main.bounds)
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let initialVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-                self.window?.rootViewController = initialVC
-                self.window?.makeKeyAndVisible()
-                let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesTableViewController") as! FavouritesTableViewController
-                let nav = UINavigationController(rootViewController: favouritesVC)
-                initialVC.present(nav, animated: true, completion: {
+                
+                if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
                     
+                    // location has successfully been authenticated and it isn't first launch
                     
+                    let initialVC = storyboard.instantiateViewController(withIdentifier: "DefaultViewController") as! DefaultViewController
+                    self.window?.rootViewController = initialVC
+                    self.window?.makeKeyAndVisible()
+                    let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesViewController
+                    let nav = UINavigationController(rootViewController: favouritesVC)
+                    initialVC.present(nav, animated: true, completion: nil)
                     
-                })
+                } else if (CLLocationManager.authorizationStatus() == .denied) || (CLLocationManager.authorizationStatus() == .restricted) || (CLLocationManager.authorizationStatus() == .notDetermined) {
+                    
+                    // .denied = user explicitly said no to using location or location services are off in settings
+                    // .restricted = ¯\_(ツ)_/¯
+                    // .notDetermined = user has not chosen option about Location Services (ie went driectly to "Use Address" option)
+                    // user has succesfully chosen addresses as their primary input of location, open address view
+                    
+                    let vc = storyboard.instantiateViewController(withIdentifier: "AddressViewController") as! AddressViewController
+                    let nav = UINavigationController(rootViewController: vc)
+                    self.window?.rootViewController = nav
+                    self.window?.makeKeyAndVisible()
+                    let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesViewController
+                    let nav2 = UINavigationController(rootViewController: favouritesVC)
+                    vc.present(nav2, animated: true, completion: nil)
+                    
+                }
                 
             }
             
