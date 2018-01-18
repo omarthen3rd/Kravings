@@ -137,7 +137,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var defaults = UserDefaults.standard
     
     var divisor: CGFloat!
-    var selectedId = -100
     var categories = [String]()
     var sortByItems = ["Best Match", "Rating", "Review Count", "Distance"]
     var selectedCategory = String() // initialized in getCategories()
@@ -777,6 +776,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func handleTableViewTap() {
         
+        self.updateDislikes()
         self.restaurantIndex = 0
         self.restaurants.removeAll()
         self.cards.removeAll()
@@ -794,6 +794,19 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                         
                         self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
                     }
+                    
+                    self.loadDislikes(completetionHandler: { (arr) in
+                        
+                        if let arr = arr {
+                            
+                            let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
+                            let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                            
+                            self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                            
+                        }
+                        
+                    })
                     
                     self.filterOutNonRestaurants(completetionHandler: { (newArr) in
                         
@@ -1009,6 +1022,64 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
     }
     
+    func loadDislikes(completetionHandler: @escaping ([Restaurant]!) -> Void) {
+        
+        let dislikesExist = defaults.object(forKey: "dislikes") != nil
+        
+        if dislikesExist {
+            
+            if let decodedArr = defaults.object(forKey: "dislikes") as? Data {
+                
+                if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                    
+                    completetionHandler(decodedRestaurants)
+                    
+                }
+                
+            }
+            
+        } else {
+            
+            // no dislikes
+            completetionHandler(nil)
+        }
+        
+    }
+    
+    func removeDuplicates(array: [Restaurant]) -> [Restaurant] {
+        var encountered = Set<Restaurant>()
+        var result: [Restaurant] = []
+        for value in array {
+            if encountered.contains(value) {
+                // Do not add a duplicate element.
+            }
+            else {
+                // Add value to the set.
+                encountered.insert(value)
+                // ... Append the value.
+                result.append(value)
+            }
+        }
+        return result
+    }
+    
+    func updateDislikes() {
+        
+        loadDislikes { (dislikesArray) in
+            
+            guard var dislikesArr = dislikesArray else { return }
+            
+            // dislikes exist
+            dislikesArr.append(contentsOf: self.dislikes)
+            let newArr = self.removeDuplicates(array: dislikesArr)
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: newArr)
+            self.defaults.set(encodedData, forKey: "dislikes")
+            self.defaults.synchronize()
+            
+        }
+        
+    }
+    
     func filterOutNonRestaurants(completetionHandler: @escaping ([Restaurant]!) -> Void) {
         
         let categoriesToRemove = ["Parks", "Hiking", "Veterinarians", "Shopping Centers", "Recreation Centers"]
@@ -1020,8 +1091,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func removeWith(_ indexToRemove: Int) {
         
-        // for removing likes in main view when removed in FavouritesViewController
         // func for protocol RemoveFromMainArray
+        // for removing likes in main view when removed in FavouritesViewController
         self.likes.remove(at: indexToRemove)
         
     }
@@ -1058,6 +1129,19 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                                 
                                 self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
                             }
+                            
+                            self.loadDislikes(completetionHandler: { (arr) in
+                                
+                                if let arr = arr {
+                                    
+                                    let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
+                                    let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                                    
+                                    self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                                    
+                                }
+                                
+                            })
                             
                             self.filterOutNonRestaurants(completetionHandler: { (newArr) in
                                 

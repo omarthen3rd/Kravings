@@ -28,7 +28,6 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     var blurEffectView = UIVisualEffectView()
     var noDataLabel = UILabel()
     let defaults = UserDefaults.standard
-    var labelCount = 0
     
     var removeDelegate: RemoveFromMainArray?
     var indexToRemove: Int?
