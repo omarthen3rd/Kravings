@@ -382,11 +382,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                         
                         transactions = business["transactions"].arrayValue.map( { $0.string! } )
                         
-                        let imageFinalURL = URL(string: imageURL)
-                        let posterData = try? Data(contentsOf: imageFinalURL!)
-                        if let pData = posterData {
+                        if let upwrappedImageURL = URL(string: imageURL) {
                             
-                            image = UIImage(data: pData)!
+                            if let imageData = try? Data(contentsOf: upwrappedImageURL) {
+                                
+                                image = UIImage(data: imageData)!
+                                
+                            }
                             
                         } else {
                             
@@ -395,7 +397,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                         }
                         
                         for category in business["categories"].arrayValue {
-                            
+    
                             restaurantCategory = category["title"].stringValue
                             
                         }

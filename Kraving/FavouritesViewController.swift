@@ -37,10 +37,14 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     var segment = UISegmentedControl()
     
     var searchButton = UIBarButtonItem()
-    var closeBtn = UIBarButtonItem()
     
     var shouldChangeToLongTerm = false
     
+    @IBAction func closeBtn(_ sender: Any) {
+        
+        self.dismiss(animated: true, completion: nil)
+        
+    }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         

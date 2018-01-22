@@ -58,10 +58,15 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.navigationController?.navigationBar.prefersLargeTitles = true
         }
         
+        // temp hidden until openFavouritesController is fixed
+        openFavourites.isHidden = true
+        
         // create recent searches archive
         if defaults.object(forKey: "addressRecentSearches") == nil {
             
             // no recent searches, create arr and encode
+            
+            // openFavourites.isHidden = true
             
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: searches)
             defaults.set(encodedData, forKey: "addressRecentSearches")
@@ -73,6 +78,8 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             // there are searches in archive
             // replace archived searches with current searches arr because archived will always be the most updated one at start
+            
+            // openFavourites.isHidden = false
             
             if let decodedArr = defaults.object(forKey: "addressRecentSearches") as? Data {
                 
@@ -111,6 +118,7 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
         openFavourites.imageView?.contentMode = .scaleAspectFit
         openFavourites.imageEdgeInsets = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         
+        openFavourites.addTarget(self, action: #selector(openFavouritesController), for: .touchUpInside)
         addressDone.addTarget(self, action: #selector(self.masterDone), for: UIControlEvents.touchUpInside)
         addressDone.isUserInteractionEnabled = true
         
@@ -249,6 +257,16 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             
         }
+        
+    }
+    
+    func openFavouritesController() {
+        
+        // TODO: Fix nav bar not showing in presented vc
+        
+        let vc = storyboard?.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesViewController
+        vc.segment.selectedSegmentIndex = 1
+        self.navigationController?.present(vc, animated: true, completion: nil)
         
     }
     
