@@ -233,7 +233,7 @@
                                     <constraint firstAttribute="trailing" secondItem="BcD-fb-DNe" secondAttribute="trailing" constant="16" id="tLO-85-t4x"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HQf-Mt-lgD">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HQf-Mt-lgD">
                                 <rect key="frame" x="16" y="317.5" width="343" height="32.5"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="27"/>
                                 <nil key="textColor"/>
@@ -292,6 +292,13 @@
                                             <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
+                                                <searchBar alpha="0.0" contentMode="redraw" barStyle="black" searchBarStyle="minimal" translatesAutoresizingMaskIntoConstraints="NO" id="Hsj-Kw-Cnn">
+                                                    <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="44" id="P0s-jg-rYK"/>
+                                                    </constraints>
+                                                    <textInputTraits key="textInputTraits"/>
+                                                </searchBar>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Categories" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KNe-2a-rMp">
                                                     <rect key="frame" x="8" y="8" width="121" height="28"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -299,7 +306,23 @@
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nAp-de-uuo">
+                                                    <rect key="frame" x="305" y="7" width="30" height="30"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="30" id="Ov7-iM-RAD"/>
+                                                        <constraint firstAttribute="width" constant="30" id="dKX-b7-bsw"/>
+                                                    </constraints>
+                                                </button>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="Hsj-Kw-Cnn" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" id="3tX-Wx-X8l"/>
+                                                <constraint firstItem="Hsj-Kw-Cnn" firstAttribute="leading" secondItem="umN-7M-EIE" secondAttribute="leading" id="4Kf-KP-p0p"/>
+                                                <constraint firstAttribute="trailing" secondItem="nAp-de-uuo" secondAttribute="trailing" constant="8" id="6ER-6k-tNb"/>
+                                                <constraint firstItem="nAp-de-uuo" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" constant="7" id="agv-9Q-ZSp"/>
+                                                <constraint firstAttribute="bottom" secondItem="nAp-de-uuo" secondAttribute="bottom" constant="7" id="hDN-vf-r5A"/>
+                                                <constraint firstAttribute="bottom" secondItem="Hsj-Kw-Cnn" secondAttribute="bottom" id="n8H-JL-PPZ"/>
+                                                <constraint firstAttribute="trailing" secondItem="Hsj-Kw-Cnn" secondAttribute="trailing" id="qR1-Zo-VLh"/>
+                                            </constraints>
                                         </view>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="44" id="5EF-4o-8Bx"/>
@@ -546,7 +569,10 @@
                         <outlet property="buttonsStackView" destination="FvC-MG-evt" id="2Fy-FX-GoV"/>
                         <outlet property="categoriesBtn" destination="tHR-zt-5NL" id="zAf-oE-VZO"/>
                         <outlet property="categoriesDoneButton" destination="lQE-hA-i6O" id="P1o-nN-Htz"/>
+                        <outlet property="categoriesHeaderView" destination="EfU-UY-Igr" id="euT-ud-Y4e"/>
+                        <outlet property="categoriesSearchBar" destination="Hsj-Kw-Cnn" id="QFz-MW-cOe"/>
                         <outlet property="categoriesTableView" destination="kXa-Nw-aqN" id="AyR-3o-S8O"/>
+                        <outlet property="categoriesTitle" destination="KNe-2a-rMp" id="EBY-5l-eGW"/>
                         <outlet property="categoryAndSortByContainerView" destination="XMq-yN-gFF" id="HVu-Az-1SL"/>
                         <outlet property="dislikeBtn" destination="Tsq-28-xHJ" id="UcX-X2-Xrw"/>
                         <outlet property="favouritesBtn" destination="SIj-8j-gga" id="yM0-L2-HxE"/>
@@ -554,6 +580,7 @@
                         <outlet property="loadingIndicator" destination="wXZ-Ny-sup" id="KRO-Cm-uLx"/>
                         <outlet property="loadingText" destination="BcD-fb-DNe" id="Nec-N7-aAt"/>
                         <outlet property="loadingView" destination="edi-ha-GKe" id="hLy-D3-BFP"/>
+                        <outlet property="searchCategories" destination="nAp-de-uuo" id="UWc-P6-nqY"/>
                         <outlet property="settingsBtn" destination="aq1-5z-p0b" id="EHS-qI-Z2M"/>
                         <outlet property="sortByHeaderView" destination="xeO-o0-93H" id="tdU-ds-bMX"/>
                         <outlet property="sortByTableView" destination="DIv-xG-puS" id="Lnb-Rw-syH"/>
@@ -562,7 +589,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="umh-VU-VMS" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-684" y="-850"/>
+            <point key="canvasLocation" x="-684" y="-850.52473763118451"/>
         </scene>
         <!--Favourites-->
         <scene sceneID="Rrz-Fh-JbA">
@@ -593,7 +620,7 @@
                                             </constraints>
                                         </imageView>
                                         <view userInteractionEnabled="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="k1C-Qp-Slh" customClass="CosmosView" customModule="Cosmos">
-                                            <rect key="frame" x="8" y="198.5" width="327" height="13.5"/>
+                                            <rect key="frame" x="8" y="191" width="327" height="21"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="color" keyPath="emptyColor">
@@ -616,7 +643,7 @@
                                             </userDefinedRuntimeAttributes>
                                         </view>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="umR-h9-UBl">
-                                            <rect key="frame" x="8" y="166" width="327" height="27.5"/>
+                                            <rect key="frame" x="8" y="166" width="327" height="20"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="23"/>
                                             <nil key="highlightedColor"/>
                                         </label>

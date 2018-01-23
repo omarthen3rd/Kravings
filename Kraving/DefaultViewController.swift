@@ -12,6 +12,32 @@ import SwiftyJSON
 import Alamofire
 import DeviceKit
 
+extension UIBarButtonSystemItem {
+    
+    func image() -> UIImage? {
+        let tempItem = UIBarButtonItem(barButtonSystemItem: self,
+                                       target: nil,
+                                       action: nil)
+        
+        // add to toolbar and render it
+        let bar = UIToolbar()
+        bar.setItems([tempItem],
+                     animated: false)
+        bar.snapshotView(afterScreenUpdates: true)
+        
+        // got image from real uibutton
+        let itemView = tempItem.value(forKey: "view") as! UIView
+        for view in itemView.subviews {
+            if let button = view as? UIButton,
+                let image = button.imageView?.image {
+                return image.withRenderingMode(.alwaysTemplate)
+            }
+        }
+        
+        return nil
+    }
+}
+
 extension UIView {
     
     func applyGradient(colours: [UIColor]) -> Void {
@@ -111,7 +137,7 @@ extension String {
     
 }
 
-class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray {
+class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate, UISearchResultsUpdating {
     
     @IBOutlet var thatsAllFolks: UILabel!
     @IBOutlet var loadingView: UIView!
@@ -120,7 +146,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     @IBOutlet var categoryAndSortByContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
+    @IBOutlet var categoriesHeaderView: UIVisualEffectView!
+    @IBOutlet var categoriesTitle: UILabel!
     @IBOutlet var categoriesDoneButton: UIButton!
+    @IBOutlet var categoriesSearchBar: UISearchBar!
+    @IBOutlet var searchCategories: UIButton!
     @IBOutlet var sortByHeaderView: UIVisualEffectView!
     @IBOutlet var sortByTableView: UITableView!
     
@@ -136,8 +166,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var feedbackGenerator = UIImpactFeedbackGenerator()
     var defaults = UserDefaults.standard
     
+    var resultSearchController = UISearchController(searchResultsController: nil)
+    
     var divisor: CGFloat!
     var categories = [String]()
+    var filteredCategories = [String]()
     var sortByItems = ["Best Match", "Rating", "Review Count", "Distance"]
     var selectedCategory = String() // initialized in getCategories()
     var selectedSortBy = String() // initialized in setupView()
@@ -552,6 +585,22 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         dislikeBtn.backgroundColor = UIColor.flatRed
         
         categoriesDoneButton.alpha = 0 // for animation stuff
+        
+        // search bar
+        
+        searchCategories.setImage(UIBarButtonSystemItem.search.image(), for: .normal)
+        searchCategories.addTarget(self, action: #selector(openSearchBar), for: .touchUpInside)
+        
+        resultSearchController.searchBar.delegate = self
+        resultSearchController.searchResultsUpdater = self
+        resultSearchController.dimsBackgroundDuringPresentation = false
+        resultSearchController.searchBar.sizeToFit()
+        resultSearchController.searchBar.searchBarStyle = UISearchBarStyle.minimal
+        definesPresentationContext = true
+        
+        resultSearchController.searchBar.sizeToFit()
+        categoriesHeaderView.contentView.addSubview(resultSearchController.searchBar)
+        resultSearchController.searchBar.alpha = 0
         
         likeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
         dislikeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
@@ -1099,6 +1148,28 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
     }
     
+    func openSearchBar() {
+        
+        if resultSearchController.searchBar.alpha == 0 {
+            
+            UIView.animate(withDuration: 0.2, animations: {
+                self.categoriesTitle.alpha = 0
+                self.searchCategories.alpha = 0
+                self.resultSearchController.searchBar.alpha = 1
+            })
+            
+        } else {
+            
+            UIView.animate(withDuration: 0.2, animations: {
+                self.categoriesTitle.alpha = 1
+                self.searchCategories.alpha = 1
+                self.resultSearchController.searchBar.alpha = 0
+            })
+            
+        }
+        
+    }
+    
     func searchRestaurants() {
         
         // address is primary input for location
@@ -1447,6 +1518,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                         self?.removeOldFrontCard()
                         self?.cardIsHiding = false
                         if (self?.cards.isEmpty)! {
+                            let text = "That's All Folks \n \nTry Changing The Radius In Settings"
+                            let attributedString = NSMutableAttributedString(string: text)
+                            attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
+                            self?.thatsAllFolks.attributedText = attributedString
                             self?.likeBtn.isEnabled = false
                             self?.dislikeBtn.isEnabled = false
                         }
@@ -1632,6 +1707,29 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
             return cell
         }
+        
+    }
+    
+    // MARK: - UISearchBar Functions
+    
+    func filterResults(_ searchText: String) {
+        
+        filteredCategories = categories.filter({ (category) -> Bool in
+            return category.lowercased().contains(searchText.lowercased())
+        })
+        self.categoriesTableView.reloadData()
+        
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        
+        filterResults(searchController.searchBar.text!)
+        
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        
+        openSearchBar()
         
     }
 
