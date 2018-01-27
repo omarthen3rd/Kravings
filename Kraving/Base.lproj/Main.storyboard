@@ -292,13 +292,6 @@
                                             <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <searchBar contentMode="redraw" placeholder="Search Categories" translatesAutoresizingMaskIntoConstraints="NO" id="tSU-Fd-JBe">
-                                                    <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="44" id="dLb-Wa-cC7"/>
-                                                    </constraints>
-                                                    <textInputTraits key="textInputTraits"/>
-                                                </searchBar>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Categories" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KNe-2a-rMp">
                                                     <rect key="frame" x="8" y="8" width="121" height="28"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -313,15 +306,20 @@
                                                         <constraint firstAttribute="width" constant="30" id="dKX-b7-bsw"/>
                                                     </constraints>
                                                 </button>
+                                                <searchBar contentMode="redraw" barStyle="black" searchBarStyle="minimal" placeholder="Search Categories" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tSU-Fd-JBe">
+                                                    <rect key="frame" x="0.0" y="5" width="343" height="34"/>
+                                                    <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <textInputTraits key="textInputTraits"/>
+                                                </searchBar>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailing" secondItem="nAp-de-uuo" secondAttribute="trailing" constant="8" id="6ER-6k-tNb"/>
-                                                <constraint firstAttribute="bottom" secondItem="tSU-Fd-JBe" secondAttribute="bottom" id="Ko8-Tn-n5O"/>
+                                                <constraint firstAttribute="bottom" secondItem="tSU-Fd-JBe" secondAttribute="bottom" constant="5" id="Ko8-Tn-n5O"/>
                                                 <constraint firstItem="nAp-de-uuo" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" constant="7" id="agv-9Q-ZSp"/>
                                                 <constraint firstAttribute="trailing" secondItem="tSU-Fd-JBe" secondAttribute="trailing" id="dPc-q3-jsx"/>
                                                 <constraint firstAttribute="bottom" secondItem="nAp-de-uuo" secondAttribute="bottom" constant="7" id="hDN-vf-r5A"/>
                                                 <constraint firstItem="tSU-Fd-JBe" firstAttribute="leading" secondItem="umN-7M-EIE" secondAttribute="leading" id="mL7-dg-jEl"/>
-                                                <constraint firstItem="tSU-Fd-JBe" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" id="mhr-Xu-cbW"/>
+                                                <constraint firstItem="tSU-Fd-JBe" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" constant="5" id="mhr-Xu-cbW"/>
                                             </constraints>
                                         </view>
                                         <constraints>
