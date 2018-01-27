@@ -292,6 +292,13 @@
                                             <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
+                                                <searchBar contentMode="redraw" placeholder="Search Categories" translatesAutoresizingMaskIntoConstraints="NO" id="tSU-Fd-JBe">
+                                                    <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="44" id="dLb-Wa-cC7"/>
+                                                    </constraints>
+                                                    <textInputTraits key="textInputTraits"/>
+                                                </searchBar>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Categories" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KNe-2a-rMp">
                                                     <rect key="frame" x="8" y="8" width="121" height="28"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -309,8 +316,12 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailing" secondItem="nAp-de-uuo" secondAttribute="trailing" constant="8" id="6ER-6k-tNb"/>
+                                                <constraint firstAttribute="bottom" secondItem="tSU-Fd-JBe" secondAttribute="bottom" id="Ko8-Tn-n5O"/>
                                                 <constraint firstItem="nAp-de-uuo" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" constant="7" id="agv-9Q-ZSp"/>
+                                                <constraint firstAttribute="trailing" secondItem="tSU-Fd-JBe" secondAttribute="trailing" id="dPc-q3-jsx"/>
                                                 <constraint firstAttribute="bottom" secondItem="nAp-de-uuo" secondAttribute="bottom" constant="7" id="hDN-vf-r5A"/>
+                                                <constraint firstItem="tSU-Fd-JBe" firstAttribute="leading" secondItem="umN-7M-EIE" secondAttribute="leading" id="mL7-dg-jEl"/>
+                                                <constraint firstItem="tSU-Fd-JBe" firstAttribute="top" secondItem="umN-7M-EIE" secondAttribute="top" id="mhr-Xu-cbW"/>
                                             </constraints>
                                         </view>
                                         <constraints>
@@ -559,6 +570,8 @@
                         <outlet property="categoriesBtn" destination="tHR-zt-5NL" id="zAf-oE-VZO"/>
                         <outlet property="categoriesDoneButton" destination="lQE-hA-i6O" id="P1o-nN-Htz"/>
                         <outlet property="categoriesHeaderView" destination="EfU-UY-Igr" id="euT-ud-Y4e"/>
+                        <outlet property="categoriesSearchBar" destination="tSU-Fd-JBe" id="an4-RN-T5Z"/>
+                        <outlet property="categoriesSearchButton" destination="nAp-de-uuo" id="UWc-P6-nqY"/>
                         <outlet property="categoriesTableView" destination="kXa-Nw-aqN" id="AyR-3o-S8O"/>
                         <outlet property="categoriesTitle" destination="KNe-2a-rMp" id="EBY-5l-eGW"/>
                         <outlet property="categoryAndSortByContainerView" destination="XMq-yN-gFF" id="HVu-Az-1SL"/>
@@ -568,7 +581,6 @@
                         <outlet property="loadingIndicator" destination="wXZ-Ny-sup" id="KRO-Cm-uLx"/>
                         <outlet property="loadingText" destination="BcD-fb-DNe" id="Nec-N7-aAt"/>
                         <outlet property="loadingView" destination="edi-ha-GKe" id="hLy-D3-BFP"/>
-                        <outlet property="searchCategories" destination="nAp-de-uuo" id="UWc-P6-nqY"/>
                         <outlet property="settingsBtn" destination="aq1-5z-p0b" id="EHS-qI-Z2M"/>
                         <outlet property="sortByHeaderView" destination="xeO-o0-93H" id="tdU-ds-bMX"/>
                         <outlet property="sortByTableView" destination="DIv-xG-puS" id="Lnb-Rw-syH"/>
@@ -608,7 +620,7 @@
                                             </constraints>
                                         </imageView>
                                         <view userInteractionEnabled="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="k1C-Qp-Slh" customClass="CosmosView" customModule="Cosmos">
-                                            <rect key="frame" x="8" y="198.5" width="327" height="13.5"/>
+                                            <rect key="frame" x="8" y="191" width="327" height="21"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="color" keyPath="emptyColor">
@@ -631,7 +643,7 @@
                                             </userDefinedRuntimeAttributes>
                                         </view>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="umR-h9-UBl">
-                                            <rect key="frame" x="8" y="166" width="327" height="27.5"/>
+                                            <rect key="frame" x="8" y="166" width="327" height="20"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="23"/>
                                             <nil key="highlightedColor"/>
                                         </label>

@@ -20,9 +20,7 @@ extension Notification.Name {
 extension UIBarButtonSystemItem {
     
     func image() -> UIImage? {
-        let tempItem = UIBarButtonItem(barButtonSystemItem: self,
-                                       target: nil,
-                                       action: nil)
+        let tempItem = UIBarButtonItem(barButtonSystemItem: self, target: nil, action: nil)
         
         // add to toolbar and render it
         let bar = UIToolbar()
@@ -56,24 +54,6 @@ extension UIView {
         gradient.locations = locations
         self.layer.insertSublayer(gradient, at: 0)
     }
-    
-}
-
-extension UIColor {
-    
-    static let aquafina = UIColor(red:0.03, green:0.93, blue:0.84, alpha:1.0)
-    static let hotPonk = UIColor(red:1.00, green:0.38, blue:0.68, alpha:1.0)
-    static let grayTwoPointO = UIColor(red:0.44, green:0.44, blue:0.44, alpha:1.0)
-    
-    static let websiteBlue = UIColor(red:0.00, green:0.48, blue:1.00, alpha:1.0)
-    static let favouritesPink = UIColor(red:1.00, green:0.20, blue:0.61, alpha:1.0)
-    static let reviewsYellow = UIColor(red:1.00, green:0.58, blue:0.00, alpha:1.0)
-    static let directionsRed = UIColor(red:1.00, green:0.24, blue:0.24, alpha:1.0)
-    static let callGreen = UIColor(red:0.09, green:0.86, blue:0.07, alpha:1.0)
-    
-    static let silverBlue = UIColor(red:0.96, green:0.96, blue:0.98, alpha:1.0)
-    static let darkSilverBlue = UIColor(red:0.89, green:0.92, blue:0.95, alpha:1.0)
-    static let blue2 = UIColor(red:0.13, green:0.53, blue:1.00, alpha:1.0)
     
 }
 
@@ -142,7 +122,7 @@ extension String {
     
 }
 
-class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate, UISearchResultsUpdating {
+class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate {
     
     @IBOutlet var thatsAllFolks: UILabel!
     @IBOutlet var loadingView: UIView!
@@ -154,7 +134,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var categoriesHeaderView: UIVisualEffectView!
     @IBOutlet var categoriesTitle: UILabel!
     @IBOutlet var categoriesDoneButton: UIButton!
-    @IBOutlet var searchCategories: UIButton!
+    @IBOutlet var categoriesSearchBar: UISearchBar!
+    @IBOutlet var categoriesSearchButton: UIButton!
     @IBOutlet var sortByHeaderView: UIVisualEffectView!
     @IBOutlet var sortByTableView: UITableView!
     
@@ -169,9 +150,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     var feedbackGenerator = UIImpactFeedbackGenerator()
     var defaults = UserDefaults.standard
-    
-    var resultSearchController = UISearchController(searchResultsController: nil)
-    
+        
     var divisor: CGFloat!
     var categories = [String]()
     var filteredCategories = [String]()
@@ -595,30 +574,15 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         // search bar
         
-        searchCategories.tintColor = UIColor.white
-        searchCategories.setImage(UIBarButtonSystemItem.search.image(), for: .normal)
-        searchCategories.addTarget(self, action: #selector(openSearchBar), for: .touchUpInside)
+        categoriesSearchButton.tintColor = UIColor.white
+        categoriesSearchButton.setImage(UIBarButtonSystemItem.search.image(), for: .normal)
+        categoriesSearchButton.addTarget(self, action: #selector(openSearchBar), for: .touchUpInside)
         
-        resultSearchController.searchBar.delegate = self
-        resultSearchController.searchResultsUpdater = self
-        resultSearchController.dimsBackgroundDuringPresentation = false
-        resultSearchController.searchBar.tintColor = UIColor.white
-        resultSearchController.searchBar.searchBarStyle = UISearchBarStyle.minimal
-        definesPresentationContext = true
-        
-        categoriesHeaderView.contentView.addSubview(resultSearchController.searchBar)
-        // resultSearchController constraints
-        /*
-        resultSearchController.searchBar.leadingAnchor.constraint(equalTo: categoriesHeaderView.contentView.leadingAnchor, constant: 0).isActive = true
-        resultSearchController.searchBar.trailingAnchor.constraint(equalTo: categoriesHeaderView.contentView.trailingAnchor, constant: 0).isActive = true
-        resultSearchController.searchBar.topAnchor.constraint(equalTo: categoriesHeaderView.contentView.topAnchor, constant: 0).isActive = true
-        resultSearchController.searchBar.bottomAnchor.constraint(equalTo: categoriesHeaderView.contentView.bottomAnchor, constant: 0).isActive = true
-        resultSearchController.searchBar.heightAnchor.constraint(equalTo: categoriesHeaderView.contentView.heightAnchor, constant: 0)
-        */
-        resultSearchController.searchBar.sizeToFit()
-        resultSearchController.searchBar.frame.size.width = categoriesHeaderView.contentView.frame.size.width
-        
-        resultSearchController.searchBar.alpha = 0
+        categoriesSearchBar.delegate = self
+        categoriesSearchBar.showsCancelButton = true
+        categoriesSearchBar.alpha = 0 // used to animate it to open and close
+        categoriesSearchBar.searchBarStyle = .minimal
+        categoriesSearchBar.tintColor = UIColor.white
         
         likeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
         dislikeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
@@ -849,7 +813,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         self.restaurantIndex = 0
         self.restaurants.removeAll()
         self.cards.removeAll()
-        resultSearchController.isActive = false
+        categoriesSearchBar.resignFirstResponder() // get rid of keyboard
         openCategories()
         loadingAnimator(.unhide)
         self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
@@ -883,6 +847,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                         if let newArr = newArr {
                             self.restaurants = newArr
                         }
+                        
+                        // filter out session favourites too
+                        let mapped = self.likes.map( { $0.id } )
+                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                        self.restaurants = filteredRestaurants
                         
                         DispatchQueue.main.async {
                             self.resetCards()
@@ -1182,28 +1151,33 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func openSearchBar() {
         
-        if resultSearchController.searchBar.alpha == 0 {
+        if categoriesSearchBar.alpha == 0 {
             
-            UIView.animate(withDuration: 0.2, animations: {
+            // open search bar here
+            UIView.animate(withDuration: 0.3, animations: {
+                
                 self.categoriesTitle.alpha = 0
-                self.searchCategories.alpha = 0
-                self.resultSearchController.searchBar.alpha = 1
+                self.categoriesSearchButton.alpha = 0
+                self.categoriesSearchBar.alpha = 1
+                
             })
             
-            self.resultSearchController.searchBar.becomeFirstResponder()
+            self.categoriesSearchBar.becomeFirstResponder()
             
         } else {
             
-            UIView.animate(withDuration: 0.2, animations: {
+            // close search bar here
+            UIView.animate(withDuration: 0.3, animations: {
+                
                 self.categoriesTitle.alpha = 1
-                self.searchCategories.alpha = 1
-                self.resultSearchController.searchBar.alpha = 0
+                self.categoriesSearchButton.alpha = 1
+                self.categoriesSearchBar.alpha = 0
+                
             })
             
-            self.resultSearchController.searchBar.resignFirstResponder()
+            self.categoriesSearchBar.resignFirstResponder()
             
         }
-        
         
     }
     
@@ -1694,7 +1668,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         if tableView == categoriesTableView {
             
-            if resultSearchController.isActive {
+            if categoriesSearchBar.alpha == 1 {
                 self.selectedCategory = self.filteredCategories[indexPath.row]
             } else {
                 self.selectedCategory = self.categories[indexPath.row]
@@ -1721,7 +1695,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         if tableView == categoriesTableView {
             
-            if resultSearchController.isActive {
+            if categoriesSearchBar.alpha == 1 {
                 return filteredCategories.count
             } else {
                 return self.categories.count
@@ -1741,7 +1715,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
             
-            if resultSearchController.isActive {
+            if categoriesSearchBar.alpha == 1 {
                 cell.categoryLabel.text = filteredCategories[indexPath.row]
             } else {
                 cell.categoryLabel.text = categories[indexPath.row]
@@ -1767,10 +1741,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     // MARK: - UISearchBar Functions
     
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
-        resultSearchController.searchBar.sizeToFit()
-        resultSearchController.searchBar.frame.size.width = categoriesHeaderView.contentView.frame.size.width
+        filterResults(searchText)
         
     }
     
@@ -1780,12 +1753,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             return category.lowercased().contains(searchText.lowercased())
         })
         self.categoriesTableView.reloadData()
-        
-    }
-    
-    func updateSearchResults(for searchController: UISearchController) {
-        
-        filterResults(searchController.searchBar.text!)
         
     }
     
