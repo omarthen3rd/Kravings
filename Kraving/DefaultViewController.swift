@@ -11,6 +11,11 @@ import CoreLocation
 import SwiftyJSON
 import Alamofire
 import DeviceKit
+import NotificationCenter
+
+extension Notification.Name {
+    static let applicationWillResignActive = Notification.Name(rawValue: "applicationWillResignActive")
+}
 
 extension UIBarButtonSystemItem {
     
@@ -149,7 +154,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var categoriesHeaderView: UIVisualEffectView!
     @IBOutlet var categoriesTitle: UILabel!
     @IBOutlet var categoriesDoneButton: UIButton!
-    @IBOutlet var categoriesSearchBar: UISearchBar!
     @IBOutlet var searchCategories: UIButton!
     @IBOutlet var sortByHeaderView: UIVisualEffectView!
     @IBOutlet var sortByTableView: UITableView!
@@ -517,6 +521,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func setupView() {
         
+        // notification observer
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateDislikes), name: .applicationWillResignActive, object: nil)
+        
         plusDevices = [.iPhone6Plus, .iPhone7Plus, .iPhone8Plus, .iPhoneX]
         
         self.thatsAllFolks.text = "That's All Folks!"
@@ -588,18 +595,29 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         // search bar
         
+        searchCategories.tintColor = UIColor.white
         searchCategories.setImage(UIBarButtonSystemItem.search.image(), for: .normal)
         searchCategories.addTarget(self, action: #selector(openSearchBar), for: .touchUpInside)
         
         resultSearchController.searchBar.delegate = self
         resultSearchController.searchResultsUpdater = self
         resultSearchController.dimsBackgroundDuringPresentation = false
-        resultSearchController.searchBar.sizeToFit()
+        resultSearchController.searchBar.tintColor = UIColor.white
         resultSearchController.searchBar.searchBarStyle = UISearchBarStyle.minimal
         definesPresentationContext = true
         
-        resultSearchController.searchBar.sizeToFit()
         categoriesHeaderView.contentView.addSubview(resultSearchController.searchBar)
+        // resultSearchController constraints
+        /*
+        resultSearchController.searchBar.leadingAnchor.constraint(equalTo: categoriesHeaderView.contentView.leadingAnchor, constant: 0).isActive = true
+        resultSearchController.searchBar.trailingAnchor.constraint(equalTo: categoriesHeaderView.contentView.trailingAnchor, constant: 0).isActive = true
+        resultSearchController.searchBar.topAnchor.constraint(equalTo: categoriesHeaderView.contentView.topAnchor, constant: 0).isActive = true
+        resultSearchController.searchBar.bottomAnchor.constraint(equalTo: categoriesHeaderView.contentView.bottomAnchor, constant: 0).isActive = true
+        resultSearchController.searchBar.heightAnchor.constraint(equalTo: categoriesHeaderView.contentView.heightAnchor, constant: 0)
+        */
+        resultSearchController.searchBar.sizeToFit()
+        resultSearchController.searchBar.frame.size.width = categoriesHeaderView.contentView.frame.size.width
+        
         resultSearchController.searchBar.alpha = 0
         
         likeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
@@ -831,6 +849,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         self.restaurantIndex = 0
         self.restaurants.removeAll()
         self.cards.removeAll()
+        resultSearchController.isActive = false
         openCategories()
         loadingAnimator(.unhide)
         self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
@@ -1116,16 +1135,29 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func updateDislikes() {
         
+        print("ran updateDislikes")
+        
         loadDislikes { (dislikesArray) in
             
-            guard var dislikesArr = dislikesArray else { return }
+            if var dislikesArr = dislikesArray {
+                
+                // dislikes exist
+                dislikesArr.append(contentsOf: self.dislikes)
+                let newArr = self.removeDuplicates(array: dislikesArr)
+                let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: newArr)
+                self.defaults.set(encodedData, forKey: "dislikes")
+                self.defaults.synchronize()
+                
+            } else {
+                
+                // dislikes do not exist
+                
+                let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: self.dislikes)
+                self.defaults.set(encodedData, forKey: "dislikes")
+                self.defaults.synchronize()
+                
+            }
             
-            // dislikes exist
-            dislikesArr.append(contentsOf: self.dislikes)
-            let newArr = self.removeDuplicates(array: dislikesArr)
-            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: newArr)
-            self.defaults.set(encodedData, forKey: "dislikes")
-            self.defaults.synchronize()
             
         }
         
@@ -1158,6 +1190,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 self.resultSearchController.searchBar.alpha = 1
             })
             
+            self.resultSearchController.searchBar.becomeFirstResponder()
+            
         } else {
             
             UIView.animate(withDuration: 0.2, animations: {
@@ -1166,7 +1200,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 self.resultSearchController.searchBar.alpha = 0
             })
             
+            self.resultSearchController.searchBar.resignFirstResponder()
+            
         }
+        
         
     }
     
@@ -1207,10 +1244,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                                 
                                 if let arr = arr {
                                     
+                                    print("dislikes exist")
+                                    
                                     let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
                                     let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
                                     
                                     self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                                    
+                                } else {
+                                    
+                                    print("dislikes do not exist")
                                     
                                 }
                                 
@@ -1651,7 +1694,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         if tableView == categoriesTableView {
             
-            self.selectedCategory = self.categories[indexPath.row]
+            if resultSearchController.isActive {
+                self.selectedCategory = self.filteredCategories[indexPath.row]
+            } else {
+                self.selectedCategory = self.categories[indexPath.row]
+            }
             
             self.handleTableViewTap()
             self.shouldSelectCell = false
@@ -1674,7 +1721,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         if tableView == categoriesTableView {
             
-            return self.categories.count
+            if resultSearchController.isActive {
+                return filteredCategories.count
+            } else {
+                return self.categories.count
+            }
             
         } else {
             
@@ -1690,7 +1741,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
             
-            cell.categoryLabel.text = categories[indexPath.row]
+            if resultSearchController.isActive {
+                cell.categoryLabel.text = filteredCategories[indexPath.row]
+            } else {
+                cell.categoryLabel.text = categories[indexPath.row]
+            }
             
             return cell
             
@@ -1711,6 +1766,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     }
     
     // MARK: - UISearchBar Functions
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        
+        resultSearchController.searchBar.sizeToFit()
+        resultSearchController.searchBar.frame.size.width = categoriesHeaderView.contentView.frame.size.width
+        
+    }
     
     func filterResults(_ searchText: String) {
         
@@ -1740,10 +1802,14 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         if segue.identifier == "settingsSegue" {
             
+            self.updateDislikes()
+            
             let destVC = (segue.destination as! UINavigationController).topViewController as? SettingsTableViewController
             destVC?.delegate = self
             
         } else if segue.identifier == "favouritesSegue" {
+            
+            self.updateDislikes()
             
             let destVC = (segue.destination as! UINavigationController).topViewController as? FavouritesViewController
             destVC?.likes = self.likes

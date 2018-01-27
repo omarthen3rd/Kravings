@@ -100,7 +100,7 @@ class Restaurant: NSObject, NSCoding {
     }
     
     deinit {
-        print("\(name):\(id) is being deinitialized")
+        print("")
     }
     
     func encode(with aCoder: NSCoder) {
