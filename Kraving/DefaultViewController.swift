@@ -1763,6 +1763,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         
         openSearchBar()
+        self.categoriesSearchBar.text = "" // clears potential remaining text
+        self.categoriesTableView.reloadData() // get rid of potential filtered searches remaining in table view
         
     }
 

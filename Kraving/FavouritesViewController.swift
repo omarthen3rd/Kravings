@@ -16,14 +16,18 @@ protocol RemoveFromMainArray {
     func removeWith(_ indexToRemove: Int)
     
 }
+enum RestaurantSource {
+    
+    case likes, longTermFavourites, dislikes
+    
+}
 
 class FavouritesViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout, RemoveFromArray {
     
-    var longTermFavourites = [Restaurant]()
-    var longTermFavouritesFiltered = [Restaurant]()
-    
     var likes = [Restaurant]()
-    var likesFiltered = [Restaurant]()
+    
+    var restaurants = [Restaurant]()
+    var filteredRestaurants = [Restaurant]()
     
     var blurEffectView = UIVisualEffectView()
     var noDataLabel = UILabel()
@@ -32,13 +36,12 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     var removeDelegate: RemoveFromMainArray?
     var indexToRemove: Int?
     let device = Device()
+    var arrSource: RestaurantSource = .likes
     
     var resultSearchController = UISearchController(searchResultsController: nil)
     var segment = UISegmentedControl()
     
     var searchButton = UIBarButtonItem()
-    
-    var shouldChangeToLongTerm = false
     
     @IBAction func closeBtn(_ sender: Any) {
         
@@ -69,7 +72,7 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         }
         
         setupView()
-        loadLongTermFavourites()
+        loadLikes()
         
     }
 
@@ -77,7 +80,9 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         super.viewDidAppear(animated)
         
         DispatchQueue.main.async {
-            self.loadLongTermFavourites()
+            // self.loadLikes()
+            // self.loadLongTermFavourites()
+            // self.loadDislikes()
             self.collectionView?.collectionViewLayout.invalidateLayout()
             self.collectionView?.reloadData()
         }
@@ -105,7 +110,7 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         resultSearchController.searchBar.searchBarStyle = UISearchBarStyle.minimal
         definesPresentationContext = true
         
-        segment = UISegmentedControl(items: ["Session", "Long Term"])
+        segment = UISegmentedControl(items: ["Session", "Long Term", "Dislikes"])
         segment.sizeToFit()
         segment.selectedSegmentIndex = 0
         segment.addTarget(self, action: #selector(indexChanged(_:)), for: .valueChanged)
@@ -122,6 +127,12 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         
     }
     
+    func loadLikes() {
+        
+        self.restaurants = likes
+        
+    }
+    
     func loadLongTermFavourites() {
         
         let favouritesExist = defaults.object(forKey: "favourites") != nil
@@ -132,7 +143,29 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
                 
                 if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
                     
-                    self.longTermFavourites = decodedRestaurants
+                    // restaurant arr is now longTermFavourites
+                    self.restaurants = decodedRestaurants
+                    
+                }
+                
+            }
+            
+        }
+        
+    }
+    
+    func loadDislikes() {
+        
+        let dislikesExist = defaults.object(forKey: "dislikes") != nil
+        
+        if dislikesExist {
+            
+            if let decodedArr = defaults.object(forKey: "dislikes") as? Data {
+                
+                if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                    
+                    // restaurant arr is now dislikes
+                    self.restaurants = decodedRestaurants
                     
                 }
                 
@@ -207,21 +240,10 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     
     func filterContentForSearchText(searchText: String) {
         
-        if shouldChangeToLongTerm {
-            
-            longTermFavouritesFiltered = longTermFavourites.filter({ (restaurant) -> Bool in
-                return restaurant.name.lowercased().contains(searchText.lowercased())
-            })
-            self.collectionView?.reloadData()
-            
-        } else {
-            
-            likesFiltered = likes.filter({ (restaurant) -> Bool in
-                return restaurant.name.lowercased().contains(searchText.lowercased())
-            })
-            self.collectionView?.reloadData()
-            
-        }
+        filteredRestaurants = restaurants.filter({ (restaurant) -> Bool in
+            return restaurant.name.lowercased().contains(searchText.lowercased())
+        })
+        self.collectionView?.reloadData()
         
     }
 
@@ -240,19 +262,11 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
                 
                 if resultSearchController.isActive {
                     
-                    if shouldChangeToLongTerm {
-                        favourite = longTermFavouritesFiltered[indexPath.row]
-                    } else {
-                        favourite = likesFiltered[indexPath.row]
-                    }
+                    favourite = filteredRestaurants[indexPath.row]
                     
                 } else {
                     
-                    if shouldChangeToLongTerm {
-                        favourite = longTermFavourites[indexPath.row]
-                    } else {
-                        favourite = likes[indexPath.row]
-                    }
+                    favourite = restaurants[indexPath.row]
                     
                 }
                 
@@ -270,33 +284,29 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         
-        if shouldChangeToLongTerm {
+        if restaurants.count > 0 {
             
-            if longTermFavourites.count > 0 {
-                
-                loadSadView("")
-                return 1
-                
-            } else {
-                
-                loadSadView("No Long Term Favourites Yet")
-                return 0
-                
-            }
+            loadSadView("")
+            return 1
             
         } else {
             
-            if likes.count > 0 {
+            var message = ""
+            
+            switch arrSource {
+            case .likes:
+                message = "No Favourites In This Session"
                 
-                loadSadView("")
-                return 1
-                
-            } else {
-                
-                loadSadView("No Favourites In This Session")
-                return 0
+            case .dislikes:
+                message = "No Dislikes Yet"
+            
+            case .longTermFavourites:
+                message = "No Long Term Favourites Yet"
                 
             }
+            
+            self.loadSadView(message)
+            return 0
             
         }
         
@@ -306,17 +316,9 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         if resultSearchController.isActive {
-            if shouldChangeToLongTerm {
-                return longTermFavouritesFiltered.count
-            } else {
-                return likesFiltered.count
-            }
+            return filteredRestaurants.count
         } else {
-            if shouldChangeToLongTerm {
-                return longTermFavourites.count
-            } else {
-                return likes.count
-            }
+            return restaurants.count
         }
         
     }
@@ -328,19 +330,11 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         
         if resultSearchController.isActive {
             
-            if shouldChangeToLongTerm {
-                favourite = longTermFavouritesFiltered[indexPath.row]
-            } else {
-                favourite = likesFiltered[indexPath.row]
-            }
+            favourite = filteredRestaurants[indexPath.row]
             
         } else {
             
-            if shouldChangeToLongTerm {
-                favourite = longTermFavourites[indexPath.row]
-            } else {
-                favourite = likes[indexPath.row]
-            }
+            favourite = restaurants[indexPath.row]
             
         }
         
@@ -371,16 +365,28 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         switch sender.selectedSegmentIndex {
         case 0:
             // session favourites
-            shouldChangeToLongTerm = false
+            self.arrSource = .likes
+            self.restaurants.removeAll()
             DispatchQueue.main.async {
+                self.loadLikes()
                 self.collectionView?.collectionViewLayout.invalidateLayout()
                 self.collectionView?.reloadData()
             }
         case 1:
             // long term favourites
-            shouldChangeToLongTerm = true
+            self.arrSource = .longTermFavourites
+            self.restaurants.removeAll()
             DispatchQueue.main.async {
                 self.loadLongTermFavourites()
+                self.collectionView?.collectionViewLayout.invalidateLayout()
+                self.collectionView?.reloadData()
+            }
+        case 2:
+            // dislikes
+            self.arrSource = .dislikes
+            self.restaurants.removeAll()
+            DispatchQueue.main.async {
+                self.loadDislikes()
                 self.collectionView?.collectionViewLayout.invalidateLayout()
                 self.collectionView?.reloadData()
             }
@@ -402,7 +408,9 @@ extension FavouritesViewController: UISearchResultsUpdating, UISearchBarDelegate
         
         searchBar.resignFirstResponder()
         navigationItem.titleView = segment
-        navigationItem.leftBarButtonItem = searchButton
+        if device.systemVersion < "11.0" {
+            navigationItem.leftBarButtonItem = searchButton
+        }
         
     }
     
