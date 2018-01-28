@@ -272,6 +272,7 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
                 
                 destVC.restaurant = favourite
                 destVC.removeDelegate = self
+                destVC.restaurantSource = arrSource
                 destVC.shouldHideStatus = false
                 
             }

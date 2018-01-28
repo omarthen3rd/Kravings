@@ -90,6 +90,7 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
     var olderDevices = [Device]()
     
     var shouldHideStatus: Bool = false
+    var restaurantSource: RestaurantSource = .likes
     
     var removeDelegate: RemoveFromArray?
     var restaurant: Restaurant? {
@@ -895,9 +896,7 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
             defaults.set(encodedData, forKey: "favourites")
             defaults.synchronize()
             
-            showAlertView(false)
-            
-            callRemoveDelegate()
+            callRemoveDelegate() // remove from session favourites/likes array in FavouritesViewController (collection view)
             
         } else {
             
@@ -910,8 +909,6 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
                         // not in favourites -> add to favourites
                         
                         decodedRestaurants.append(restaurant)
-                        
-                        showAlertView(false)
                         
                     }
                     
@@ -929,6 +926,56 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
         
     }
     
+    func addToDislikes() {
+        
+        guard let restaurant = restaurant else { return }
+        if defaults.object(forKey: "dislikes") == nil {
+            
+            // no dislikes, create arr, encode and replace
+            
+            var dislikeRestaurants = [Restaurant]()
+            dislikeRestaurants.append(restaurant)
+            
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: dislikeRestaurants)
+            defaults.set(encodedData, forKey: "dislikes")
+            defaults.synchronize()
+            
+        } else {
+            
+            guard let decodedArr = defaults.object(forKey: "dislikes") as? Data else { return }
+            guard var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] else { return }
+            
+            if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
+                
+                // not in dislikes -> add to dislikes
+                
+                decodedRestaurants.append(restaurant)
+                
+            }
+            let encode: Data = NSKeyedArchiver.archivedData(withRootObject: decodedRestaurants)
+            defaults.set(encode, forKey: "dislikes")
+            defaults.synchronize()
+            
+        }
+        
+    }
+    
+    func removeFromDislikes() {
+        
+        guard let restaurant = restaurant else { return }
+        guard let decodedArr = defaults.object(forKey: "dislikes") as? Data else { return }
+        guard let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] else { return }
+        
+        let newRestaurants = decodedRestaurants.filter{ !($0.id == restaurant.id) }
+        // return everything that doesn't match the current restaurant ID
+        // (i.e the one we want deleted)
+        
+        let encode: Data = NSKeyedArchiver.archivedData(withRootObject: newRestaurants)
+        defaults.set(encode, forKey: "dislikes")
+        defaults.synchronize()
+        
+    }
+    
     func removeFromLongTermFavourites() {
         
         guard let restaurant = restaurant else { return }
@@ -938,12 +985,10 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
         let newRestaurants = decodedRestaurants.filter{ !($0.id == restaurant.id) }
         // return everything that doesn't match the current restaurant ID
         // (i.e the one we want deleted)
-
+        
         let encode: Data = NSKeyedArchiver.archivedData(withRootObject: newRestaurants)
         defaults.set(encode, forKey: "favourites")
         defaults.synchronize()
-        
-        self.navigationController?.popViewController(animated: true)
         
     }
     
@@ -982,7 +1027,7 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
         
     }
     
-    func showAlertView(_ isFavourite: Bool) {
+    func showAlertView(withMessage message: String, _ image: UIImage) {
         
         let closeBlur = UIViewPropertyAnimator(duration: 0.2, curve: .easeOut) {
             
@@ -1013,20 +1058,12 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
         self.alertView.alpha = 0
         self.alertView.isHidden = false
         
-        if isFavourite {
-            
-            alertViewImage.image = UIImage(named: "favouritesAlreadyIn")?.withRenderingMode(.alwaysTemplate)
-            alertViewLabel.text = "Removed From Favourites"
-            self.alertView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-            blurAnimator.startAnimation()
-            
-        } else {
-            
-            alertViewImage.image = UIImage(named: "favouritesAddedIn")?.withRenderingMode(.alwaysTemplate)
-            alertViewLabel.text = "Added To Long Term Favourites"
-            blurAnimator.startAnimation()
-            
-        }
+        // prep before animation
+        
+        alertViewImage.image = image.withRenderingMode(.alwaysTemplate)
+        alertViewLabel.text = message
+        alertView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+        blurAnimator.startAnimation()
         
     }
     
@@ -1046,30 +1083,53 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
         
         let alertCtrl = UIAlertController(title: "Restaurant Options", message: "Here are some options for adding/removing the restaurant.", preferredStyle: .actionSheet)
         
-        var addOrRemove = UIAlertAction()
-        
-        if restaurantInFavourites() {
-            // in long term favorites
-            addOrRemove = UIAlertAction(title: "Remove From Long Term Favourites", style: .destructive, handler: { (_) in
+        switch restaurantSource {
+        case .longTermFavourites:
+            let removeFromLongTerm = UIAlertAction(title: "Remove From Long Term Favourites", style: .destructive, handler: { (_) in
+                self.showAlertView(withMessage: "Removed From Long Term Favourites", #imageLiteral(resourceName: "notHappyHeart"))
                 self.removeFromLongTermFavourites()
+                self.navigationController?.popViewController(animated: true)
             })
-        } else {
-            addOrRemove = UIAlertAction(title: "Add To Long Term Favourites", style: .default, handler: { (_) in
+            let addToDislikes = UIAlertAction(title: "Dislike", style: .destructive, handler: { (_) in
+                self.showAlertView(withMessage: "Added To Dislikes", #imageLiteral(resourceName: "notHappyHeart"))
+                self.removeFromLongTermFavourites()
+                self.addToDislikes()
+                self.navigationController?.popViewController(animated: true)
+            })
+            alertCtrl.addAction(removeFromLongTerm)
+            alertCtrl.addAction(addToDislikes)
+            
+        case .likes:
+            let removeFromSession = UIAlertAction(title: "Remove From Session Favourites", style: .destructive, handler: { (_) in
+                self.showAlertView(withMessage: "Removed From Session Favourites", #imageLiteral(resourceName: "notHappyHeart"))
+                self.callRemoveDelegate() // removes from FavouritesViewController (collection view) and then goes to back to preview view
+            })
+            let addToLongTerm = UIAlertAction(title: "Add To Long Term Favourites", style: .default, handler: { (_) in
+                self.showAlertView(withMessage: "Added To Long Term Favourites", #imageLiteral(resourceName: "happyHeart"))
                 self.addToLongTermFavourites()
             })
-        }
-        
-        var removeFromSessionFavourites = UIAlertAction()
-        if !restaurantInFavourites() {
-            removeFromSessionFavourites = UIAlertAction(title: "Remove From Session Favourites", style: .destructive, handler: { (_) in
-                self.callRemoveDelegate()
+            let addToDislikes = UIAlertAction(title: "Dislike", style: .destructive, handler: { (_) in
+                self.showAlertView(withMessage: "Added To Dislikes", #imageLiteral(resourceName: "notHappyHeart"))
+                self.removeFromLongTermFavourites()
+                self.addToDislikes()
+                self.navigationController?.popViewController(animated: true)
             })
-            alertCtrl.addAction(removeFromSessionFavourites)
+            alertCtrl.addAction(addToLongTerm)
+            alertCtrl.addAction(removeFromSession)
+            alertCtrl.addAction(addToDislikes)
+            
+        case .dislikes:
+            
+            let removeFromDislikes = UIAlertAction(title: "Remove From Dislikes", style: .destructive, handler: { (_) in
+                self.showAlertView(withMessage: "Removed From Dislikes", #imageLiteral(resourceName: "happyHeart"))
+                self.removeFromDislikes()
+                self.navigationController?.popViewController(animated: true)
+            })
+            alertCtrl.addAction(removeFromDislikes)
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
-        alertCtrl.addAction(addOrRemove)
         alertCtrl.addAction(cancelAction)
         
         self.present(alertCtrl, animated: true, completion: nil)
