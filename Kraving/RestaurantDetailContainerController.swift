@@ -1112,6 +1112,7 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
                 self.showAlertView(withMessage: "Added To Dislikes", #imageLiteral(resourceName: "notHappyHeart"))
                 self.removeFromLongTermFavourites()
                 self.addToDislikes()
+                self.callRemoveDelegate() 
                 self.navigationController?.popViewController(animated: true)
             })
             alertCtrl.addAction(addToLongTerm)

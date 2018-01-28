@@ -128,6 +128,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var loadingView: UIView!
     @IBOutlet var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet var loadingText: UILabel!
+    @IBOutlet var connectionTimerView: UIView!
+    @IBOutlet var connectionTimerLabel: UILabel!
     
     @IBOutlet var categoryAndSortByContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
@@ -159,7 +161,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var selectedSortBy = String() // initialized in setupView()
     var shouldSelectCell = false
     
-    var accessToken = String()
+    var connectionTimer = Timer()
+    var counter = 0.0
     
     var restaurants = [Restaurant]()
     var likes = [Restaurant]()
@@ -268,7 +271,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         self.thatsAllFolks.text = "That's All Folks!"
         self.selectedSortBy = "best_match"
         self.loadingIndicator.hidesWhenStopped = true
-        loadingAnimator(.unhide)
+        connectionTimerView.isHidden = true
+        loadingAnimator(.unhide) // unhide loading view
         
         self.categoriesTableView.dataSource = self
         self.categoriesTableView.delegate = self
@@ -284,7 +288,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
         } else {
             
-            setInsets(18) // insets for main 3 buttons, increase number to make them smaller
+            setInsets(20) // insets for main 3 buttons, increase number to make them smaller
             likeBtn.layer.cornerRadius = 20
             dislikeBtn.layer.cornerRadius = 20
             
@@ -293,8 +297,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         let image1S = #imageLiteral(resourceName: "btn_categories_selected").withRenderingMode(.alwaysTemplate)
         let image2S = #imageLiteral(resourceName: "btn_openFavourites_selected").withRenderingMode(.alwaysTemplate)
         let image3S = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
-        let image4S = #imageLiteral(resourceName: "btn_addToFavourites_selected").withRenderingMode(.alwaysTemplate)
-        let image5S = #imageLiteral(resourceName: "btn_removeFavourites_selected").withRenderingMode(.alwaysTemplate)
+        let image4S = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
+        let image5S = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
         
         categoriesBtn.setImage(image1S, for: .normal)
         categoriesBtn.setImage(image1S, for: UIControlState.highlighted)
@@ -350,7 +354,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         categoriesBtn.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
         categoriesDoneButton.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
-        
+                
         if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
             
             // location services is main source
@@ -429,13 +433,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         if device.isOneOf(plusDevices) {
             
-            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 16, left: 0, bottom: 16, right: 0)
-            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 16, left: 0, bottom: 16, right: 0)
+            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 14, left: 0, bottom: 14, right: 0)
+            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 14, left: 0, bottom: 14, right: 0)
             
         } else {
             
-            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
-            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
+            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
             
         }
         
@@ -656,6 +660,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             }, completion: { (success) in
                 self.loadingView.isHidden = true
                 self.loadingIndicator.stopAnimating()
+                print("ran before invalidate")
+                DispatchQueue.main.async {
+                    self.connectionTimer.invalidate() // finish connectionTimer when view is being called to hide
+                }
+                self.connectionTimerView.isHidden = true
             })
             
         } else {
@@ -674,6 +683,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 self.loadingView.isHidden = false
                 self.loadingText.text = self.getLoadingLines()
                 self.loadingIndicator.startAnimating()
+                self.connectionTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.updateTimer), userInfo: nil, repeats: true) // reistablish timer
             })
             
         }
@@ -715,6 +725,30 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         return date12
         
+        
+    }
+    
+    func updateTimer() {
+        
+        counter += 1
+        
+        print(counter)
+        
+        if counter >= 9 && connectionTimerView.isHidden {
+            
+            connectionTimerView.alpha = 0
+            // transform connectionTimerView before animation
+            connectionTimerView.transform = CGAffineTransform(translationX: 0, y: (connectionTimerView.bounds.size.height + 20))
+            connectionTimerView.isHidden = false
+            
+            UIView.animate(withDuration: 0.5, animations: {
+                
+                self.connectionTimerView.alpha = 1
+                self.connectionTimerView.transform = CGAffineTransform.identity
+                
+            })
+            
+        }
         
     }
     
@@ -848,17 +882,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     }
     
     func removeDuplicates(array: [Restaurant]) -> [Restaurant] {
-        var encountered = Set<Restaurant>()
+        var encounteredMap = [String]()
         var result: [Restaurant] = []
-        for value in array {
-            if encountered.contains(value) {
+        for restaurant in array {
+            if encounteredMap.contains(restaurant.id) {
                 // Do not add a duplicate element.
-            }
-            else {
+            } else {
                 // Add value to the set.
-                encountered.insert(value)
+                encounteredMap.append(restaurant.id)
                 // ... Append the value.
-                result.append(value)
+                result.append(restaurant)
             }
         }
         return result

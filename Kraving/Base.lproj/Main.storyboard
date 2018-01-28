@@ -209,30 +209,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="edi-ha-GKe">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <subviews>
-                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="wXZ-Ny-sup">
-                                        <rect key="frame" x="169" y="393.5" width="37" height="37"/>
-                                        <color key="color" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
-                                    </activityIndicatorView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BcD-fb-DNe">
-                                        <rect key="frame" x="16" y="237" width="343" height="32.5"/>
-                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="27"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstItem="wXZ-Ny-sup" firstAttribute="top" secondItem="BcD-fb-DNe" secondAttribute="bottom" constant="124" id="B6M-Fc-iaN"/>
-                                    <constraint firstAttribute="trailing" secondItem="wXZ-Ny-sup" secondAttribute="trailing" constant="169" id="bpA-f3-3Gc"/>
-                                    <constraint firstItem="wXZ-Ny-sup" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="169" id="diQ-9m-oJd"/>
-                                    <constraint firstItem="BcD-fb-DNe" firstAttribute="top" secondItem="edi-ha-GKe" secondAttribute="top" constant="237" id="lZa-gO-AsN"/>
-                                    <constraint firstItem="BcD-fb-DNe" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="16" id="qbL-OZ-4Gc"/>
-                                    <constraint firstAttribute="trailing" secondItem="BcD-fb-DNe" secondAttribute="trailing" constant="16" id="tLO-85-t4x"/>
-                                </constraints>
-                            </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HQf-Mt-lgD">
                                 <rect key="frame" x="16" y="317.5" width="343" height="32.5"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="27"/>
@@ -539,6 +515,58 @@
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                             </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="edi-ha-GKe">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <subviews>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="wXZ-Ny-sup">
+                                        <rect key="frame" x="169" y="393.5" width="37" height="37"/>
+                                        <color key="color" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
+                                    </activityIndicatorView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BcD-fb-DNe">
+                                        <rect key="frame" x="16" y="237" width="343" height="32.5"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="27"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a2G-lw-1eH">
+                                        <rect key="frame" x="26" y="564" width="323" height="77"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Have You Tried Checking Your Internet?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYm-Vn-UeG">
+                                                <rect key="frame" x="8" y="8" width="307" height="61"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                        <color key="backgroundColor" red="0.90923665358269579" green="0.93472086211740169" blue="0.97031646573604058" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstItem="gYm-Vn-UeG" firstAttribute="leading" secondItem="a2G-lw-1eH" secondAttribute="leading" constant="8" id="2Jw-S9-qZ0"/>
+                                            <constraint firstAttribute="bottom" secondItem="gYm-Vn-UeG" secondAttribute="bottom" constant="8" id="7wa-Ju-dBy"/>
+                                            <constraint firstAttribute="trailing" secondItem="gYm-Vn-UeG" secondAttribute="trailing" constant="8" id="QmZ-Ht-o7Q"/>
+                                            <constraint firstItem="gYm-Vn-UeG" firstAttribute="top" secondItem="a2G-lw-1eH" secondAttribute="top" constant="8" id="mq3-M9-JDT"/>
+                                            <constraint firstAttribute="height" constant="77" id="p97-4g-56o"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="8"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="wXZ-Ny-sup" firstAttribute="top" secondItem="BcD-fb-DNe" secondAttribute="bottom" constant="124" id="B6M-Fc-iaN"/>
+                                    <constraint firstItem="a2G-lw-1eH" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="26" id="BmJ-yY-XT5"/>
+                                    <constraint firstAttribute="trailing" secondItem="a2G-lw-1eH" secondAttribute="trailing" constant="26" id="EZW-y5-qop"/>
+                                    <constraint firstAttribute="bottom" secondItem="a2G-lw-1eH" secondAttribute="bottom" constant="26" id="HfY-bJ-pPy"/>
+                                    <constraint firstAttribute="trailing" secondItem="wXZ-Ny-sup" secondAttribute="trailing" constant="169" id="bpA-f3-3Gc"/>
+                                    <constraint firstItem="wXZ-Ny-sup" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="169" id="diQ-9m-oJd"/>
+                                    <constraint firstItem="BcD-fb-DNe" firstAttribute="top" secondItem="edi-ha-GKe" secondAttribute="top" constant="237" id="lZa-gO-AsN"/>
+                                    <constraint firstItem="BcD-fb-DNe" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="16" id="qbL-OZ-4Gc"/>
+                                    <constraint firstAttribute="trailing" secondItem="BcD-fb-DNe" secondAttribute="trailing" constant="16" id="tLO-85-t4x"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -573,6 +601,8 @@
                         <outlet property="categoriesTableView" destination="kXa-Nw-aqN" id="AyR-3o-S8O"/>
                         <outlet property="categoriesTitle" destination="KNe-2a-rMp" id="EBY-5l-eGW"/>
                         <outlet property="categoryAndSortByContainerView" destination="XMq-yN-gFF" id="HVu-Az-1SL"/>
+                        <outlet property="connectionTimerLabel" destination="gYm-Vn-UeG" id="dSM-y6-bwh"/>
+                        <outlet property="connectionTimerView" destination="a2G-lw-1eH" id="i9v-n9-TWw"/>
                         <outlet property="dislikeBtn" destination="Tsq-28-xHJ" id="UcX-X2-Xrw"/>
                         <outlet property="favouritesBtn" destination="SIj-8j-gga" id="yM0-L2-HxE"/>
                         <outlet property="likeBtn" destination="0Ea-hS-8Xg" id="Glc-Wq-Ban"/>
