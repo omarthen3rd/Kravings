@@ -130,6 +130,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var loadingText: UILabel!
     @IBOutlet var connectionTimerView: UIView!
     @IBOutlet var connectionTimerLabel: UILabel!
+    @IBOutlet var connectionTimerButton: UIButton!
     
     @IBOutlet var categoryAndSortByContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
@@ -272,6 +273,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         self.selectedSortBy = "best_match"
         self.loadingIndicator.hidesWhenStopped = true
         connectionTimerView.isHidden = true
+        connectionTimerButton.addTarget(self, action: #selector(reloadView), for: .touchUpInside)
         loadingAnimator(.unhide) // unhide loading view
         
         self.categoriesTableView.dataSource = self
@@ -731,9 +733,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     func updateTimer() {
         
         counter += 1
-        
-        print(counter)
-        
+                
         if counter >= 9 && connectionTimerView.isHidden {
             
             connectionTimerView.alpha = 0
@@ -899,8 +899,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func updateDislikes() {
         
-        print("ran updateDislikes")
-        
         loadDislikes { (dislikesArray) in
             
             if var dislikesArr = dislikesArray {
@@ -1059,6 +1057,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             }
             
         }
+        
+    }
+    
+    func reloadView() {
+        
+        self.viewDidAppear(false)
         
     }
     

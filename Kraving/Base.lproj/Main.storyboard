@@ -529,27 +529,43 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a2G-lw-1eH">
-                                        <rect key="frame" x="26" y="564" width="323" height="77"/>
+                                        <rect key="frame" x="16" y="576" width="343" height="75"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Have You Tried Checking Your Internet?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYm-Vn-UeG">
-                                                <rect key="frame" x="8" y="8" width="307" height="61"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                <rect key="frame" x="8" y="8" width="327" height="21.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HrY-qC-Gtc">
+                                                <rect key="frame" x="126" y="37" width="91" height="30"/>
+                                                <color key="backgroundColor" red="0.0" green="0.4793452024" blue="0.99908632040000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <state key="normal" title="Retry">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <integer key="value" value="6"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" red="0.90923665358269579" green="0.93472086211740169" blue="0.97031646573604058" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstItem="gYm-Vn-UeG" firstAttribute="leading" secondItem="a2G-lw-1eH" secondAttribute="leading" constant="8" id="2Jw-S9-qZ0"/>
-                                            <constraint firstAttribute="bottom" secondItem="gYm-Vn-UeG" secondAttribute="bottom" constant="8" id="7wa-Ju-dBy"/>
+                                            <constraint firstAttribute="trailing" secondItem="HrY-qC-Gtc" secondAttribute="trailing" constant="126" id="Bts-wB-1TF"/>
+                                            <constraint firstItem="HrY-qC-Gtc" firstAttribute="top" secondItem="gYm-Vn-UeG" secondAttribute="bottom" constant="8" id="OS5-pX-Yx5"/>
                                             <constraint firstAttribute="trailing" secondItem="gYm-Vn-UeG" secondAttribute="trailing" constant="8" id="QmZ-Ht-o7Q"/>
                                             <constraint firstItem="gYm-Vn-UeG" firstAttribute="top" secondItem="a2G-lw-1eH" secondAttribute="top" constant="8" id="mq3-M9-JDT"/>
-                                            <constraint firstAttribute="height" constant="77" id="p97-4g-56o"/>
+                                            <constraint firstAttribute="height" constant="75" id="p97-4g-56o"/>
+                                            <constraint firstAttribute="bottom" secondItem="HrY-qC-Gtc" secondAttribute="bottom" constant="8" id="vSL-h3-7RJ"/>
+                                            <constraint firstItem="HrY-qC-Gtc" firstAttribute="leading" secondItem="a2G-lw-1eH" secondAttribute="leading" constant="126" id="wuJ-AZ-4eZ"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
                                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="8"/>
+                                                <integer key="value" value="10"/>
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
                                     </view>
@@ -557,9 +573,9 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="wXZ-Ny-sup" firstAttribute="top" secondItem="BcD-fb-DNe" secondAttribute="bottom" constant="124" id="B6M-Fc-iaN"/>
-                                    <constraint firstItem="a2G-lw-1eH" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="26" id="BmJ-yY-XT5"/>
-                                    <constraint firstAttribute="trailing" secondItem="a2G-lw-1eH" secondAttribute="trailing" constant="26" id="EZW-y5-qop"/>
-                                    <constraint firstAttribute="bottom" secondItem="a2G-lw-1eH" secondAttribute="bottom" constant="26" id="HfY-bJ-pPy"/>
+                                    <constraint firstItem="a2G-lw-1eH" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="16" id="BmJ-yY-XT5"/>
+                                    <constraint firstAttribute="trailing" secondItem="a2G-lw-1eH" secondAttribute="trailing" constant="16" id="EZW-y5-qop"/>
+                                    <constraint firstAttribute="bottom" secondItem="a2G-lw-1eH" secondAttribute="bottom" constant="16" id="HfY-bJ-pPy"/>
                                     <constraint firstAttribute="trailing" secondItem="wXZ-Ny-sup" secondAttribute="trailing" constant="169" id="bpA-f3-3Gc"/>
                                     <constraint firstItem="wXZ-Ny-sup" firstAttribute="leading" secondItem="edi-ha-GKe" secondAttribute="leading" constant="169" id="diQ-9m-oJd"/>
                                     <constraint firstItem="BcD-fb-DNe" firstAttribute="top" secondItem="edi-ha-GKe" secondAttribute="top" constant="237" id="lZa-gO-AsN"/>
@@ -601,6 +617,7 @@
                         <outlet property="categoriesTableView" destination="kXa-Nw-aqN" id="AyR-3o-S8O"/>
                         <outlet property="categoriesTitle" destination="KNe-2a-rMp" id="EBY-5l-eGW"/>
                         <outlet property="categoryAndSortByContainerView" destination="XMq-yN-gFF" id="HVu-Az-1SL"/>
+                        <outlet property="connectionTimerButton" destination="HrY-qC-Gtc" id="2wK-UF-oKc"/>
                         <outlet property="connectionTimerLabel" destination="gYm-Vn-UeG" id="dSM-y6-bwh"/>
                         <outlet property="connectionTimerView" destination="a2G-lw-1eH" id="i9v-n9-TWw"/>
                         <outlet property="dislikeBtn" destination="Tsq-28-xHJ" id="UcX-X2-Xrw"/>
@@ -648,7 +665,7 @@
                                             </constraints>
                                         </imageView>
                                         <view userInteractionEnabled="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="k1C-Qp-Slh" customClass="CosmosView" customModule="Cosmos">
-                                            <rect key="frame" x="8" y="191" width="327" height="21"/>
+                                            <rect key="frame" x="8" y="198.5" width="327" height="13.5"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="color" keyPath="emptyColor">
@@ -671,7 +688,7 @@
                                             </userDefinedRuntimeAttributes>
                                         </view>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="umR-h9-UBl">
-                                            <rect key="frame" x="8" y="166" width="327" height="20"/>
+                                            <rect key="frame" x="8" y="166" width="327" height="27.5"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="23"/>
                                             <nil key="highlightedColor"/>
                                         </label>
