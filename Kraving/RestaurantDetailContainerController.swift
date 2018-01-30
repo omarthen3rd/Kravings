@@ -402,8 +402,8 @@ class RestaurantDetailContainerController: UIViewController, UITableViewDataSour
             let new = fullWeek.filter( {!days.contains($0)} ) // days that are missing
             for day in new {
                 
-                let indexThing = fullWeek.index(of: day) // find which index day belongs in
-                guard let indexyMcIndexFace = indexThing else { return }
+                // find which index "day" belongs in
+                guard let indexyMcIndexFace = fullWeek.index(of: day) else { return }
                 
                 newTimings.insert((key: indexyMcIndexFace, value: [day : "CLOSED"]), at: indexyMcIndexFace)
                 

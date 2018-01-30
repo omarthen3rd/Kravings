@@ -178,6 +178,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var cards = [RestaurantCard]()
     let device = Device()
     var plusDevices = [Device]()
+    var smallDevices = [Device]()
         
     // UIKit dynamics variables for card animation
     var dynamicAnimator: UIDynamicAnimator!
@@ -268,6 +269,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateDislikes), name: .applicationWillResignActive, object: nil)
         
         plusDevices = [.iPhone6Plus, .iPhone7Plus, .iPhone8Plus, .iPhoneX]
+        smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
         
         self.thatsAllFolks.text = "That's All Folks!"
         self.selectedSortBy = "best_match"
@@ -287,6 +289,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             setInsets(22) // insets for main 3 buttons, increase number to make them smaller
             likeBtn.layer.cornerRadius = 30
             dislikeBtn.layer.cornerRadius = 30
+            
+        } else if device.isOneOf(smallDevices) {
+            
+            setInsets(15) // insets for main 3 buttons, increase number to make them smaller
+            likeBtn.layer.cornerRadius = 18
+            dislikeBtn.layer.cornerRadius = 18
             
         } else {
             
@@ -351,8 +359,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         categoriesSearchBar.barStyle = .blackTranslucent
         categoriesSearchBar.tintColor = UIColor.white
         
-        likeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
-        dislikeBtn.addTarget(self, action: #selector(self.popButton(button:_:)), for: .touchUpInside)
+        likeBtn.addTarget(self, action: #selector(self.buttonCaller(_:)), for: .touchUpInside)
+        dislikeBtn.addTarget(self, action: #selector(self.buttonCaller(_:)), for: .touchUpInside)
         
         categoriesBtn.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
         categoriesDoneButton.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
@@ -438,7 +446,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             likeBtn.imageEdgeInsets = UIEdgeInsets(top: 14, left: 0, bottom: 14, right: 0)
             dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 14, left: 0, bottom: 14, right: 0)
             
-        } else {
+        } else if device.isOneOf(smallDevices) {
+            
+            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+            
+        }  else {
             
             likeBtn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
             dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
@@ -765,7 +778,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             let restaurant = self.restaurants[self.restaurantIndex]
             self.likes.append(restaurant)
             
-            let velocity = CGPoint(x: 980, y: 320) // sample taken from pan gesture
+            var velocity = CGPoint()
+            
+            if device.isOneOf(smallDevices) {
+                velocity = CGPoint(x: 240, y: 80) // sample taken from pan gesture
+            } else {
+                velocity = CGPoint(x: 980, y: 320) // sample taken from pan gesture
+            }
             
             let pushBehavior = UIPushBehavior(items: [cards[0]], mode: .instantaneous)
             pushBehavior.pushDirection = CGVector(dx: velocity.x/10, dy: velocity.y/10)
@@ -1606,8 +1625,15 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         }
     }
     
+    func buttonCaller(_ button: UIButton) {
+        
+        popButton(button: button, false)
+        
+    }
+    
     func popButton(button: UIButton, _ isFromPanGesture: Bool = false) {
         
+        // to prevent rapid tapping
         button.isUserInteractionEnabled = false
         
         let buttonAnimator = UIViewPropertyAnimator(duration: 0.15, curve: .easeOut, animations: {

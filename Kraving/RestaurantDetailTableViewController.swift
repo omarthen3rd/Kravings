@@ -93,6 +93,7 @@ class RestaurantDetailTableViewController: UITableViewController, UICollectionVi
             restaurantCategory.text = restaurant.category
             setOtherCategories()
             restaurantCategory.textColor = contrastColor
+            restaurantCategory.numberOfLines = 0
             
             restaurantRating.contentMode = .right
             restaurantRating.rating = Double(restaurant.rating)

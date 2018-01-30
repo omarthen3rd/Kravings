@@ -9,6 +9,7 @@
 import UIKit
 import Cosmos
 import PhoneNumberKit
+import DeviceKit
 
 class RestaurantCard: UIView {
     
@@ -25,12 +26,15 @@ class RestaurantCard: UIView {
     let defaults = UserDefaults.standard
     
     var view: UIView!
+    var smallDevices = [Device]()
     
     var restaurant: Restaurant? {
         
         didSet {
             
             guard let restaurant = restaurant else { return }
+            
+            smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
             
             let avgColor = UIColor(averageColorFrom: restaurant.image!)
             let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: false)
@@ -77,6 +81,15 @@ class RestaurantCard: UIView {
             restaurantStars.settings.emptyColor = contrastColor.withAlphaComponent(0.3)
             restaurantStars.settings.updateOnTouch = false
             restaurantStars.settings.starSize = 23
+            restaurantStars.contentMode = .right
+            
+            if Device().isOneOf(smallDevices) {
+                // reduce font sizes on 4" devices
+                restaurantName.font = UIFont.boldSystemFont(ofSize: 22)
+                restaurantCategory.font = UIFont.systemFont(ofSize: 17, weight: UIFontWeightLight)
+                restaurantPriceAndDistance.font = UIFont.systemFont(ofSize: 18, weight: UIFontWeightLight)
+                restaurantStars.settings.starSize = 21
+            }
             
             self.layoutSubviews()
             

@@ -99,10 +99,6 @@ class Restaurant: NSObject, NSCoding {
         
     }
     
-    deinit {
-        print("")
-    }
-    
     func encode(with aCoder: NSCoder) {
         
         aCoder.encode(name, forKey: PropertyKey.nameKey)
