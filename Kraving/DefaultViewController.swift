@@ -122,6 +122,10 @@ extension String {
     
 }
 
+enum SourceOfFunction {
+    case settings, tableview, mainview
+}
+
 class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate {
     
     @IBOutlet var thatsAllFolks: UILabel!
@@ -256,7 +260,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             self.lat = coord.latitude
             self.long = coord.longitude
             
-            self.searchRestaurants()
+            self.searchRestaurants(.mainview)
             
         }
     }
@@ -378,7 +382,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         } else {
             
             // address is main source
-            searchRestaurants()
+            self.searchRestaurants(.mainview)
             
         }
         
@@ -545,7 +549,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             self.categoriesDoneButton.transform = CGAffineTransform.identity
             self.categoriesDoneButton.alpha = 1
             
-            self.shouldHideCards(true)
+            UIView.animate(withDuration: 0.4) {
+                self.shouldHideCards(true)
+            }
             
         }
         
@@ -560,7 +566,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             self.categoriesDoneButton.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
             self.categoriesDoneButton.alpha = 0
             
-            self.shouldHideCards(false)
+            UIView.animate(withDuration: 0.4) {
+                self.shouldHideCards(false)
+            }
             
         }
         closeView.addCompletion { (position) in
@@ -590,75 +598,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func handleTableViewTap() {
         
-        self.updateDislikes()
-        self.restaurantIndex = 0
-        self.restaurants.removeAll()
-        self.cards.removeAll()
-        categoriesSearchBar.resignFirstResponder() // get rid of keyboard
-        openCategories()
-        loadingAnimator(.unhide)
-        self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
-            
-            if success {
-                
-                self.loadLongTermFavourites(completetionHandler: { (arr) in
-                    
-                    if let arr = arr {
-                        let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                        
-                        self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
-                    }
-                    
-                    self.loadDislikes(completetionHandler: { (arr) in
-                        
-                        if let arr = arr {
-                            
-                            let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                            let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                            
-                            self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
-                            
-                        }
-                        
-                    })
-                    
-                    self.filterOutNonRestaurants(completetionHandler: { (newArr) in
-                        
-                        if let newArr = newArr {
-                            self.restaurants = newArr
-                        }
-                        
-                        // filter out session favourites too
-                        let mapped = self.likes.map( { $0.id } )
-                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                        self.restaurants = filteredRestaurants
-                        
-                        DispatchQueue.main.async {
-                            self.resetCards()
-                            self.loadingAnimator(.hide)
-                        }
-                        
-                    })
-                    
-                })
-                
-            } else {
-                
-                print("ran else in handleTap (no results)")
-                self.loadingText.text = "There's been an error which is not our fault. Please try again later."
-                
-                let text = "No Results With Your Chosen Criteria \n \nTry Changing The Radius In Settings"
-                let attributedString = NSMutableAttributedString(string: text)
-                attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
-                self.thatsAllFolks.attributedText = attributedString
-                
-                self.thatsAllFolks.numberOfLines = 0
-                self.loadingAnimator(.hide)
-                
-            }
-            
-        })
+        searchRestaurants(.tableview)
         
     }
     
@@ -675,7 +615,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             }, completion: { (success) in
                 self.loadingView.isHidden = true
                 self.loadingIndicator.stopAnimating()
-                print("ran before invalidate")
                 DispatchQueue.main.async {
                     self.connectionTimer.invalidate() // finish connectionTimer when view is being called to hide
                 }
@@ -993,90 +932,120 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
     }
     
-    func searchRestaurants() {
+    func searchRestaurants(_ source: SourceOfFunction) {
         
-        // address is primary input for location
+        switch source {
+        case .mainview:
+            // runs when first searching for restaurants on app launch
+            self.restaurants.removeAll()
+            self.cards.removeAll()
+            self.restaurantIndex = 0
+            self.getCategories(completionHandler: { (success) in
+                
+                if success {
+                    self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView and sortByTableView
+                    
+                    DispatchQueue.main.async {
+                        self.categoriesTableView.reloadData()
+                        self.sortByTableView.reloadData()
+                    }
+                } else {
+                    self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
+                }
+                
+            })
+            
+        case .settings:
+            // runs when data changed through settings
+            UIView.animate(withDuration: 0.4) {
+                self.shouldHideCards(true)
+            }
+            // not running updateDislikes as it already runs when opening settings view
+            self.restaurantIndex = 0
+            self.restaurants.removeAll()
+            self.cards.removeAll()
+            loadingAnimator(.unhide)
+            
+        case .tableview:
+            // runs when category/sort changes through table view
+            self.updateDislikes()
+            self.restaurantIndex = 0
+            self.restaurants.removeAll()
+            self.cards.removeAll()
+            categoriesSearchBar.resignFirstResponder() // get rid of keyboard
+            loadingAnimator(.unhide) // open loading view before closing categories for better effect
+            openCategories()
+            
+        }
         
-        self.restaurants.removeAll()
-        self.cards.removeAll()
-        self.restaurantIndex = 0
-        self.getCategories { (success) in
+        // after all patterns have gone through, then search businesses is run
+        
+        self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
             
             if success {
                 
-                self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView and sortByTableView
-                
-                DispatchQueue.main.async {
+                self.loadLongTermFavourites(completetionHandler: { (arr) in
                     
-                    self.categoriesTableView.reloadData()
-                    self.sortByTableView.reloadData()
-                    
-                }
-                
-                self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
-                    
-                    if success {
+                    if let arr = arr {
+                        let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
+                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
                         
-                        self.loadLongTermFavourites(completetionHandler: { (arr) in
-                            
-                            if let arr = arr {
-                                let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                                let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                                
-                                self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
-                            }
-                            
-                            self.loadDislikes(completetionHandler: { (arr) in
-                                
-                                if let arr = arr {
-                                    
-                                    print("dislikes exist")
-                                    
-                                    let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                                    let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                                    
-                                    self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
-                                    
-                                } else {
-                                    
-                                    print("dislikes do not exist")
-                                    
-                                }
-                                
-                            })
-                            
-                            self.filterOutNonRestaurants(completetionHandler: { (newArr) in
-                                
-                                if let newArr = newArr {
-                                    self.restaurants = newArr
-                                }
-                                
-                                DispatchQueue.main.async {
-                                    self.resetCards()
-                                    self.loadingAnimator(.hide)
-                                }
-                                
-                            })
-                            
-                        })
-                        
-                    } else {
-                        
-                        print("ran else in addressThingy (probably)")
-                        self.loadingText.text = "There's been an error which is not our fault. Please try again later."
-                        
+                        self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
                     }
+                    
+                    self.loadDislikes(completetionHandler: { (arr) in
+                        
+                        if let arr = arr {
+                            
+                            let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
+                            let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                            
+                            self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                            
+                        }
+                        
+                    })
+                    
+                    self.filterOutNonRestaurants(completetionHandler: { (newArr) in
+                        
+                        if let newArr = newArr {
+                            self.restaurants = newArr
+                        }
+                        
+                        // filter out session favourites too
+                        let mapped = self.likes.map( { $0.id } )
+                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                        self.restaurants = filteredRestaurants
+                        
+                        DispatchQueue.main.async {
+                            self.resetCards()
+                            self.loadingAnimator(.hide)
+                        }
+                        
+                    })
                     
                 })
                 
             } else {
                 
-                self.loadingText.text = "There's been an error which is not our fault. Please try again later."
+                self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
+                
+                if source == .tableview {
+                    
+                    let text = "No Results With Your Chosen Criteria \n \nTry Changing The Radius In Settings"
+                    let attributedString = NSMutableAttributedString(string: text)
+                    attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
+                    self.thatsAllFolks.attributedText = attributedString
+                    
+                    self.thatsAllFolks.numberOfLines = 0
+                    self.loadingAnimator(.hide)
+                    
+                }
+                
                 
             }
             
-        }
-        
+        })
     }
     
     func reloadView() {
@@ -1672,40 +1641,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func dataChanged() {
         
-        UIView.animate(withDuration: 0.5) {
-            self.shouldHideCards(true)
-        }
-        self.restaurantIndex = 0
-        self.restaurants.removeAll()
-        self.cards.removeAll()
-        loadingAnimator(.unhide)
-        self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
-            
-            if success {
-                
-                self.loadLongTermFavourites(completetionHandler: { (arr) in
-                    
-                    let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                    let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                    
-                    self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
-                    
-                    DispatchQueue.main.async {
-                        self.resetCards()
-                        self.loadingAnimator(.hide)
-                    }
-                    
-                })
-                
-            } else {
-                
-                print("ran else in handleTap (no results)")
-                self.loadingText.text = "There's been an error which is not our fault. Please try again later."
-                self.loadingAnimator(.hide)
-                
-            }
-            
-        })
+        searchRestaurants(.settings)
         
     }
     
