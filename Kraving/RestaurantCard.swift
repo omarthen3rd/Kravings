@@ -16,8 +16,9 @@ class RestaurantCard: UIView {
     @IBOutlet var contentView: UIView!
     
     @IBOutlet var featuredImageView: UIImageView!
-    
-    @IBOutlet var containerView: UIView!
+    @IBOutlet var imageView2: UIImageView!
+
+    @IBOutlet var containerBlurView: VisualEffectView!
     @IBOutlet var restaurantName: UILabel!
     @IBOutlet var restaurantCategory: UILabel!
     @IBOutlet var restaurantPriceAndDistance: UILabel!
@@ -39,11 +40,17 @@ class RestaurantCard: UIView {
             let avgColor = UIColor(averageColorFrom: restaurant.image!)
             let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: false)
             
-            containerView.backgroundColor = avgColor
+            containerBlurView.blurRadius = 25
+            containerBlurView.colorTint = avgColor.withAlphaComponent(0.6)
+            containerBlurView.colorTintAlpha = 1
             
             featuredImageView.image = restaurant.image
             featuredImageView.clipsToBounds = true
             featuredImageView.contentMode = .scaleAspectFill
+            
+            imageView2.image = restaurant.image
+            imageView2.clipsToBounds = true
+            imageView2.contentMode = .scaleAspectFill
             
             restaurantName.text = restaurant.name
             restaurantName.textColor = contrastColor

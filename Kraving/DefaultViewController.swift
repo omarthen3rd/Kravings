@@ -122,6 +122,12 @@ extension String {
     
 }
 
+extension UIColor {
+    
+    static let newBlack = UIColor(red:0.20, green:0.20, blue:0.20, alpha:1.0)
+    
+}
+
 enum SourceOfFunction {
     case settings, tableview, mainview
 }
@@ -147,13 +153,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     @IBOutlet var categoryAndSortByContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
-    @IBOutlet var categoriesHeaderView: UIVisualEffectView!
     @IBOutlet var categoriesTitle: UILabel!
     @IBOutlet var categoriesDoneButton: UIButton!
     @IBOutlet var categoriesSearchBar: UISearchBar!
     @IBOutlet var categoriesSearchButton: UIButton!
-    @IBOutlet var sortByHeaderView: UIVisualEffectView!
     @IBOutlet var sortByTableView: UITableView!
+    @IBOutlet var sortByTitle: UILabel!
     
     @IBAction func unwindToMainController(segue: UIStoryboardSegue) {}
     
@@ -167,6 +172,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var selectedCategory = String() // initialized in getCategories()
     var selectedSortBy = String() // initialized in setupView()
     var shouldSelectCell = false
+    var didSelectCell = false
     
     var connectionTimer = Timer()
     var counter = 0.0
@@ -279,6 +285,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         self.thatsAllFolks.text = "That's All Folks!"
         self.selectedSortBy = "best_match"
+        self.sortedBy.text = "Sorted by " + sortByItems[0]
         self.loadingIndicator.hidesWhenStopped = true
         connectionTimerView.isHidden = true
         connectionTimerButton.addTarget(self, action: #selector(reloadView), for: .touchUpInside)
@@ -298,7 +305,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         favouritesBtn.setImage(favouritesImage, for: .normal)
         categoriesBtn.setImage(categoriesImage, for: .normal)
         
-        // set tints
+        // set colors/tints
         categoriesBtn.imageView?.tintColor = UIColor.flatGray
         categoriesBtn.tintColor = UIColor.flatGray
         favouritesBtn.imageView?.tintColor = UIColor.flatGray
@@ -306,12 +313,15 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         settingsBtn.imageView?.tintColor = UIColor.flatGray
         settingsBtn.tintColor = UIColor.flatGray
         sortedBy.textColor = UIColor.flatGray
+        currentCategory.textColor = UIColor.newBlack
+        categoriesTitle.textColor = UIColor.newBlack
+        sortByTitle.textColor = UIColor.newBlack
         
         categoriesDoneButton.alpha = 0 // for animation stuff
         
         // search bar
         
-        categoriesSearchButton.tintColor = UIColor.white
+        categoriesSearchButton.tintColor = UIColor.newBlack
         categoriesSearchButton.setImage(UIBarButtonSystemItem.search.image(), for: .normal)
         categoriesSearchButton.addTarget(self, action: #selector(openSearchBar), for: .touchUpInside)
         
@@ -319,11 +329,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         categoriesSearchBar.showsCancelButton = true
         categoriesSearchBar.alpha = 0 // used to animate it to open and close
         categoriesSearchBar.searchBarStyle = .minimal
-        categoriesSearchBar.barStyle = .blackTranslucent
-        categoriesSearchBar.tintColor = UIColor.white
+        categoriesSearchBar.barStyle = .default
+        categoriesSearchBar.tintColor = UIColor.newBlack
         
         categoriesBtn.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
-        categoriesDoneButton.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
+        categoriesDoneButton.addTarget(self, action: #selector(self.doneButtonCaller(_:)), for: .touchUpInside)
                 
         if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
             
@@ -471,15 +481,20 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         let openView = UIViewPropertyAnimator(duration: 0.2, curve: .easeOut) {
             
+            self.headerView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+            self.headerView.alpha = 0
+            
+            self.shouldHideCards(true)
+            
+            UIView.animate(withDuration: 0.4) {
+                
+            }
+            
             self.categoryAndSortByContainerView.transform = CGAffineTransform.identity
             self.categoryAndSortByContainerView.alpha = 1
             
             self.categoriesDoneButton.transform = CGAffineTransform.identity
             self.categoriesDoneButton.alpha = 1
-            
-            UIView.animate(withDuration: 0.4) {
-                self.shouldHideCards(true)
-            }
             
         }
         
@@ -490,6 +505,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
             self.categoriesDoneButton.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
             self.categoriesDoneButton.alpha = 0
+            
+            self.headerView.transform = CGAffineTransform.identity
+            self.headerView.alpha = 1
             
             UIView.animate(withDuration: 0.4) {
                 self.shouldHideCards(false)
@@ -871,6 +889,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                     self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView and sortByTableView
                     
                     DispatchQueue.main.async {
+                        self.currentCategory.text = self.categories[0]
                         self.categoriesTableView.reloadData()
                         self.sortByTableView.reloadData()
                     }
@@ -976,6 +995,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     func reloadView() {
         
         self.viewDidAppear(false)
+        
+    }
+    
+    func doneButtonCaller(_ button: UIButton) {
+        
+        if didSelectCell {
+            handleTableViewTap()
+            didSelectCell = false // reset for selecting again
+        }
+        openCategories()
         
     }
     
@@ -1543,6 +1572,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        didSelectCell = true
+        
         if tableView == categoriesTableView {
             
             if categoriesSearchBar.alpha == 1 {
@@ -1551,7 +1582,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 self.selectedCategory = self.categories[indexPath.row]
             }
             
-            self.handleTableViewTap()
             self.shouldSelectCell = false
             
         } else {
@@ -1561,7 +1591,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             sortBy = sortBy.lowercased()
             self.selectedSortBy = sortBy
             
-            self.handleTableViewTap()
             self.shouldSelectCell = false
             
         }
