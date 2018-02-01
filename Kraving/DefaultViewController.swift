@@ -136,6 +136,15 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var connectionTimerLabel: UILabel!
     @IBOutlet var connectionTimerButton: UIButton!
     
+    @IBOutlet var headerView: UIView!
+    @IBOutlet var currentCategory: UILabel!
+    @IBOutlet var sortedBy: UILabel!
+    @IBOutlet var settingsBtn: UIButton!
+    @IBOutlet var categoriesBtn: UIButton!
+    @IBOutlet var favouritesBtn: UIButton!
+    
+    @IBOutlet var cardPlaceholder: UIView!
+    
     @IBOutlet var categoryAndSortByContainerView: UIView!
     @IBOutlet var categoriesTableView: UITableView!
     @IBOutlet var categoriesHeaderView: UIVisualEffectView!
@@ -145,13 +154,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var categoriesSearchButton: UIButton!
     @IBOutlet var sortByHeaderView: UIVisualEffectView!
     @IBOutlet var sortByTableView: UITableView!
-    
-    @IBOutlet var buttonsStackView: UIStackView!
-    @IBOutlet var settingsBtn: UIButton!
-    @IBOutlet var categoriesBtn: UIButton!
-    @IBOutlet var favouritesBtn: UIButton!
-    @IBOutlet var dislikeBtn: UIButton!
-    @IBOutlet var likeBtn: UIButton!
     
     @IBAction func unwindToMainController(segue: UIStoryboardSegue) {}
     
@@ -196,7 +198,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     }
     
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
-        return .slide // animation when opening/closing carDetail
+        return .slide // animation when opening/closing cardDetail
     }
 
     // MARK: - Default Functions
@@ -288,65 +290,22 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         self.sortByTableView.dataSource = self
         self.sortByTableView.delegate = self
         
-        if device.isOneOf(plusDevices) {
-            
-            setInsets(22) // insets for main 3 buttons, increase number to make them smaller
-            likeBtn.layer.cornerRadius = 30
-            dislikeBtn.layer.cornerRadius = 30
-            
-        } else if device.isOneOf(smallDevices) {
-            
-            setInsets(15) // insets for main 3 buttons, increase number to make them smaller
-            likeBtn.layer.cornerRadius = 18
-            dislikeBtn.layer.cornerRadius = 18
-            
-        } else {
-            
-            setInsets(20) // insets for main 3 buttons, increase number to make them smaller
-            likeBtn.layer.cornerRadius = 20
-            dislikeBtn.layer.cornerRadius = 20
-            
-        }
+        // set images
+        let settingsImage = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
+        let favouritesImage = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
+        let categoriesImage = #imageLiteral(resourceName: "btn_closeView").withRenderingMode(.alwaysTemplate)
+        settingsBtn.setImage(settingsImage, for: .normal)
+        favouritesBtn.setImage(favouritesImage, for: .normal)
+        categoriesBtn.setImage(categoriesImage, for: .normal)
         
-        let image1S = #imageLiteral(resourceName: "btn_categories_selected").withRenderingMode(.alwaysTemplate)
-        let image2S = #imageLiteral(resourceName: "btn_openFavourites_selected").withRenderingMode(.alwaysTemplate)
-        let image3S = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
-        let image4S = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
-        let image5S = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
-        
-        categoriesBtn.setImage(image1S, for: .normal)
-        categoriesBtn.setImage(image1S, for: UIControlState.highlighted)
+        // set tints
         categoriesBtn.imageView?.tintColor = UIColor.flatGray
-        categoriesBtn.imageView?.contentMode = .scaleAspectFit
         categoriesBtn.tintColor = UIColor.flatGray
-        
-        favouritesBtn.setImage(image2S, for: .normal)
-        favouritesBtn.setImage(image2S, for: UIControlState.highlighted)
         favouritesBtn.imageView?.tintColor = UIColor.flatGray
-        favouritesBtn.imageView?.contentMode = .scaleAspectFit
         favouritesBtn.tintColor = UIColor.flatGray
-        
-        settingsBtn.setImage(image3S, for: .normal)
-        settingsBtn.setImage(image3S, for: UIControlState.highlighted)
         settingsBtn.imageView?.tintColor = UIColor.flatGray
-        settingsBtn.imageView?.contentMode = .scaleAspectFit
         settingsBtn.tintColor = UIColor.flatGray
-        
-        likeBtn.setImage(image4S, for: .normal)
-        likeBtn.setImage(image4S, for: UIControlState.highlighted)
-        likeBtn.imageView?.tintColor = UIColor.white
-        likeBtn.imageView?.contentMode = .scaleAspectFit
-        likeBtn.tintColor = UIColor.white
-        likeBtn.clipsToBounds = true
-        likeBtn.backgroundColor = UIColor.flatGreen
-        
-        dislikeBtn.setImage(image5S, for: .normal)
-        dislikeBtn.setImage(image5S, for: UIControlState.highlighted)
-        dislikeBtn.imageView?.tintColor = UIColor.white
-        dislikeBtn.imageView?.contentMode = .scaleAspectFit
-        dislikeBtn.tintColor = UIColor.white
-        dislikeBtn.clipsToBounds = true
-        dislikeBtn.backgroundColor = UIColor.flatRed
+        sortedBy.textColor = UIColor.flatGray
         
         categoriesDoneButton.alpha = 0 // for animation stuff
         
@@ -362,9 +321,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         categoriesSearchBar.searchBarStyle = .minimal
         categoriesSearchBar.barStyle = .blackTranslucent
         categoriesSearchBar.tintColor = UIColor.white
-        
-        likeBtn.addTarget(self, action: #selector(self.buttonCaller(_:)), for: .touchUpInside)
-        dislikeBtn.addTarget(self, action: #selector(self.buttonCaller(_:)), for: .touchUpInside)
         
         categoriesBtn.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
         categoriesDoneButton.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
@@ -434,31 +390,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         if defaults.object(forKey: "whichCell") == nil {
             
             defaults.set("", forKey: "whichCell")
-            
-        }
-        
-    }
-    
-    func setInsets(_ number: CGFloat) {
-        
-        settingsBtn.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
-        categoriesBtn.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
-        favouritesBtn.imageEdgeInsets = UIEdgeInsets(top: number, left: 0, bottom: number, right: 0)
-        
-        if device.isOneOf(plusDevices) {
-            
-            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 14, left: 0, bottom: 14, right: 0)
-            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 14, left: 0, bottom: 14, right: 0)
-            
-        } else if device.isOneOf(smallDevices) {
-            
-            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
-            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
-            
-        }  else {
-            
-            likeBtn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
-            dislikeBtn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
             
         }
         
@@ -543,9 +474,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             self.categoryAndSortByContainerView.transform = CGAffineTransform.identity
             self.categoryAndSortByContainerView.alpha = 1
             
-            self.buttonsStackView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-            self.buttonsStackView.alpha = 0
-            
             self.categoriesDoneButton.transform = CGAffineTransform.identity
             self.categoriesDoneButton.alpha = 1
             
@@ -559,9 +487,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
             self.categoryAndSortByContainerView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
             self.categoryAndSortByContainerView.alpha = 0
-            
-            self.buttonsStackView.transform = CGAffineTransform.identity
-            self.buttonsStackView.alpha = 1
             
             self.categoriesDoneButton.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
             self.categoriesDoneButton.alpha = 0
@@ -1304,14 +1229,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         for i in 0...self.restaurants.count - 1 {
             
-            let card = RestaurantCard(frame: CGRect(x: 0, y: 0, width: self.view.frame.width - 32, height: self.categoryAndSortByContainerView.bounds.size.height - 40))
+            let card = RestaurantCard(frame: CGRect(x: 0, y: 0, width: self.view.frame.width - 32, height: self.cardPlaceholder.bounds.size.height - 40))
             card.restaurant = self.restaurants[i]
             self.cards.append(card)
             
         }
-        
-        self.likeBtn.isEnabled = true
-        self.dislikeBtn.isEnabled = true
         
         self.layoutCards()
         
@@ -1326,7 +1248,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         let firstCard = cards[0]
         self.view.addSubview(firstCard)
         firstCard.layer.zPosition = CGFloat(cards.count)
-        firstCard.center = self.categoryAndSortByContainerView.center
+        firstCard.center = self.cardPlaceholder.center
         firstCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openCardDetail)))
         firstCard.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleCardPan)))
         
@@ -1346,7 +1268,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             card.alpha = alpha
             
             // position each card so there's a set space (cardInteritemSpacing) between each card, to give it a fanned out look
-            card.center.x = self.categoryAndSortByContainerView.center.x
+            card.center.x = self.cardPlaceholder.center.x
             card.frame.origin.y = cards[0].frame.origin.y - (CGFloat(i))
             // workaround: scale causes heights to skew so compensate for it with some tweaking
             if i == 3 {
@@ -1375,9 +1297,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 card.transform = CGAffineTransform(scaleX: newDownscale, y: newDownscale)
                 card.alpha = newAlpha
                 if i == 1 {
-                    card.center = self.categoryAndSortByContainerView.center
+                    card.center = self.cardPlaceholder.center
                 } else {
-                    card.center.x = self.categoryAndSortByContainerView.center.x
+                    card.center.x = self.cardPlaceholder.center.x
                     card.frame.origin.y = self.cards[1].frame.origin.y - (CGFloat(i - 1) * self.cardInteritemSpacing)
                 }
             }, completion: { (_) in
@@ -1406,7 +1328,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         // initial state of new card
         newCard.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
         newCard.alpha = 0
-        newCard.center.x = self.categoryAndSortByContainerView.center.x
+        newCard.center.x = self.cardPlaceholder.center.x
         newCard.frame.origin.y = cards[1].frame.origin.y - (4 * cardInteritemSpacing)
         self.view.addSubview(newCard)
         
@@ -1414,7 +1336,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         UIView.animate(withDuration: animationDuration, delay: (3 * (animationDuration / 2)), usingSpringWithDamping: 0.8, initialSpringVelocity: 0.0, options: [], animations: {
             newCard.transform = CGAffineTransform(scaleX: downscale, y: downscale)
             newCard.alpha = alpha
-            newCard.center.x = self.categoryAndSortByContainerView.center.x
+            newCard.center.x = self.cardPlaceholder.center.x
             newCard.frame.origin.y = self.cards[1].frame.origin.y - (3 * self.cardInteritemSpacing) + 1.5
         }, completion: { (_) in
             
@@ -1493,9 +1415,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 }
             }
             
-            if !(cards[0].center.x > (self.categoryAndSortByContainerView.center.x + requiredOffsetFromCenter) || cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter)) {
+            if !(cards[0].center.x > (self.cardPlaceholder.center.x + requiredOffsetFromCenter) || cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter)) {
                 // snap to center
-                let snapBehavior = UISnapBehavior(item: cards[0], snapTo: self.categoryAndSortByContainerView.center)
+                let snapBehavior = UISnapBehavior(item: cards[0], snapTo: self.cardPlaceholder.center)
                 dynamicAnimator.addBehavior(snapBehavior)
                 self.statusBarShouldBeHidden = false
                 UIView.animate(withDuration: 0.25) {
@@ -1524,12 +1446,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 itemBehavior.addAngularVelocity(CGFloat(angular), for: cards[0])
                 dynamicAnimator.addBehavior(itemBehavior)
                 
-                if cards[0].center.x > (self.categoryAndSortByContainerView.center.x + requiredOffsetFromCenter) {
+                if cards[0].center.x > (self.cardPlaceholder.center.x + requiredOffsetFromCenter) {
                     // like
-                    popButton(button: self.likeBtn, true)
+                    self.addToLikes(true)
                 } else if cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter) {
                     // dislike
-                    popButton(button: self.dislikeBtn, true)
+                    self.addToDislikes(true)
                 }
                 
                 self.statusBarShouldBeHidden = false
@@ -1568,12 +1490,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                             let attributedString = NSMutableAttributedString(string: text)
                             attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
                             self?.thatsAllFolks.attributedText = attributedString
-                            self?.likeBtn.isEnabled = false
-                            self?.dislikeBtn.isEnabled = false
+                            // disable buttons if empty here
                         }
-                        // re-enable buttons after addToLikes() is run to prevent rapid tapping
-                        self?.likeBtn.isUserInteractionEnabled = true
-                        self?.dislikeBtn.isUserInteractionEnabled = true
+                        // re-enable buttons after addToLikes/Dislikes function is run to prevent rapid tapping
+                        
                     })
                 }
             })
@@ -1584,57 +1504,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             }, completion: { (_) in
                 self.removeOldFrontCard()
                 if self.cards.isEmpty {
-                    self.likeBtn.isEnabled = false
-                    self.dislikeBtn.isEnabled = false
+                    // disable buttons if empty here
                 }
-                // re-enable buttons after addToLikes() is run to prevent rapid tapping
-                self.likeBtn.isUserInteractionEnabled = true
-                self.dislikeBtn.isUserInteractionEnabled = true
+                // re-enable buttons after addToLikes/Dislikes function is run to prevent rapid tapping
             })
         }
-    }
-    
-    func buttonCaller(_ button: UIButton) {
-        
-        popButton(button: button, false)
-        
-    }
-    
-    func popButton(button: UIButton, _ isFromPanGesture: Bool = false) {
-        
-        // to prevent rapid tapping
-        button.isUserInteractionEnabled = false
-        
-        let buttonAnimator = UIViewPropertyAnimator(duration: 0.15, curve: .easeOut, animations: {
-            
-            button.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-            self.settingsBtn.alpha = 0
-            self.categoriesBtn.alpha = 0
-            self.favouritesBtn.alpha = 0
-            
-        })
-        buttonAnimator.addCompletion({ (_) in
-            
-            UIViewPropertyAnimator(duration: 0.2, curve: .easeIn, animations: {
-                button.transform = CGAffineTransform.identity
-                self.settingsBtn.alpha = 1
-                self.categoriesBtn.alpha = 1
-                self.favouritesBtn.alpha = 1
-                self.dislikeBtn.alpha = 1
-                self.likeBtn.alpha = 1
-                
-            }).startAnimation()
-            
-            if button == self.likeBtn {
-                self.addToLikes(isFromPanGesture)
-            } else {
-                self.addToDislikes(isFromPanGesture)
-            }
-            
-        })
-        
-        buttonAnimator.startAnimation()
-        
     }
     
     // MARK: - Settings Delegate
