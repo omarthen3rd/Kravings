@@ -406,6 +406,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             
         }
         
+        if defaults.object(forKey: "cornerRadius") == nil {
+            
+            defaults.set(15, forKey: "cornerRadius")
+            
+        }
+        
     }
     
     func shouldHideCards(_ bool: Bool) {
@@ -1283,6 +1289,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         firstCard.center = self.cardPlaceholder.center
         firstCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openCardDetail)))
         firstCard.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleCardPan)))
+        shadowTo(firstCard, shouldRemove: false) // add shadow to card
         
         // the next 3 cards in the deck
         for i in 1...3 {
@@ -1340,6 +1347,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                     self.restaurantIndex += 1
                     card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.openCardDetail)))
                     card.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.handleCardPan)))
+                    self.shadowTo(card, shouldRemove: false) // add shadow to card
                 }
             })
             
@@ -1416,6 +1424,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         switch sender.state {
         case .began:
+            // shadowTo(card, shouldRemove: true)
             dynamicAnimator.removeAllBehaviors()
             let offset = UIOffsetMake(panLocationInCard.x - cards[0].bounds.midX, panLocationInCard.y - cards[0].bounds.midY);
             // card is attached to center
@@ -1541,6 +1550,36 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 // re-enable buttons after addToLikes/Dislikes function is run to prevent rapid tapping
             })
         }
+    }
+    
+    func shadowTo(_ card: UIView, shouldRemove: Bool) {
+        
+        if shouldRemove {
+            
+            UIView.animate(withDuration: 0.5, animations: {
+                
+                card.layer.shadowOpacity = 0
+                
+            })
+            
+            card.layer.shadowPath = nil
+            
+        } else {
+            
+            card.clipsToBounds = false
+            card.layer.shadowColor = UIColor(averageColorFrom: self.restaurants[self.restaurantIndex].image!).withAlphaComponent(0.6).cgColor
+            card.layer.shadowOffset = CGSize(width: 0, height: 8)
+            card.layer.shadowRadius = 15
+            card.layer.shadowPath = UIBezierPath(roundedRect: card.bounds, cornerRadius: 20).cgPath
+            
+            UIView.animate(withDuration: 0.5, animations: {
+                
+                card.layer.shadowOpacity = 1
+                
+            })
+            
+        }
+        
     }
     
     // MARK: - Settings Delegate

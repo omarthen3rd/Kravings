@@ -15,6 +15,8 @@ class RestaurantCard: UIView {
     
     @IBOutlet var contentView: UIView!
     
+    @IBOutlet var stuffContainer: UIView!
+    
     @IBOutlet var featuredImageView: UIImageView!
     @IBOutlet var imageView2: UIImageView!
 
@@ -132,8 +134,8 @@ class RestaurantCard: UIView {
         
         addSubview(view)
         
-        self.clipsToBounds = true
-        self.layer.cornerRadius = 20
+        self.stuffContainer.clipsToBounds = true
+        self.stuffContainer.layer.cornerRadius = 15
         
         self.layoutSubviews()
         

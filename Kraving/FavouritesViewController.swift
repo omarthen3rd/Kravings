@@ -256,7 +256,7 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
             
             if let currentCell = sender as? FavouritesCollectionViewCell, let indexPath = self.collectionView?.indexPath(for: currentCell) {
                 
-                let destVC = segue.destination as! RestaurantDetailContainerController
+                let destVC = segue.destination as! RestaurantDetailController
                 
                 var favourite: Restaurant
                 

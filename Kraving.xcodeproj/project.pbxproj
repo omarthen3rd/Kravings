@@ -13,6 +13,7 @@
 		5636C66A1F165F41006D41E6 /* Slidercell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5636C6671F165F41006D41E6 /* Slidercell.xib */; };
 		5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */; };
 		56375B531F92357D001FCAFE /* Cells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56375B521F92357D001FCAFE /* Cells.swift */; };
+		5637F47E2025F6720061987C /* UIImageEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568683161F89868100D4BE60 /* UIImageEffects.swift */; };
 		564F9AA61FE567DD00C650D0 /* FavouritesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 564F9AA51FE567DD00C650D0 /* FavouritesViewController.swift */; };
 		565418641FE44B6300A2286B /* RestaurantCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565418631FE44B6300A2286B /* RestaurantCard.swift */; };
 		565418661FE44DDD00A2286B /* RestaurantCard1.xib in Resources */ = {isa = PBXBuildFile; fileRef = 565418651FE44DDD00A2286B /* RestaurantCard1.xib */; };
@@ -213,6 +214,7 @@
 			children = (
 				56D8551F1FD70B290031B8AE /* RestaurantDetailContainerController.swift */,
 				5655245F1F89285E009C9EFD /* RestaurantDetailTableViewController.swift */,
+				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
 			);
 			name = "Restaurant Detail Controller";
 			sourceTree = "<group>";
@@ -262,7 +264,6 @@
 				56375B521F92357D001FCAFE /* Cells.swift */,
 				56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */,
 				56D99DA21F102F35000FA4F8 /* Main.storyboard */,
-				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
 				56D99DA51F102F35000FA4F8 /* Assets.xcassets */,
 				56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */,
 				56D99DAA1F102F35000FA4F8 /* Info.plist */,
@@ -510,6 +511,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				56F5FC221F1037F600AF0B18 /* Restaurant.swift in Sources */,
+				5637F47E2025F6720061987C /* UIImageEffects.swift in Sources */,
 				5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */,
 				565524601F89285E009C9EFD /* RestaurantDetailTableViewController.swift in Sources */,
 				56D855201FD70B290031B8AE /* RestaurantDetailContainerController.swift in Sources */,
