@@ -133,7 +133,7 @@ class RestaurantCard: UIView {
         addSubview(view)
         
         self.clipsToBounds = true
-        self.layer.cornerRadius = 15
+        self.layer.cornerRadius = 20
         
         self.layoutSubviews()
         

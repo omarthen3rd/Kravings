@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		562036231F7023A6004DF27B /* loadingLines.json in Resources */ = {isa = PBXBuildFile; fileRef = 56B7B1D01F6C6BBD00E5EB1F /* loadingLines.json */; };
+		56295FCB2024E55D00600A4F /* RestaurantDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */; };
 		5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */; };
 		5636C66A1F165F41006D41E6 /* Slidercell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5636C6671F165F41006D41E6 /* Slidercell.xib */; };
 		5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */; };
@@ -66,6 +67,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantDetailController.swift; sourceTree = "<group>"; };
 		5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
 		5636C6671F165F41006D41E6 /* Slidercell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Slidercell.xib; sourceTree = "<group>"; };
 		5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderTableViewCell.swift; sourceTree = "<group>"; };
@@ -260,6 +262,7 @@
 				56375B521F92357D001FCAFE /* Cells.swift */,
 				56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */,
 				56D99DA21F102F35000FA4F8 /* Main.storyboard */,
+				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
 				56D99DA51F102F35000FA4F8 /* Assets.xcassets */,
 				56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */,
 				56D99DAA1F102F35000FA4F8 /* Info.plist */,
@@ -512,6 +515,7 @@
 				56D855201FD70B290031B8AE /* RestaurantDetailContainerController.swift in Sources */,
 				56375B531F92357D001FCAFE /* Cells.swift in Sources */,
 				56BF7BDC1F58AC170098644B /* StartUpViewController.swift in Sources */,
+				56295FCB2024E55D00600A4F /* RestaurantDetailController.swift in Sources */,
 				56BB4F1F1F5DF2A700F2CA2C /* ButtonTableViewCell.swift in Sources */,
 				568683191F89868700D4BE60 /* VisualEffectView.swift in Sources */,
 				56C895BA2006E1B500FC9C60 /* NoConnectionView.swift in Sources */,

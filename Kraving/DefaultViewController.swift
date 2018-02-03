@@ -125,6 +125,7 @@ extension String {
 extension UIColor {
     
     static let newBlack = UIColor(red:0.20, green:0.20, blue:0.20, alpha:1.0)
+    static let newWhite = UIColor(red:0.96, green:0.96, blue:0.96, alpha:1.0)
     
 }
 
@@ -282,6 +283,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         plusDevices = [.iPhone6Plus, .iPhone7Plus, .iPhone8Plus, .iPhoneX]
         smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
+        
+        self.view.backgroundColor = UIColor.newWhite
         
         self.thatsAllFolks.text = "That's All Folks!"
         self.selectedSortBy = "best_match"
@@ -1385,7 +1388,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         let restaurant = self.restaurants[self.restaurantIndex]
         
-        let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailContainerController") as! RestaurantDetailContainerController
+        let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
         vc.restaurant = restaurant
         vc.shouldHideStatus = true
         
@@ -1582,11 +1585,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 self.selectedCategory = self.categories[indexPath.row]
             }
             
+            self.currentCategory.text = self.selectedCategory
             self.shouldSelectCell = false
             
         } else {
             
             var sortBy = sortByItems[indexPath.row]
+            self.sortedBy.text = "Sort by " + sortBy
             sortBy = sortBy.replacingOccurrences(of: " ", with: "_")
             sortBy = sortBy.lowercased()
             self.selectedSortBy = sortBy
