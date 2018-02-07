@@ -14,6 +14,7 @@ target 'Kraving' do
   pod 'PhoneNumberKit', '~> 1.3'
   pod 'ChameleonFramework/Swift', :git => 'https://github.com/ViccAlexander/Chameleon.git', :branch => 'wip/swift4'
   pod 'SimpleImageViewer', '~> 1.1.1'
+  pod 'PullToDismiss', '~> 2.1'
 
 end
 

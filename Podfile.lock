@@ -4,13 +4,14 @@ PODS:
   - ChameleonFramework/Swift (2.1.0):
     - ChameleonFramework/Default
   - Cosmos (11.0.3)
-  - DeviceKit (1.4.0)
+  - DeviceKit (1.5.0)
   - PhoneNumberKit (1.4.0):
     - PhoneNumberKit/PhoneNumberKitCore (= 1.4.0)
     - PhoneNumberKit/UIKit (= 1.4.0)
   - PhoneNumberKit/PhoneNumberKitCore (1.4.0)
   - PhoneNumberKit/UIKit (1.4.0):
     - PhoneNumberKit/PhoneNumberKitCore
+  - PullToDismiss (2.1)
   - SimpleImageViewer (1.1.1)
   - SwiftyJSON (4.0.0)
 
@@ -20,6 +21,7 @@ DEPENDENCIES:
   - Cosmos (~> 11.0)
   - DeviceKit (~> 1.0)
   - PhoneNumberKit (~> 1.3)
+  - PullToDismiss (~> 2.1)
   - SimpleImageViewer (~> 1.1.1)
   - SwiftyJSON
 
@@ -37,11 +39,12 @@ SPEC CHECKSUMS:
   Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
   ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
   Cosmos: eb506859929f4add2d2aec822a27efb2f718a95d
-  DeviceKit: fa74d97499660e88081718b16688e19217595dba
+  DeviceKit: 883552d64028056216e913a88f892e7e29678e75
   PhoneNumberKit: a739c359d05701e2e9745654f53e7c64379c2516
+  PullToDismiss: 5513d561c382d201d0e3fbbdab9a47196cf5d2e2
   SimpleImageViewer: 34c3a2cde2d9ac022146772cefc27fca14b0c8b1
   SwiftyJSON: 070dabdcb1beb81b247c65ffa3a79dbbfb3b48aa
 
-PODFILE CHECKSUM: 4c2c2eb19ccc18d2012ed232dbac4f3923285cf9
+PODFILE CHECKSUM: 168fb8eef6a512160a5979195acbcb5d2fc77e3c
 
 COCOAPODS: 1.3.1

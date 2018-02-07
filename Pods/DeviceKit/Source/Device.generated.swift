@@ -312,7 +312,7 @@ public enum Device {
 
     /// Returns whether the device is an iPhone (real or simulator)
     public var isPhone: Bool {
-      return isOneOf(Device.allPhones) || isOneOf(Device.allSimulatorPhones) || UIDevice.current.userInterfaceIdiom == .phone
+      return (isOneOf(Device.allPhones) || isOneOf(Device.allSimulatorPhones) || UIDevice.current.userInterfaceIdiom == .phone) && !isPod
     }
 
     /// Returns whether the device is an iPad (real or simulator)
@@ -541,6 +541,24 @@ public enum Device {
     return nil
     #endif
   }
+
+  /// True when a Guided Access session is currently active; otherwise, false.
+  public var isGuidedAccessSessionActive: Bool {
+    #if os(iOS)
+    return UIAccessibilityIsGuidedAccessEnabled()
+    #else
+    return false
+    #endif
+  }
+
+  /// The brightness level of the screen.
+  public var screenBrightness: Int {
+    #if os(iOS)
+    return Int(UIScreen.main.brightness * 100)
+    #else
+    return 100
+    #endif
+  }
 }
 
 // MARK: - CustomStringConvertible
@@ -642,6 +660,15 @@ extension Device: Equatable {
         case .unknown: self = .full // Should never happen since `batteryMonitoring` is enabled.
         }
         UIDevice.current.isBatteryMonitoringEnabled = false
+      }
+
+      /// The user enabled Low Power mode
+      public var lowPowerMode: Bool {
+        if #available(iOS 9.0, *) {
+          return ProcessInfo.processInfo.isLowPowerModeEnabled
+        } else {
+          return false
+        }
       }
 
       /// Provides a textual representation of the battery state.
