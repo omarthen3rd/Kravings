@@ -75,7 +75,7 @@ extension NSMutableAttributedString {
     func setBoldForText(_ textToFind: String) {
         let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
         if range.location != NSNotFound {
-            let attrs = [NSFontAttributeName : UIFont.boldSystemFont(ofSize: 18)]
+            let attrs = [NSFontAttributeName : UIFont.boldSystemFont(ofSize: 19)]
             addAttributes(attrs, range: range)
         }
         
@@ -133,7 +133,7 @@ enum SourceOfFunction {
     case settings, tableview, mainview
 }
 
-class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate {
+class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate, UpdateStatusBar {
     
     @IBOutlet var thatsAllFolks: UILabel!
     @IBOutlet var loadingView: UIView!
@@ -210,8 +210,17 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
 
     // MARK: - Default Functions
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        print("viewDidAppear")
+        
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        print("ran viewWillAppear")
         
         statusBarShouldBeHidden = false
         UIView.animate(withDuration: 0.25) {
@@ -303,7 +312,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         // set images
         let settingsImage = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
         let favouritesImage = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
-        let categoriesImage = #imageLiteral(resourceName: "btn_closeView").withRenderingMode(.alwaysTemplate)
+        let categoriesImage = #imageLiteral(resourceName: "chevron").withRenderingMode(.alwaysTemplate)
         settingsBtn.setImage(settingsImage, for: .normal)
         favouritesBtn.setImage(favouritesImage, for: .normal)
         categoriesBtn.setImage(categoriesImage, for: .normal)
@@ -1392,23 +1401,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
     }
     
-    func openCardDetail() {
-        
-        let restaurant = self.restaurants[self.restaurantIndex]
-        
-        let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
-        vc.restaurant = restaurant
-        vc.shouldHideStatus = true
-        
-        statusBarShouldBeHidden = true
-        UIView.animate(withDuration: 0.25) {
-            self.setNeedsStatusBarAppearanceUpdate()
-        }
-        
-        self.present(vc, animated: true, completion: nil)
-        
-    }
-    
     func handleCardPan(sender: UIPanGestureRecognizer) {
         
         // if we're in the process of hiding a card, don't let the user interace with the cards yet
@@ -1582,11 +1574,41 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
     }
     
+    func openCardDetail() {
+        
+        let restaurant = self.restaurants[self.restaurantIndex]
+        
+        let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
+        vc.restaurant = restaurant
+        vc.shouldHideStatus = true
+        vc.modalPresentationStyle = .overFullScreen
+        vc.statusBarDelegate = self
+        
+        statusBarShouldBeHidden = true
+        UIView.animate(withDuration: 0.25) {
+            self.setNeedsStatusBarAppearanceUpdate()
+        }
+        
+        self.present(vc, animated: true, completion: nil)
+        
+    }
+    
     // MARK: - Settings Delegate
     
     func dataChanged() {
         
         searchRestaurants(.settings)
+        
+    }
+    
+    // MARK: - Status bar delegate
+    
+    func updateStatusBar() {
+        
+        statusBarShouldBeHidden = false
+        UIView.animate(withDuration: 0.25) {
+            self.setNeedsStatusBarAppearanceUpdate()
+        }
         
     }
     

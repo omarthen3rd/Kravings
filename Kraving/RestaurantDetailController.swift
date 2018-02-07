@@ -14,6 +14,19 @@ import ChameleonFramework
 import PhoneNumberKit
 import SimpleImageViewer
 import DeviceKit
+import PullToDismiss
+
+protocol RemoveFromArray {
+    
+    func removeFromArrayWith(_ restaurant: Restaurant)
+    
+}
+
+protocol UpdateStatusBar {
+    
+    func updateStatusBar()
+    
+}
 
 extension CIImage {
     
@@ -38,12 +51,6 @@ extension UIImage {
     var grayscale: UIImage? {
         return applying(saturation: 0)
     }
-    
-}
-
-protocol RemoveFromArray {
-    
-    func removeFromArrayWith(_ restaurant: Restaurant)
     
 }
 
@@ -73,12 +80,13 @@ extension UIImageView {
 
 class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITableViewDelegate, UITableViewDataSource {
     
-    @IBOutlet var closeBtn: UIButton!
-    
     @IBOutlet var restaurantPhoto: UIImageView!
     @IBOutlet var restaurantPhotoBlur: VisualEffectView!
     
+    @IBOutlet var scrollView: UIScrollView!
+    
     // Header View Outlets
+    @IBOutlet var restaurantHeaderViewTopConstraint: NSLayoutConstraint!
     @IBOutlet var restaurantHeaderView: UIView!
     @IBOutlet var restaurantName: UILabel!
     @IBOutlet var restaurantCategory: UILabel!
@@ -141,14 +149,13 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     var currentTimings = [RestaurantHours]()
     var restaurantTimings = [(key: Int, value: [String: String])]()
     
-    let device = Device()
-    var olderDevices = [Device]()
-    
     var cornerRadius = Float()
     
     var restaurantSource: RestaurantSource = .likes
-    
     var removeDelegate: RemoveFromArray?
+    var statusBarDelegate: UpdateStatusBar?
+    
+    private var pullToDismiss: PullToDismiss?
     
     override var prefersStatusBarHidden: Bool {
         return shouldHideStatus
@@ -156,8 +163,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
         
         // shouldHideStatus == false -> means that navigation bar will be used
         self.setNeedsStatusBarAppearanceUpdate()
@@ -180,26 +185,18 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func setupView() {
         
+        // universal corner radius for elements (set in DefaultViewController)
         cornerRadius = defaults.float(forKey: "cornerRadius")
         
-        self.photosCollectionView.delegate = self
-        self.photosCollectionView.dataSource = self
-        
-        olderDevices = [.iPhone5, .iPhone5c, .iPhone6, .iPhone6Plus]
-        
         guard let restaurant = restaurant else { return }
-        guard let closeBtn = closeBtn else { return }
         
         let avgColor = UIColor(averageColorFrom: restaurant.image!)
         let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: true)
         
-        closeBtn.addTarget(self, action: #selector(dismissViewThing), for: .touchUpInside)
-        closeBtn.tintColor = contrastColor
-        
-        // Main immediate visible UI setup
+        // Immediate visible UI setup
         restaurantPhotoBlur.colorTint = contrastColor
         restaurantPhotoBlur.colorTintAlpha = 0.2
-        restaurantPhotoBlur.blurRadius = 15
+        restaurantPhotoBlur.blurRadius = 23
         restaurantPhotoBlur.scale = 1
         
         // photo saturation
@@ -266,6 +263,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantTimingsLabel.text = "Loading..."
         
         restaurantPhotosTitle.textColor = contrastColor.withAlphaComponent(0.7)
+        photosCollectionView.delegate = self
+        photosCollectionView.dataSource = self
         loadPhotos()
         
         // set colors/tints for buttons
@@ -281,10 +280,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         // Reviews Button Blur and Image
         restaurantReviewsView.backgroundColor = avgColor.withAlphaComponent(0.7)
-        restaurantReviewsBlur.colorTint = avgColor
-        restaurantReviewsBlur.colorTintAlpha = 0.7
-        restaurantReviewsBlur.blurRadius = 25
-        restaurantReviewsBlur.scale = 1
         
         let reviewsImage = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
         restaurantReviewsButton.setImage(reviewsImage, for: .normal)
@@ -294,10 +289,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         // App Buttons Blur and Images
         restaurantAppButtonsView.backgroundColor = avgColor.withAlphaComponent(0.7)
-        restaurantAppButtonsBlur.colorTint = avgColor
-        restaurantAppButtonsBlur.colorTintAlpha = 0.7
-        restaurantAppButtonsBlur.blurRadius = 25
-        restaurantAppButtonsBlur.scale = 1
         
         let phoneImage = #imageLiteral(resourceName: "btn_call_selected").withRenderingMode(.alwaysTemplate)
         restaurantPhoneButton.setImage(phoneImage, for: .normal)
@@ -392,8 +383,23 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         // show/hide button in navigation bar
         if shouldHideStatus == false {
+            // navigation bar is active
+            
             let barButton = UIBarButtonItem(barButtonSystemItem: .organize, target: self, action: #selector(self.openRestaurantActionSheet))
             self.navigationItem.rightBarButtonItem = barButton
+            
+        } else {
+            
+            pullToDismiss = PullToDismiss(scrollView: scrollView, viewController: self)
+            pullToDismiss?.delegate = self
+            pullToDismiss?.dismissableHeightPercentage = 0.45
+            pullToDismiss?.backgroundEffect = BlurEffect(color: UIColor.white, alpha: 0.3, blurRadius: 30, saturationDeltaFactor: 1.8)
+            pullToDismiss?.dismissAction = {
+                
+                self.dismissViewThing()
+                
+            }
+            
         }
         
         setCornerRadius()
@@ -403,6 +409,18 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     func setCornerRadius() {
         
         let radius = CGFloat(cornerRadius)
+        
+        restaurantHeaderView.clipsToBounds = true
+        restaurantHeaderView.layer.cornerRadius = radius
+        
+        restaurantReviewsView.clipsToBounds = true
+        restaurantReviewsView.layer.cornerRadius = radius
+        
+        restaurantTimingsView.clipsToBounds = true
+        restaurantTimingsView.layer.cornerRadius = radius
+        
+        restaurantAppButtonsView.clipsToBounds = true
+        restaurantAppButtonsView.layer.cornerRadius = radius
         
         timingsTableView.clipsToBounds = true
         timingsTableView.layer.cornerRadius = radius
@@ -419,8 +437,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         alertView.clipsToBounds = true
         alertView.layer.cornerRadius = radius
         
-        timingsOpenOrCloseView.layer.cornerRadius = 5
         timingsOpenOrCloseView.clipsToBounds = true
+        timingsOpenOrCloseView.layer.cornerRadius = 5
         
     }
     
@@ -431,6 +449,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             self.navigationController?.popViewController(animated: true)
         } else {
             self.dismiss(animated: true, completion: nil)
+            if let del = statusBarDelegate {
+                del.updateStatusBar()
+            }
         }
         
     }
@@ -553,13 +574,26 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                         
                         if day.day == today {
                             
+                            var attrString = NSMutableAttributedString()
+                            var stringy = String()
+                            
                             if i == sameDays {
-                                self.restaurantTimingsLabel.text = self.restaurantTimingsLabel.text! + "\(day.startTime) to " + "\(day.endTime) \n"
+                                
+                                // self.restaurantTimingsLabel.text = self.restaurantTimingsLabel.text! + "\(day.startTime) to " + "\(day.endTime) \n"
+                                stringy += "\(day.startTime) to " + "\(day.endTime) \n"
                             } else {
                                 
                                 let openOrCloseText = self.isRestaurantOpen ? "OPEN NOW" : "CLOSED NOW"
                                 
-                                self.restaurantTimingsLabel.text = self.restaurantTimingsLabel.text! + "\(day.startTime) to " + "\(day.endTime) ⋅ \(openOrCloseText)"
+                                // self.restaurantTimingsLabel.text = self.restaurantTimingsLabel.text! + "\(day.startTime) to " + "\(day.endTime) ⋅ \(openOrCloseText)"
+                                
+                                stringy += "\(day.startTime) to " + "\(day.endTime) ⋅ \(openOrCloseText)"
+                                
+                                attrString = NSMutableAttributedString(string: stringy)
+                                attrString.setBoldForText(openOrCloseText)
+                                
+                                self.restaurantTimingsLabel.attributedText = attrString
+                                
                             }
                             
                             i += 1
@@ -578,7 +612,13 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                             
                             let openOrCloseText = self.isRestaurantOpen ? "OPEN NOW" : "CLOSED NOW"
                             
-                            self.restaurantTimingsLabel.text = "\(operationDay.startTime) to " + "\(operationDay.endTime) ⋅ \(openOrCloseText)"
+                            let stringy = "\(operationDay.startTime) to " + "\(operationDay.endTime) ⋅ \(openOrCloseText)"
+                            
+                            let attrString = NSMutableAttributedString(string: stringy)
+                            attrString.setBoldForText(openOrCloseText)
+                            self.restaurantTimingsLabel.attributedText = attrString
+                            
+                            // self.restaurantTimingsLabel.text = "\(operationDay.startTime) to " + "\(operationDay.endTime) ⋅ \(openOrCloseText)"
                             break // break when restaurant timing is found
                             
                         } else if operationDay.day != self.getCurrentDay() {
@@ -1606,7 +1646,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         }
         
         self.reviewsStarView.rating = Double(restaurant.rating)
-        self.reviewsStarView.text = "\(restaurant.reviewCount) VOTES"
+        // self.reviewsStarView.text = "\(restaurant.reviewCount) VOTES"
         self.reviewsStarView.settings.emptyBorderWidth = 0
         self.reviewsStarView.settings.updateOnTouch = false
         self.reviewsStarView.settings.starSize = 21
@@ -1733,7 +1773,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         cell.imageView.downloadedFrom(url: photoURL)
         cell.imageView.contentMode = .scaleAspectFill
         
-        cell.layer.cornerRadius = 8
+        cell.layer.cornerRadius = 10
         cell.clipsToBounds = true
         
         return cell
@@ -1741,7 +1781,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
+                
         return CGSize(width: collectionView.bounds.size.height, height: collectionView.bounds.size.height)
         
     }
