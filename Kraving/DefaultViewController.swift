@@ -133,7 +133,14 @@ enum SourceOfFunction {
     case settings, tableview, mainview
 }
 
-class DefaultViewController: UIViewController, CLLocationManagerDelegate, SettingsDelegate, UITableViewDelegate, UITableViewDataSource, RemoveFromMainArray, UISearchBarDelegate, UpdateStatusBar {
+class SortByCollectionCell: UICollectionViewCell {
+    
+    @IBOutlet var sortByButton: UIButton!
+    @IBOutlet var sortByLabel: UILabel!
+    
+}
+
+class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UpdateStatusBar, RemoveFromMainArray, SettingsDelegate {
     
     @IBOutlet var thatsAllFolks: UILabel!
     @IBOutlet var loadingView: UIView!
@@ -153,13 +160,17 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     @IBOutlet var cardPlaceholder: UIView!
     
     @IBOutlet var categoryAndSortByContainerView: UIView!
+    
+    // Categories/Sort By View
     @IBOutlet var categoriesTableView: UITableView!
     @IBOutlet var categoriesTitle: UILabel!
-    @IBOutlet var categoriesDoneButton: UIButton!
     @IBOutlet var categoriesSearchBar: UISearchBar!
     @IBOutlet var categoriesSearchButton: UIButton!
-    @IBOutlet var sortByTableView: UITableView!
+    
+    @IBOutlet var sortByColletionView: UICollectionView!
     @IBOutlet var sortByTitle: UILabel!
+    
+    @IBOutlet var categoriesDoneButton: UIButton!
     
     @IBAction func unwindToMainController(segue: UIStoryboardSegue) {}
     
@@ -167,6 +178,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var defaults = UserDefaults.standard
         
     var divisor: CGFloat!
+    
     var categories = [String]()
     var filteredCategories = [String]()
     var sortByItems = ["Best Match", "Rating", "Review Count", "Distance"]
@@ -182,13 +194,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     var likes = [Restaurant]()
     var dislikes = [Restaurant]()
     var restaurantIndex = 0
+    var cards = [RestaurantCard]()
     
     var locationManager = CLLocationManager()
     var locationToUse = String()
     var lat = Double()
     var long = Double()
     
-    var cards = [RestaurantCard]()
     let device = Device()
     var plusDevices = [Device]()
     var smallDevices = [Device]()
@@ -287,6 +299,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func setupView() {
         
+        loadingAnimator(.unhide) // unhide loading view
+        
         // notification observer
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateDislikes), name: .applicationWillResignActive, object: nil)
         
@@ -297,17 +311,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         
         self.thatsAllFolks.text = "That's All Folks!"
         self.selectedSortBy = "best_match"
-        self.sortedBy.text = "Sorted by " + sortByItems[0]
+        self.sortedBy.text = "Sorting by " + sortByItems[0]
         self.loadingIndicator.hidesWhenStopped = true
         connectionTimerView.isHidden = true
         connectionTimerButton.addTarget(self, action: #selector(reloadView), for: .touchUpInside)
-        loadingAnimator(.unhide) // unhide loading view
         
         self.categoriesTableView.dataSource = self
         self.categoriesTableView.delegate = self
-        
-        self.sortByTableView.dataSource = self
-        self.sortByTableView.delegate = self
         
         // set images
         let settingsImage = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
@@ -372,7 +382,14 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         // table views
         
         categoriesTableView.backgroundColor = UIColor.darkGray
-        sortByTableView.backgroundColor = UIColor.darkGray
+        sortByColletionView.backgroundColor = UIColor.darkGray
+        
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.itemSize = CGSize(width: sortByColletionView.bounds.size.width / 2, height: sortByColletionView.bounds.size.height / 2)
+        layout.minimumInteritemSpacing = 0
+        layout.minimumLineSpacing = 0
+        sortByColletionView!.collectionViewLayout = layout
         
     }
     
@@ -904,12 +921,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             self.getCategories(completionHandler: { (success) in
                 
                 if success {
-                    self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView and sortByTableView
+                    self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView
                     
                     DispatchQueue.main.async {
                         self.currentCategory.text = self.categories[0]
                         self.categoriesTableView.reloadData()
-                        self.sortByTableView.reloadData()
                     }
                 } else {
                     self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
@@ -936,7 +952,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
             self.cards.removeAll()
             categoriesSearchBar.resignFirstResponder() // get rid of keyboard
             loadingAnimator(.unhide) // open loading view before closing categories for better effect
-            openCategories()
+            openCategories() // TODO: fix header view poping up before loading shows when done button pressed
             
         }
         
@@ -1054,7 +1070,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 self.categories.insert("All Types", at: 0)
                 DispatchQueue.main.async {
                     self.categoriesTableView.reloadData()
-                    self.sortByTableView.reloadData()
                 }
                 self.selectedCategory = "All Types"
                 
@@ -1623,11 +1638,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
                 let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! CategoryTableViewCell
                 cell.setSelected(true, animated: true)
                 
-            } else if tableView == sortByTableView && indexPath.row == 0 {
-                
-                let cell = tableView.dequeueReusableCell(withIdentifier: "sortCell") as! CategoryTableViewCell
-                cell.setSelected(true, animated: true)
-                
             }
             
         }
@@ -1652,7 +1662,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         } else {
             
             var sortBy = sortByItems[indexPath.row]
-            self.sortedBy.text = "Sort by " + sortBy
+            self.sortedBy.text = "Sorting by " + sortBy
             sortBy = sortBy.replacingOccurrences(of: " ", with: "_")
             sortBy = sortBy.lowercased()
             self.selectedSortBy = sortBy
@@ -1665,49 +1675,69 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if tableView == categoriesTableView {
-            
-            if categoriesSearchBar.alpha == 1 {
-                return filteredCategories.count
-            } else {
-                return self.categories.count
-            }
-            
+        if categoriesSearchBar.alpha == 1 {
+            return filteredCategories.count
         } else {
-            
-            return self.sortByItems.count
-            
+            return self.categories.count
         }
-        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        if tableView == categoriesTableView {
-            
-            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
-            
-            if categoriesSearchBar.alpha == 1 {
-                cell.categoryLabel.text = filteredCategories[indexPath.row]
-            } else {
-                cell.categoryLabel.text = categories[indexPath.row]
-            }
-            
-            return cell
-            
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
+        
+        if categoriesSearchBar.alpha == 1 {
+            cell.categoryLabel.text = filteredCategories[indexPath.row]
         } else {
-            
-            let cell = tableView.dequeueReusableCell(withIdentifier: "sortCell", for: indexPath) as! CategoryTableViewCell
-            
-            cell.categoryLabel.text = sortByItems[indexPath.row]
-            
-            let newSelectionView = UIView(frame: cell.bounds)
-            newSelectionView.backgroundColor = UIColor.darkGray.darken(byPercentage: 0.2)
-            
-            cell.selectedBackgroundView = newSelectionView
-            
-            return cell
+            cell.categoryLabel.text = categories[indexPath.row]
         }
+        
+        return cell
+        
+    }
+    
+    // MARK: - Collection view
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return sortByItems.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        var sortBy = sortByItems[indexPath.row]
+        self.sortedBy.text = "Sorting by " + sortBy
+        sortBy = sortBy.replacingOccurrences(of: " ", with: "_")
+        sortBy = sortBy.lowercased()
+        self.selectedSortBy = sortBy
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "sortByCell", for: indexPath) as! SortByCollectionCell
+        
+        let sortTitle = sortByItems[indexPath.row]
+        cell.sortByLabel.text = sortTitle
+        cell.sortByLabel.textColor = UIColor.white
+        
+        let newSelectionView = UIView(frame: cell.bounds)
+        newSelectionView.backgroundColor = UIColor.darkGray.darken(byPercentage: 0.2)
+        cell.selectedBackgroundView = newSelectionView
+        
+        return cell
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let width = collectionView.bounds.size.width
+        let height = collectionView.bounds.size.height
+        
+        return CGSize(width: width / 2, height: height / 2)
         
     }
     
@@ -1733,6 +1763,14 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, Settin
         openSearchBar()
         self.categoriesSearchBar.text = "" // clears potential remaining text
         self.categoriesTableView.reloadData() // get rid of potential filtered searches remaining in table view
+        
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        openSearchBar()
+        self.categoriesSearchBar.text = "" // clears potential remaining text
+        // self.categoriesTableView.reloadData() // get rid of potential filtered searches remaining in table view
         
     }
 

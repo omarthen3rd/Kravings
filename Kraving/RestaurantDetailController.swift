@@ -130,6 +130,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     @IBOutlet var timingsDoneButton: UIButton!
     @IBOutlet var timingsContainerView: UIView!
     @IBOutlet var timingsTableView: UITableView!
+    @IBOutlet var timingsRedoButton: UIButton!
     
     @IBOutlet var alertView: VisualEffectView!
     @IBOutlet var alertViewLabel: UILabel!
@@ -257,7 +258,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantPhone.textColor = contrastColor
         
         // does timings and sets everything
-        doTimings()
+        doTimings() // sets/sorts timings for todays day
         restaurantTimingsTitle.textColor = contrastColor.withAlphaComponent(0.7)
         restaurantTimingsLabel.textColor = contrastColor
         restaurantTimingsLabel.text = "Loading..."
@@ -317,6 +318,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
         restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
         restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
+        timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
         
         // Other UI setup (timings/reviews)
         
@@ -352,7 +354,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         containerBackgroundBlur.alpha = 0
         
         getReviews()
-        getTimings()
+        getTimings() // gets general timings for tableview
         
         // timings view coloring
         timingsDoneButton.backgroundColor = contrastColor
@@ -363,6 +365,12 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         timingsOpenOrClose.text = "LOADING..."
         updateOpenCloseLabel()
+        
+        let refreshImage = #imageLiteral(resourceName: "btn_refresh").withRenderingMode(.alwaysTemplate)
+        timingsRedoButton.setImage(refreshImage, for: .normal)
+        timingsRedoButton.tintColor = contrastColor
+        timingsRedoButton.imageView?.tintColor = contrastColor
+        timingsRedoButton.imageView?.contentMode = .scaleAspectFit
         
         // reviews view coloring
         reviewsDoneButton.backgroundColor = contrastColor
@@ -1315,6 +1323,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             
             self.restaurantTimings = newTimings
             
+            self.timingsTableView.isUserInteractionEnabled = true
+            
             
         } else {
             
@@ -1351,6 +1361,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                 let newTimings = timingsDictTemp.sorted(by: { $0.0 < $1.0 })
                 self.restaurantTimings = newTimings
                 
+                self.timingsTableView.isUserInteractionEnabled = true
+                
             } else {
                 // a full week, everything is good
                 var index = 0
@@ -1367,9 +1379,22 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                 let newTimings = timingsDictTemp.sorted(by: { $0.0 < $1.0 })
                 self.restaurantTimings = newTimings
                 
+                self.timingsTableView.isUserInteractionEnabled = true
+                
             }
             
         }
+        
+    }
+    
+    func redoTimings() {
+        
+        self.timingsTableView.isUserInteractionEnabled = false
+        
+        self.currentTimings.removeAll()
+        self.restaurantTimings.removeAll()
+        
+        getTimings()
         
     }
     
