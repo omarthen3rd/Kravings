@@ -120,8 +120,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     @IBOutlet var reviewsTitleLabel: UILabel!
     @IBOutlet var reviewsDoneButton: UIButton!
     @IBOutlet var reviewsStarView: CosmosView!
+    @IBOutlet var reviewsMakeReview: UIButton!
     @IBOutlet var reviewsContainerView: UIView!
     @IBOutlet var reviewsTableView: UITableView!
+    @IBOutlet var reviewsTextView: UITextView!
     
     @IBOutlet var timingsTitleLabel: UILabel!
     @IBOutlet var timingsOpenOrClose: UILabel!
@@ -155,6 +157,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     var restaurantSource: RestaurantSource = .likes
     var removeDelegate: RemoveFromArray?
     var statusBarDelegate: UpdateStatusBar?
+    
+    var avgColor = UIColor()
+    var contrastColor = UIColor()
     
     private var pullToDismiss: PullToDismiss?
     
@@ -191,8 +196,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         guard let restaurant = restaurant else { return }
         
-        let avgColor = UIColor(averageColorFrom: restaurant.image!)
-        let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: true)
+        avgColor = UIColor(averageColorFrom: restaurant.image!)
+        contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: true)
         
         // Immediate visible UI setup
         restaurantPhotoBlur.colorTint = contrastColor
@@ -309,6 +314,11 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.tintColor = contrastColor
         restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
         
+        reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
+        reviewsMakeReview.imageView?.tintColor = contrastColor
+        reviewsMakeReview.tintColor = contrastColor
+        reviewsMakeReview.imageView?.contentMode = .scaleAspectFit
+        
         // targets
         // restaurantTimingsButton target is added in doTimings() function
         restaurantReviewsButton.addTarget(self, action: #selector(openReviewView), for: .touchUpInside)
@@ -319,6 +329,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
         restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
         timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
+        reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
         
         // Other UI setup (timings/reviews)
         
@@ -330,6 +341,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         self.timingsTableView.reloadData()
         self.timingsTableView.delegate = self
         self.timingsTableView.dataSource = self
+        self.timingsTableView.backgroundColor = contrastColor
         timingsContainerView.isHidden = false // will now use blur effect == nil to open/close view
         timingsContainerView.alpha = 0
         
@@ -341,6 +353,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         self.reviewsTableView.reloadData()
         self.reviewsTableView.delegate = self
         self.reviewsTableView.dataSource = self
+        self.reviewsTableView.backgroundColor = contrastColor
         reviewsContainerView.isHidden = false // will now use blur effect == nil to open/close view
         reviewsContainerView.alpha = 0
         
@@ -401,7 +414,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             pullToDismiss = PullToDismiss(scrollView: scrollView, viewController: self)
             pullToDismiss?.delegate = self
             pullToDismiss?.dismissableHeightPercentage = 0.45
-            pullToDismiss?.backgroundEffect = BlurEffect(color: UIColor.white, alpha: 0.3, blurRadius: 30, saturationDeltaFactor: 1.8)
             pullToDismiss?.dismissAction = {
                 
                 self.dismissViewThing()
@@ -435,6 +447,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         reviewsTableView.clipsToBounds = true
         reviewsTableView.layer.cornerRadius = radius
+        
+        reviewsTextView.clipsToBounds = true
+        reviewsTextView.layer.cornerRadius = radius
         
         timingsDoneButton.clipsToBounds = true
         timingsDoneButton.layer.cornerRadius = radius
@@ -1060,6 +1075,57 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             }
             
         }
+        
+    }
+    
+    func openSubmitReviewView() {
+        
+        reviewsTextView.isHidden = reviewsTableView.isHidden // open text view
+        reviewsTableView.isHidden = !reviewsTextView.isHidden // hide table view
+        
+        
+        makeReviewView()
+        
+    }
+    
+    func makeReviewView() {
+        
+        // add inputAccessoryView (view attatched to keyboard)
+        
+        let accessoryView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 52))
+        accessoryView.backgroundColor = contrastColor
+        accessoryView.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.reviewsTextView.inputAccessoryView = accessoryView
+        
+        let submitButton = UIButton(type: .custom)
+        submitButton.setTitle("Submit", for: [])
+        submitButton.setTitleColor(contrastColor, for: [])
+        submitButton.backgroundColor = avgColor
+        submitButton.layer.cornerRadius = 10
+        submitButton.clipsToBounds = true
+        submitButton.heightAnchor.constraint(equalToConstant: 52)
+        
+        let cancelButton = UIButton(type: .custom)
+        cancelButton.setTitle("Cancel", for: [])
+        cancelButton.setTitleColor(contrastColor, for: [])
+        cancelButton.backgroundColor = avgColor
+        cancelButton.layer.cornerRadius = 10
+        cancelButton.clipsToBounds = true
+        cancelButton.heightAnchor.constraint(equalToConstant: 52)
+        
+        let stackView = UIStackView(arrangedSubviews: [cancelButton, submitButton])
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.spacing = 8
+        stackView.distribution = .equalSpacing
+        
+        accessoryView.addSubview(stackView)
+        
+        stackView.leadingAnchor.constraint(equalTo: accessoryView.leadingAnchor, constant: 8)
+        stackView.trailingAnchor.constraint(equalTo: accessoryView.trailingAnchor, constant: 8)
+        stackView.topAnchor.constraint(equalTo: accessoryView.topAnchor, constant: 8)
+        stackView.bottomAnchor.constraint(equalTo: accessoryView.bottomAnchor, constant: 8)
         
     }
     
@@ -1718,6 +1784,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             cell.textReview.text = currentReview.reviewText
             cell.timeOfReview.text = currentReview.reviewTime
             
+            cell.name.textColor = avgColor.darken(byPercentage: 0.25)
+            cell.textReview.textColor = avgColor.darken(byPercentage: 0.25)
+            cell.timeOfReview.textColor = avgColor.darken(byPercentage: 0.25)
+            
             return cell
             
         } else {
@@ -1734,10 +1804,13 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             
             if cell.day.text == today {
                 // bold text if timing is today
-                cell.day.font = UIFont.systemFont(ofSize: 19, weight: UIFontWeightSemibold)
-                cell.hours.font = UIFont.systemFont(ofSize: 19, weight: UIFontWeightSemibold)
+                cell.day.font = UIFont.systemFont(ofSize: 19, weight: UIFontWeightBold)
+                cell.hours.font = UIFont.systemFont(ofSize: 19, weight: UIFontWeightBold)
                 
             }
+            
+            cell.day.textColor = avgColor.darken(byPercentage: 0.25)
+            cell.hours.textColor = avgColor.darken(byPercentage: 0.25)
             
             return cell
             
