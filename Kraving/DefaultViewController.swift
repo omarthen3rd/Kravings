@@ -1424,10 +1424,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         let requiredOffsetFromCenter: CGFloat = 15
         
         guard let card = sender.view else { return }
+        guard let cardRestaurant = card as? RestaurantCard else { return }
         let statusBar = UIApplication.shared.statusBarFrame
         
         let panLocationInView = sender.location(in: view)
         let panLocationInCard = sender.location(in: cards[0])
+        
+        let xFromCenter = card.center.x - view.center.x
         
         switch sender.state {
         case .began:
@@ -1452,6 +1455,22 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 cardIntersectsWithStatusBar = true
             }
             
+            if xFromCenter > 0 {
+                // show likes
+                cardRestaurant.thumbsUpDown.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
+                cardRestaurant.thumbsUpDown.tintColor = UIColor.flatWhite
+                cardRestaurant.thumbsUpDownVisual.colorTint = UIColor.flatGreen
+                
+            } else {
+                // show dislikes
+                cardRestaurant.thumbsUpDown.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
+                cardRestaurant.thumbsUpDown.tintColor = UIColor.flatWhite
+                cardRestaurant.thumbsUpDownVisual.colorTint = UIColor.flatRed
+                
+            }
+            
+            cardRestaurant.thumbsUpDownVisual.alpha = abs(xFromCenter) / (view.center.x - 30)
+            
         case .ended:
             
             dynamicAnimator.removeAllBehaviors()
@@ -1467,6 +1486,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 // snap to center
                 let snapBehavior = UISnapBehavior(item: cards[0], snapTo: self.cardPlaceholder.center)
                 dynamicAnimator.addBehavior(snapBehavior)
+                cardRestaurant.thumbsUpDownVisual.alpha = 0
                 self.statusBarShouldBeHidden = false
                 UIView.animate(withDuration: 0.25) {
                     self.setNeedsStatusBarAppearanceUpdate()

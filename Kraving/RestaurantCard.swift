@@ -17,6 +17,9 @@ class RestaurantCard: UIView {
     
     @IBOutlet var stuffContainer: UIView!
     
+    @IBOutlet var thumbsUpDownVisual: VisualEffectView!
+    @IBOutlet var thumbsUpDown: UIImageView!
+    
     @IBOutlet var featuredImageView: UIImageView!
     @IBOutlet var imageView2: UIImageView!
 
@@ -99,6 +102,13 @@ class RestaurantCard: UIView {
                 restaurantPriceAndDistance.font = UIFont.systemFont(ofSize: 18, weight: UIFontWeightLight)
                 restaurantStars.settings.starSize = 21
             }
+            
+            thumbsUpDownVisual.blurRadius = 20
+            thumbsUpDownVisual.colorTintAlpha = 0.4
+            thumbsUpDownVisual.scale = 1
+            thumbsUpDownVisual.alpha = 0
+            
+            thumbsUpDown.alpha = 1
             
             self.layoutSubviews()
             
