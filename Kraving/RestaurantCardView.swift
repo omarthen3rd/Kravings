@@ -48,16 +48,14 @@ extension UILabel {
 class RestaurantCardView: UIView {
 
     let defaults = UserDefaults.standard
-    var thumbsUpDownVisual = VisualEffectView()
+    var thumbsUpDownView = UIView()
     var thumbsUpDownImage = UIImageView()
     var smallDevices = [Device]()
     
     var restaurant: Restaurant? {
         
         didSet {
-            
             commonInit()
-            
         }
         
     }
@@ -78,6 +76,11 @@ class RestaurantCardView: UIView {
         let width = self.bounds.size.width
         let height = self.bounds.size.height
         
+        let stuffContainer = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        stuffContainer.layer.cornerRadius = 15
+        stuffContainer.clipsToBounds = true
+        stuffContainer.backgroundColor = .clear
+        
         smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
         let deviceIsSmall = Device().isOneOf(smallDevices)
         
@@ -88,7 +91,7 @@ class RestaurantCardView: UIView {
         bgImageView.image = restaurant.image
         bgImageView.clipsToBounds = true
         bgImageView.contentMode = .scaleAspectFill
-        self.addSubview(bgImageView)
+        stuffContainer.addSubview(bgImageView)
         
         let containerHeight: CGFloat = deviceIsSmall ? 106 : 110
         
@@ -125,7 +128,6 @@ class RestaurantCardView: UIView {
         restaurantStars.settings.starSize = deviceIsSmall ? 21 : 23
         restaurantStars.contentMode = .right
         
-        print("restaurantCategory.totalY: \(restaurantCategory.totalY)")
         let restaurantPriceDistance = UILabel(frame: CGRect(x: 10, y: restaurantCategory.totalY + 4, width: width - 20, height: deviceIsSmall ? 21 : 23))
         restaurantPriceDistance.font = UIFont.systemFont(ofSize: deviceIsSmall ? 17 : 19, weight: UIFontWeightLight)
         restaurantPriceDistance.textColor = contrastColor
@@ -152,25 +154,26 @@ class RestaurantCardView: UIView {
         containerBlurView.contentView.addSubview(restaurantCategory)
         containerBlurView.contentView.addSubview(restaurantStars)
         containerBlurView.contentView.addSubview(restaurantPriceDistance)
-        addSubview(containerBlurView)
+        stuffContainer.addSubview(containerBlurView)
         
-        thumbsUpDownVisual = VisualEffectView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-        thumbsUpDownVisual.blurRadius = 20
-        thumbsUpDownVisual.colorTintAlpha = 0.4
-        thumbsUpDownVisual.scale = 1
-        thumbsUpDownVisual.alpha = 0
+        thumbsUpDownView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        thumbsUpDownView.alpha = 0
         
-        thumbsUpDownImage = UIImageView(frame: CGRect(x: thumbsUpDownVisual.center.x, y: thumbsUpDownVisual.center.y, width: width - 160, height: width - 160))
+        thumbsUpDownImage = UIImageView(frame: CGRect(x: 0, y: 0, width: width - 160, height: width - 160))
+        thumbsUpDownImage.center = thumbsUpDownView.center
         
-        thumbsUpDownVisual.contentView.addSubview(thumbsUpDownImage)
-        thumbsUpDownVisual.layoutSubviews()
-        addSubview(thumbsUpDownVisual)
-        bringSubview(toFront: thumbsUpDownVisual)
+        thumbsUpDownView.addSubview(thumbsUpDownImage)
+        thumbsUpDownView.layoutSubviews()
+        stuffContainer.addSubview(thumbsUpDownView)
+        stuffContainer.bringSubview(toFront: thumbsUpDownView)
         
+        addSubview(stuffContainer)
         self.layoutSubviews()
         
         self.layer.cornerRadius = 15
         self.clipsToBounds = true
+        
+        self.backgroundColor = .clear
         
     }
     

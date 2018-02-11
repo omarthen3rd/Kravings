@@ -1311,7 +1311,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         firstCard.center = self.cardPlaceholder.center
         firstCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openCardDetail)))
         firstCard.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleCardPan)))
-        // shadowTo(firstCard, shouldRemove: false) // add shadow to card
+        shadowTo(firstCard, shouldRemove: false) // add shadow to card
         
         // the next 3 cards in the deck
         for i in 1...3 {
@@ -1369,7 +1369,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     self.restaurantIndex += 1
                     card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.openCardDetail)))
                     card.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.handleCardPan)))
-                    // self.shadowTo(card, shouldRemove: false) // add shadow to card
+                    self.shadowTo(card, shouldRemove: false) // add shadow to card
                 }
             })
             
@@ -1457,15 +1457,15 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 // show likes
                 cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
                 cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
-                cardRestaurant.thumbsUpDownVisual.colorTint = UIColor.flatGreen
+                cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatGreen
             } else if cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter) {
                 // show dislikes
                 cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
                 cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
-                cardRestaurant.thumbsUpDownVisual.colorTint = UIColor.flatRed
+                cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatRed
             }
             
-            cardRestaurant.thumbsUpDownVisual.alpha = abs(xFromCenter) / (view.center.x - 40)
+            cardRestaurant.thumbsUpDownView.alpha = abs(xFromCenter) / (view.center.x - 40)
             
         case .ended:
             
@@ -1482,8 +1482,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 // snap to center
                 let snapBehavior = UISnapBehavior(item: cards[0], snapTo: self.cardPlaceholder.center)
                 dynamicAnimator.addBehavior(snapBehavior)
+                
                 UIView.animate(withDuration: 0.2, animations: {
-                    cardRestaurant.thumbsUpDownVisual.alpha = 0
+                    cardRestaurant.thumbsUpDownImage.image = nil
+                    cardRestaurant.thumbsUpDownView.backgroundColor = nil
+                    cardRestaurant.thumbsUpDownView.alpha = 0
                 })
                 self.statusBarShouldBeHidden = false
                 UIView.animate(withDuration: 0.25) {
@@ -1520,7 +1523,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     self.addToDislikes(true)
                 }
                 UIView.animate(withDuration: 0.2, animations: {
-                    cardRestaurant.thumbsUpDownVisual.alpha = 1
+                    cardRestaurant.thumbsUpDownView.alpha = 1
                 })
                 
                 self.statusBarShouldBeHidden = false
@@ -1584,11 +1587,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         if shouldRemove {
             
-            UIView.animate(withDuration: 0.5, animations: {
-                
-                card.layer.shadowOpacity = 0
-                
-            })
+            let animation = CABasicAnimation(keyPath: "shadowOpacity")
+            animation.fromValue = card.layer.shadowOpacity
+            animation.toValue = 0.0
+            animation.duration = 0.3
+            card.layer.add(animation, forKey: animation.keyPath)
+            card.layer.shadowOpacity = 0.0
             
             card.layer.shadowPath = nil
             
@@ -1600,11 +1604,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             card.layer.shadowRadius = 15
             card.layer.shadowPath = UIBezierPath(roundedRect: card.bounds, cornerRadius: 20).cgPath
             
-            UIView.animate(withDuration: 0.5, animations: {
-                
-                card.layer.shadowOpacity = 1
-                
-            })
+            let animation = CABasicAnimation(keyPath: "shadowOpacity")
+            animation.fromValue = card.layer.shadowOpacity
+            animation.toValue = 1.0
+            animation.duration = 0.3
+            card.layer.add(animation, forKey: animation.keyPath)
+            card.layer.shadowOpacity = 1.0
             
         }
         

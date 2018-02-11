@@ -1665,7 +1665,7 @@
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="15"/>
+                                        <integer key="value" value="20"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </visualEffectView>
@@ -1732,7 +1732,7 @@
     </scenes>
     <resources>
         <image name="AppIconShow" width="360" height="360"/>
-        <image name="addressViewWallpaper" width="3680" height="2456"/>
+        <image name="addressViewWallpaper" width="420" height="910"/>
         <image name="btn_closeView" width="20" height="20"/>
         <image name="btn_openFavourites_selected" width="124" height="110"/>
     </resources>

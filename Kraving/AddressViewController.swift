@@ -100,13 +100,13 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
         // backgroundBlur.blurRadius = 35
         // backgroundBlur.scale = 1.0
         
-        backgroundBlur.effect = UIBlurEffect(style: .light)
+        backgroundBlur.effect = nil // UIBlurEffect(style: .light)
         
         // table view ui
         searchesTableView.backgroundColor = UIColor.clear
         searchesTableView.contentOffset = CGPoint(x: 0, y: -50)
         searchesTableView.separatorColor = UIColor.clear
-        searchesTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.light)
+        searchesTableView.separatorEffect = UIBlurEffect(style: UIBlurEffectStyle.regular)
         searchesTableView.separatorStyle = .singleLine
         searchesTableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         
