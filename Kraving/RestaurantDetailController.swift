@@ -608,8 +608,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                                 
                                 let openOrCloseText = self.isRestaurantOpen ? "OPEN NOW" : "CLOSED NOW"
                                 
-                                // self.restaurantTimingsLabel.text = self.restaurantTimingsLabel.text! + "\(day.startTime) to " + "\(day.endTime) ⋅ \(openOrCloseText)"
-                                
                                 stringy += "\(day.startTime) to " + "\(day.endTime) ⋅ \(openOrCloseText)"
                                 
                                 attrString = NSMutableAttributedString(string: stringy)
@@ -641,7 +639,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                             attrString.setBoldForText(openOrCloseText)
                             self.restaurantTimingsLabel.attributedText = attrString
                             
-                            // self.restaurantTimingsLabel.text = "\(operationDay.startTime) to " + "\(operationDay.endTime) ⋅ \(openOrCloseText)"
                             break // break when restaurant timing is found
                             
                         } else if operationDay.day != self.getCurrentDay() {
@@ -1460,7 +1457,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         self.currentTimings.removeAll()
         self.restaurantTimings.removeAll()
         
-        getTimings()
+        DispatchQueue.main.async {
+            self.getTimings()
+        }
         
     }
     

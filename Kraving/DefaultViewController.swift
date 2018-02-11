@@ -176,8 +176,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     var feedbackGenerator = UIImpactFeedbackGenerator()
     var defaults = UserDefaults.standard
-        
-    var divisor: CGFloat!
     
     var categories = [String]()
     var filteredCategories = [String]()
@@ -194,7 +192,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     var likes = [Restaurant]()
     var dislikes = [Restaurant]()
     var restaurantIndex = 0
-    var cards = [RestaurantCard]()
+    var cards = [RestaurantCardView]()
     
     var locationManager = CLLocationManager()
     var locationToUse = String()
@@ -246,7 +244,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
 
         // Do any additional setup after loading the view.
         
-        divisor = (view.frame.width / 2) / 0.61
         dynamicAnimator = UIDynamicAnimator(referenceView: self.view)
         setDefaults()
         setupView()
@@ -1291,12 +1288,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         for i in 0...self.restaurants.count - 1 {
             
-            let card = RestaurantCard(frame: CGRect(x: 0, y: 0, width: self.view.frame.width - 32, height: self.cardPlaceholder.bounds.size.height - 40))
+            let card = RestaurantCardView(frame: CGRect(x: 0, y: 0, width: cardPlaceholder.bounds.size.width, height: cardPlaceholder.bounds.size.height))
             card.restaurant = self.restaurants[i]
             self.cards.append(card)
             
         }
         
+        // layout the first 4 cards for the user
         self.layoutCards()
         
     }
@@ -1313,7 +1311,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         firstCard.center = self.cardPlaceholder.center
         firstCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openCardDetail)))
         firstCard.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleCardPan)))
-        shadowTo(firstCard, shouldRemove: false) // add shadow to card
+        // shadowTo(firstCard, shouldRemove: false) // add shadow to card
         
         // the next 3 cards in the deck
         for i in 1...3 {
@@ -1332,7 +1330,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
             // position each card so there's a set space (cardInteritemSpacing) between each card, to give it a fanned out look
             card.center.x = self.cardPlaceholder.center.x
-            card.frame.origin.y = cards[0].frame.origin.y - (CGFloat(i))
+            card.frame.origin.y = cards[0].frame.origin.y - (CGFloat(i) * cardInteritemSpacing)
             // workaround: scale causes heights to skew so compensate for it with some tweaking
             if i == 3 {
                 card.frame.origin.y += 1.5
@@ -1371,7 +1369,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     self.restaurantIndex += 1
                     card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.openCardDetail)))
                     card.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.handleCardPan)))
-                    self.shadowTo(card, shouldRemove: false) // add shadow to card
+                    // self.shadowTo(card, shouldRemove: false) // add shadow to card
                 }
             })
             
@@ -1421,10 +1419,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         // if we're in the process of hiding a card, don't let the user interace with the cards yet
         if cardIsHiding { return }
         // distance user must pan right or left to trigger an option
-        let requiredOffsetFromCenter: CGFloat = 15
+        let requiredOffsetFromCenter: CGFloat = 10
         
         guard let card = sender.view else { return }
-        guard let cardRestaurant = card as? RestaurantCard else { return }
+        guard let cardRestaurant = card as? RestaurantCardView else { return }
         let statusBar = UIApplication.shared.statusBarFrame
         
         let panLocationInView = sender.location(in: view)
@@ -1455,21 +1453,19 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 cardIntersectsWithStatusBar = true
             }
             
-            if xFromCenter > 0 {
+            if cards[0].center.x > (self.cardPlaceholder.center.x + requiredOffsetFromCenter) {
                 // show likes
-                cardRestaurant.thumbsUpDown.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
-                cardRestaurant.thumbsUpDown.tintColor = UIColor.flatWhite
+                cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
+                cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
                 cardRestaurant.thumbsUpDownVisual.colorTint = UIColor.flatGreen
-                
-            } else {
+            } else if cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter) {
                 // show dislikes
-                cardRestaurant.thumbsUpDown.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
-                cardRestaurant.thumbsUpDown.tintColor = UIColor.flatWhite
+                cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
+                cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
                 cardRestaurant.thumbsUpDownVisual.colorTint = UIColor.flatRed
-                
             }
             
-            cardRestaurant.thumbsUpDownVisual.alpha = abs(xFromCenter) / (view.center.x - 30)
+            cardRestaurant.thumbsUpDownVisual.alpha = abs(xFromCenter) / (view.center.x - 40)
             
         case .ended:
             
@@ -1486,7 +1482,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 // snap to center
                 let snapBehavior = UISnapBehavior(item: cards[0], snapTo: self.cardPlaceholder.center)
                 dynamicAnimator.addBehavior(snapBehavior)
-                cardRestaurant.thumbsUpDownVisual.alpha = 0
+                UIView.animate(withDuration: 0.2, animations: {
+                    cardRestaurant.thumbsUpDownVisual.alpha = 0
+                })
                 self.statusBarShouldBeHidden = false
                 UIView.animate(withDuration: 0.25) {
                     self.setNeedsStatusBarAppearanceUpdate()
@@ -1521,6 +1519,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     // dislike
                     self.addToDislikes(true)
                 }
+                UIView.animate(withDuration: 0.2, animations: {
+                    cardRestaurant.thumbsUpDownVisual.alpha = 1
+                })
                 
                 self.statusBarShouldBeHidden = false
                 UIView.animate(withDuration: 0.25) {

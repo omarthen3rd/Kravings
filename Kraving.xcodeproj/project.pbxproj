@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		562036231F7023A6004DF27B /* loadingLines.json in Resources */ = {isa = PBXBuildFile; fileRef = 56B7B1D01F6C6BBD00E5EB1F /* loadingLines.json */; };
 		56295FCB2024E55D00600A4F /* RestaurantDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */; };
+		562EE9B22030ACC8000BE07A /* RestaurantCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562EE9B12030ACC8000BE07A /* RestaurantCardView.swift */; };
 		5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */; };
 		5636C66A1F165F41006D41E6 /* Slidercell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5636C6671F165F41006D41E6 /* Slidercell.xib */; };
 		5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */; };
@@ -67,6 +68,7 @@
 
 /* Begin PBXFileReference section */
 		56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantDetailController.swift; sourceTree = "<group>"; };
+		562EE9B12030ACC8000BE07A /* RestaurantCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantCardView.swift; sourceTree = "<group>"; };
 		5636C6661F165F41006D41E6 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
 		5636C6671F165F41006D41E6 /* Slidercell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Slidercell.xib; sourceTree = "<group>"; };
 		5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderTableViewCell.swift; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 			children = (
 				56F5FC211F1037F600AF0B18 /* Restaurant.swift */,
 				565418631FE44B6300A2286B /* RestaurantCard.swift */,
+				562EE9B12030ACC8000BE07A /* RestaurantCardView.swift */,
 				565418651FE44DDD00A2286B /* RestaurantCard1.xib */,
 			);
 			name = "Restaurant Card";
@@ -491,6 +494,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				56F5FC221F1037F600AF0B18 /* Restaurant.swift in Sources */,
+				562EE9B22030ACC8000BE07A /* RestaurantCardView.swift in Sources */,
 				5637F47E2025F6720061987C /* UIImageEffects.swift in Sources */,
 				5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */,
 				56375B531F92357D001FCAFE /* Cells.swift in Sources */,
