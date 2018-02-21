@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let initialVC = storyboard.instantiateViewController(withIdentifier: "DefaultViewController") as! DefaultViewController
                     self.window?.rootViewController = initialVC
                     self.window?.makeKeyAndVisible()
-                    let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesViewController
+                    let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesContainerController") as! FavouritesContainerController
                     let nav = UINavigationController(rootViewController: favouritesVC)
                     initialVC.present(nav, animated: true, completion: nil)
                     
@@ -47,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let nav = UINavigationController(rootViewController: vc)
                     self.window?.rootViewController = nav
                     self.window?.makeKeyAndVisible()
-                    let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesViewController
+                    let favouritesVC = storyboard.instantiateViewController(withIdentifier: "FavouritesContainerController") as! FavouritesContainerController
                     let nav2 = UINavigationController(rootViewController: favouritesVC)
                     vc.present(nav2, animated: true, completion: nil)
                     

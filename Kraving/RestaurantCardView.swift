@@ -51,6 +51,7 @@ class RestaurantCardView: UIView {
     var thumbsUpDownView = UIView()
     var thumbsUpDownImage = UIImageView()
     var smallDevices = [Device]()
+    var cornerRadius = Float()
     
     var restaurant: Restaurant? {
         
@@ -80,6 +81,8 @@ class RestaurantCardView: UIView {
         stuffContainer.layer.cornerRadius = 15
         stuffContainer.clipsToBounds = true
         stuffContainer.backgroundColor = .clear
+        
+        cornerRadius = defaults.float(forKey: "cornerRadius")
         
         smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
         let deviceIsSmall = Device().isOneOf(smallDevices)
@@ -170,7 +173,7 @@ class RestaurantCardView: UIView {
         addSubview(stuffContainer)
         self.layoutSubviews()
         
-        self.layer.cornerRadius = 15
+        self.layer.cornerRadius = CGFloat(cornerRadius)
         self.clipsToBounds = true
         
         self.backgroundColor = .clear

@@ -11,17 +11,6 @@ import DeviceKit
 
 private let reuseIdentifier = "Cell"
 
-protocol RemoveFromMainArray {
-    
-    func removeWith(_ indexToRemove: Int)
-    
-}
-enum RestaurantSource {
-    
-    case likes, longTermFavourites, dislikes
-    
-}
-
 class FavouritesViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout, RemoveFromArray {
     
     var likes = [Restaurant]()
@@ -29,7 +18,7 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
     var restaurants = [Restaurant]()
     var filteredRestaurants = [Restaurant]()
     
-    var blurEffectView = UIVisualEffectView()
+    var blurEffectView = UIView()
     var noDataLabel = UILabel()
     let defaults = UserDefaults.standard
     
@@ -57,7 +46,7 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
             guard let index = indexToRemove else { return }
             
             if let del = removeDelegate {
-                del.removeWith(index)
+                del.removeWith(index, shouldRemoveAll: false)
             }
             
         }
@@ -115,15 +104,8 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         segment.selectedSegmentIndex = 0
         segment.addTarget(self, action: #selector(indexChanged(_:)), for: .valueChanged)
         
-        self.navigationItem.titleView = segment
-        
-        if #available(iOS 11.0, *) {
-            self.navigationItem.searchController = resultSearchController
-        } else {
-            navigationItem.prompt = "Favourites"
-            navigationItem.leftBarButtonItem = searchButton
-            collectionView?.contentOffset = CGPoint(x: 0, y: -150)
-        }
+        navigationItem.leftBarButtonItem = searchButton
+        collectionView?.contentOffset = CGPoint(x: 0, y: -150)
         
     }
     
@@ -185,19 +167,20 @@ class FavouritesViewController: UICollectionViewController, UICollectionViewDele
         noDataLabel.textAlignment = .center
         
         if message == "" {
-            for subView in blurEffectView.contentView.subviews {
+            
+            for subView in blurEffectView.subviews {
                 subView.removeFromSuperview() // to remove all the labels
             }
 
         } else {
             if !noDataLabel.isDescendant(of: blurEffectView) {
                 // if doesn't exist already, run this
-                for subView in blurEffectView.contentView.subviews {
+                for subView in blurEffectView.subviews {
                     // but remove anything just in case
                     subView.removeFromSuperview() // to remove all the labels
                 }
                 // numberOfSections is run multiple times, label is added multiple times
-                self.blurEffectView.contentView.addSubview(noDataLabel)
+                self.blurEffectView.addSubview(noDataLabel)
             }
         }
         

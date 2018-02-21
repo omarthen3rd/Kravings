@@ -13,6 +13,12 @@ import Alamofire
 import DeviceKit
 import NotificationCenter
 
+enum OpenClose {
+    
+    case open, close
+    
+}
+
 extension Notification.Name {
     static let applicationWillResignActive = Notification.Name(rawValue: "applicationWillResignActive")
 }
@@ -130,7 +136,7 @@ extension UIColor {
 }
 
 enum SourceOfFunction {
-    case settings, tableview, mainview
+    case settings, tableview, mainview, searchRadius
 }
 
 class SortByCollectionCell: UICollectionViewCell {
@@ -142,7 +148,10 @@ class SortByCollectionCell: UICollectionViewCell {
 
 class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UpdateStatusBar, RemoveFromMainArray, SettingsDelegate {
     
-    @IBOutlet var thatsAllFolks: UILabel!
+    @IBOutlet var emptyView: UIView!
+    @IBOutlet var emptyViewLabel: UILabel!
+    @IBOutlet var increaseRadius: UIButton!
+    
     @IBOutlet var loadingView: UIView!
     @IBOutlet var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet var loadingText: UILabel!
@@ -151,11 +160,13 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     @IBOutlet var connectionTimerButton: UIButton!
     
     @IBOutlet var headerView: UIView!
+    @IBOutlet var categoryTapView: UIView!
     @IBOutlet var currentCategory: UILabel!
+    @IBOutlet var categoriesBtn: UIButton!
     @IBOutlet var sortedBy: UILabel!
     @IBOutlet var settingsBtn: UIButton!
-    @IBOutlet var categoriesBtn: UIButton!
     @IBOutlet var favouritesBtn: UIButton!
+    
     
     @IBOutlet var cardPlaceholder: UIView!
     
@@ -187,6 +198,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     var connectionTimer = Timer()
     var counter = 0.0
+    var cornerRadius = Float()
     
     var restaurants = [Restaurant]()
     var likes = [Restaurant]()
@@ -223,14 +235,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        print("viewDidAppear")
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        print("ran viewWillAppear")
         
         statusBarShouldBeHidden = false
         UIView.animate(withDuration: 0.25) {
@@ -306,7 +314,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         self.view.backgroundColor = UIColor.newWhite
         
-        self.thatsAllFolks.text = "That's All Folks!"
+        self.emptyViewLabel.text = "That's All Folks"
         self.selectedSortBy = "best_match"
         self.sortedBy.text = "Sorting by " + sortByItems[0]
         self.loadingIndicator.hidesWhenStopped = true
@@ -336,8 +344,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         categoriesTitle.textColor = UIColor.newBlack
         sortByTitle.textColor = UIColor.newBlack
         
-        categoriesDoneButton.alpha = 0 // for animation stuff
-        
         // search bar
         
         categoriesSearchButton.tintColor = UIColor.newBlack
@@ -351,7 +357,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         categoriesSearchBar.barStyle = .default
         categoriesSearchBar.tintColor = UIColor.newBlack
         
-        categoriesBtn.addTarget(self, action: #selector(self.openCategories), for: .touchUpInside)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.openCategories))
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.numberOfTouchesRequired = 1
+        categoryTapView.addGestureRecognizer(tapGesture)
         categoriesDoneButton.addTarget(self, action: #selector(self.doneButtonCaller(_:)), for: .touchUpInside)
                 
         if CLLocationManager.locationServicesEnabled() && CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
@@ -376,7 +385,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         let favouritesShortcutItem = UIApplicationShortcutItem(type: "com.omar.kravings.openfavourites", localizedTitle: "Favourites", localizedSubtitle: "", icon: icon, userInfo: nil)
         UIApplication.shared.shortcutItems = [favouritesShortcutItem]
         
-        // table views
+        // table/collection view
         
         categoriesTableView.backgroundColor = UIColor.darkGray
         sortByColletionView.backgroundColor = UIColor.darkGray
@@ -387,6 +396,19 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         layout.minimumInteritemSpacing = 0
         layout.minimumLineSpacing = 0
         sortByColletionView!.collectionViewLayout = layout
+        
+        // increase radius button
+        
+        let isMetric = Locale.current.usesMetricSystem
+        let increaseTitle = isMetric ? "Increase Radius By 2 km" : "Increase Radius By 2 miles"
+        
+        increaseRadius.setTitle(increaseTitle, for: [])
+        increaseRadius.setTitleColor(UIColor.flatWhite, for: [])
+        increaseRadius.backgroundColor = UIColor.blue
+        increaseRadius.layer.cornerRadius = CGFloat(cornerRadius)
+        increaseRadius.clipsToBounds = true
+        
+        increaseRadius.addTarget(self, action: #selector(increaseSearchRadius), for: .touchUpInside)
         
     }
     
@@ -435,37 +457,47 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
         }
         
+        cornerRadius = defaults.float(forKey: "cornerRadius")
+        
     }
     
     func shouldHideCards(_ bool: Bool) {
+        
+        let yTranslation = CGFloat(Int(300 / 0.6))
         
         if bool {
             
             if self.cards.isEmpty {
                 
-                self.thatsAllFolks.alpha = 0
+                self.emptyView.alpha = 0
                 
             } else if self.cards.count <= 4 {
                 
-                self.thatsAllFolks.alpha = 0
+                self.emptyView.alpha = 0
                 
                 for i in 0...self.cards.count - 1 {
                     
-                    self.cards[i].alpha = 0
-                    self.cards[i].isUserInteractionEnabled = false
-                    self.cards[i].transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                        self.cards[i].alpha = 0
+                        self.cards[i].isUserInteractionEnabled = false
+                        self.cards[i].transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
+                        self.cards[i].transform = CGAffineTransform(translationX: 0, y: yTranslation)
+                    }, completion: nil)
 
                 }
                 
             } else {
                 
-                self.thatsAllFolks.alpha = 0
+                self.emptyView.alpha = 0
                 
                 for i in 0...4 {
                     
-                    self.cards[i].alpha = 0
-                    self.cards[i].isUserInteractionEnabled = false
-                    self.cards[i].transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                        self.cards[i].alpha = 0
+                        self.cards[i].isUserInteractionEnabled = false
+                        self.cards[i].transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
+                        self.cards[i].transform = CGAffineTransform(translationX: 0, y: yTranslation)
+                    }, completion: nil)
                     
                 }
                 
@@ -475,31 +507,35 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
             if self.cards.isEmpty {
                 
-                self.thatsAllFolks.alpha = 1
+                self.emptyView.alpha = 1
                 
             } else if self.cards.count <= 4 {
                 
-                self.thatsAllFolks.alpha = 1
+                self.emptyView.alpha = 1
                 
                 for i in 0...self.cards.count - 1 {
                     
-                    self.cards[i].alpha = 1
-                    self.cards[i].isUserInteractionEnabled = true
-                    self.cards[i].transform = CGAffineTransform.identity
-                    self.layoutCards()
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                        self.cards[i].alpha = 1
+                        self.cards[i].isUserInteractionEnabled = true
+                        self.cards[i].transform = CGAffineTransform.identity
+                        self.layoutCards()
+                    }, completion: nil)
                     
                 }
                 
             } else {
                 
-                self.thatsAllFolks.alpha = 1
+                self.emptyView.alpha = 1
                 
                 for i in 0...4 {
                     
-                    self.cards[i].alpha = 1
-                    self.cards[i].isUserInteractionEnabled = true
-                    self.cards[i].transform = CGAffineTransform.identity
-                    self.layoutCards()
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                        self.cards[i].alpha = 1
+                        self.cards[i].isUserInteractionEnabled = true
+                        self.cards[i].transform = CGAffineTransform.identity
+                        self.layoutCards()
+                    }, completion: nil)
                     
                 }
                 
@@ -511,55 +547,43 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func openCategories() {
         
-        let openView = UIViewPropertyAnimator(duration: 0.2, curve: .easeOut) {
+        let duration = 0.5
+        let dampingRatio: CGFloat = 0.9
+        let yTrans = CGFloat(Int(-300 / 0.6))
+        
+        let openView = UIViewPropertyAnimator(duration: duration, dampingRatio: dampingRatio) {
             
             self.headerView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
             self.headerView.alpha = 0
             
             self.shouldHideCards(true)
             
-            UIView.animate(withDuration: 0.4) {
-                
-            }
-            
             self.categoryAndSortByContainerView.transform = CGAffineTransform.identity
             self.categoryAndSortByContainerView.alpha = 1
             
-            self.categoriesDoneButton.transform = CGAffineTransform.identity
-            self.categoriesDoneButton.alpha = 1
-            
         }
         
-        let closeView = UIViewPropertyAnimator(duration: 0.2, curve: .easeIn) {
+        let closeView = UIViewPropertyAnimator(duration: duration, dampingRatio: dampingRatio) {
             
-            self.categoryAndSortByContainerView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+            self.categoryAndSortByContainerView.transform = CGAffineTransform(translationX: 0, y: yTrans)
             self.categoryAndSortByContainerView.alpha = 0
-            
-            self.categoriesDoneButton.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-            self.categoriesDoneButton.alpha = 0
             
             self.headerView.transform = CGAffineTransform.identity
             self.headerView.alpha = 1
             
-            UIView.animate(withDuration: 0.4) {
-                self.shouldHideCards(false)
-            }
+            self.shouldHideCards(false)
             
         }
         closeView.addCompletion { (position) in
             
             self.categoryAndSortByContainerView.isHidden = true
-            self.categoriesDoneButton.isHidden = true
             
         }
         
         if categoryAndSortByContainerView.isHidden == true {
             
-            self.categoryAndSortByContainerView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+            self.categoryAndSortByContainerView.transform = CGAffineTransform(translationX: 0, y: yTrans)
             self.categoryAndSortByContainerView.isHidden = false
-            
-            self.categoriesDoneButton.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-            self.categoriesDoneButton.isHidden = false
             
             openView.startAnimation()
             
@@ -867,11 +891,29 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
     }
     
-    func removeWith(_ indexToRemove: Int) {
+    func removeWith(_ indexToRemove: Int, shouldRemoveAll: Bool) {
         
         // func for protocol RemoveFromMainArray
         // for removing likes in main view when removed in FavouritesViewController
-        self.likes.remove(at: indexToRemove)
+        
+        if shouldRemoveAll {
+            self.likes.removeAll()
+        } else {
+            self.likes.remove(at: indexToRemove)
+        }
+        
+    }
+    
+    func removeFromDislikesWith(_ indexToRemove: Int, shouldRemoveAll: Bool) {
+        
+        // func for protocol RemoveFromMainArray
+        // for removing dislikes in main view when removed in FavouritesViewController
+        
+        if shouldRemoveAll {
+            self.dislikes.removeAll()
+        } else {
+            self.dislikes.remove(at: indexToRemove)
+        }
         
     }
     
@@ -907,7 +949,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
     }
     
-    func searchRestaurants(_ source: SourceOfFunction) {
+    func runCases(_ source: SourceOfFunction, completionHandler: @escaping (Bool) -> ()) {
         
         switch source {
         case .mainview:
@@ -921,6 +963,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView
                     
                     DispatchQueue.main.async {
+                        completionHandler(true)
                         self.currentCategory.text = self.categories[0]
                         self.categoriesTableView.reloadData()
                     }
@@ -940,87 +983,119 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             self.restaurants.removeAll()
             self.cards.removeAll()
             loadingAnimator(.unhide)
+            completionHandler(true)
             
         case .tableview:
             // runs when category/sort changes through table view
+            loadingAnimator(.unhide) // open loading view before closing categories for better effect
             self.updateDislikes()
             self.restaurantIndex = 0
             self.restaurants.removeAll()
             self.cards.removeAll()
             categoriesSearchBar.resignFirstResponder() // get rid of keyboard
-            loadingAnimator(.unhide) // open loading view before closing categories for better effect
             openCategories() // TODO: fix header view poping up before loading shows when done button pressed
+            completionHandler(true)
+            
+        case .searchRadius:
+            // runs when increasing just search radius
+            self.updateDislikes()
+            self.restaurantIndex = 0
+            self.restaurants.removeAll()
+            self.cards.removeAll()
+            loadingAnimator(.unhide)
+            completionHandler(true)
             
         }
         
-        // after all patterns have gone through, then search businesses is run
+    }
+    
+    func searchRestaurants(_ source: SourceOfFunction, _ restaurantsToRemove: [Restaurant]? = nil) {
         
-        self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
+        runCases(source) { (success) in
             
             if success {
                 
-                self.loadLongTermFavourites(completetionHandler: { (arr) in
+                self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
                     
-                    if let arr = arr {
-                        let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                    if success {
                         
-                        self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
-                    }
-                    
-                    self.loadDislikes(completetionHandler: { (arr) in
-                        
-                        if let arr = arr {
+                        self.loadLongTermFavourites(completetionHandler: { (arr) in
                             
-                            let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
-                            let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                            if let arr = arr {
+                                let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
+                                let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                                
+                                self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                            }
                             
-                            self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                            self.loadDislikes(completetionHandler: { (arr) in
+                                
+                                if let arr = arr {
+                                    
+                                    let mapped = Set(arr.map( {$0.id} )) // map out only id of longTermFavourites
+                                    let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                                    
+                                    self.restaurants = filteredRestaurants // replace restaurants with the filtered ones
+                                    
+                                }
+                                
+                            })
                             
-                        }
+                            self.filterOutNonRestaurants(completetionHandler: { (newArr) in
+                                
+                                if let newArr = newArr {
+                                    self.restaurants = newArr
+                                }
+                                
+                                // filter out session favourites too
+                                let mapped = self.likes.map( { $0.id } )
+                                let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                                self.restaurants = filteredRestaurants
+                                
+                                if let restaurantsToRemove = restaurantsToRemove {
+                                    if source == .searchRadius && !restaurantsToRemove.isEmpty {
+                                        
+                                        let mapped = restaurantsToRemove.map( { $0.id } )
+                                        let filteredRestaurants2 = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
+                                        self.restaurants = filteredRestaurants2
+                                        
+                                    }
+                                }
+                                
+                                DispatchQueue.main.async {
+                                    self.resetCards()
+                                    self.loadingAnimator(.hide)
+                                }
+                                
+                            })
+                            
+                        })
                         
-                    })
-                    
-                    self.filterOutNonRestaurants(completetionHandler: { (newArr) in
+                    } else {
                         
-                        if let newArr = newArr {
-                            self.restaurants = newArr
-                        }
+                        self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
                         
-                        // filter out session favourites too
-                        let mapped = self.likes.map( { $0.id } )
-                        let filteredRestaurants = self.restaurants.filter{ !mapped.contains($0.id) } // only return restaurants that don't match the mapped id
-                        self.restaurants = filteredRestaurants
-                        
-                        DispatchQueue.main.async {
-                            self.resetCards()
+                        if source == .tableview {
+                            
+                            let text = "No Results With Your Chosen Criteria \n \nTry Changing The Radius In Settings"
+                            let attributedString = NSMutableAttributedString(string: text)
+                            attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
+                            self.emptyViewLabel.attributedText = attributedString
+                            
+                            self.emptyViewLabel.numberOfLines = 0
                             self.loadingAnimator(.hide)
+                            
                         }
                         
-                    })
+                        
+                    }
                     
                 })
                 
-            } else {
-                
-                self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
-                
-                if source == .tableview {
-                    
-                    let text = "No Results With Your Chosen Criteria \n \nTry Changing The Radius In Settings"
-                    let attributedString = NSMutableAttributedString(string: text)
-                    attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
-                    self.thatsAllFolks.attributedText = attributedString
-                    
-                    self.thatsAllFolks.numberOfLines = 0
-                    self.loadingAnimator(.hide)
-                    
-                }
-                
-                
             }
             
-        })
+        }
+        
     }
     
     func reloadView() {
@@ -1032,10 +1107,39 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     func doneButtonCaller(_ button: UIButton) {
         
         if didSelectCell {
+            loadingAnimator(.unhide)
             handleTableViewTap()
             didSelectCell = false // reset for selecting again
+            openCategories()
+        } else {
+            openCategories()
         }
-        openCategories()
+        
+    }
+    
+    func increaseSearchRadius() {
+        
+        let isMetric = Locale.current.usesMetricSystem
+        
+        var searchRadius = defaults.integer(forKey: "searchRadius")
+        
+        if isMetric {
+            // meters
+            // increase search radius by 2000 m
+            searchRadius += 2000
+            
+        } else {
+            // miles
+            // increase search radius by 2 miles
+            searchRadius += 2
+            
+        }
+        
+        defaults.set(searchRadius, forKey: "searchRadius")
+        
+        let currentRestaurants = restaurants
+        
+        searchRestaurants(.searchRadius, currentRestaurants)
         
     }
     
@@ -1428,7 +1532,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         let panLocationInView = sender.location(in: view)
         let panLocationInCard = sender.location(in: cards[0])
         
-        let xFromCenter = card.center.x - view.center.x
+        let animationTiming: Double = 0.2
         
         switch sender.state {
         case .began:
@@ -1454,18 +1558,41 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             }
             
             if cards[0].center.x > (self.cardPlaceholder.center.x + requiredOffsetFromCenter) {
-                // show likes
-                cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
-                cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
-                cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatGreen
+                // show likes (going towards the right)
+                
+                UIView.animate(withDuration: animationTiming, animations: {
+                    
+                    cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
+                    cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
+                    cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatGreen
+                    
+                    if cardRestaurant.thumbsUpDownView.alpha == 0 {
+                        cardRestaurant.thumbsUpDownView.alpha = 1
+                    }
+                })
+                
             } else if cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter) {
-                // show dislikes
-                cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
-                cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
-                cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatRed
+                // show dislikes (going towards the left)
+                
+                UIView.animate(withDuration: animationTiming, animations: {
+                    
+                    cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
+                    cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
+                    cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatRed
+                    
+                    if cardRestaurant.thumbsUpDownView.alpha == 0 {
+                        cardRestaurant.thumbsUpDownView.alpha = 1
+                    }
+                })
+                
+            } else {
+                // fade it out (center)
+                
+                UIView.animate(withDuration: animationTiming, animations: {
+                    cardRestaurant.thumbsUpDownView.alpha = 0
+                })
+                
             }
-            
-            cardRestaurant.thumbsUpDownView.alpha = abs(xFromCenter) / (view.center.x - 40)
             
         case .ended:
             
@@ -1558,10 +1685,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                         self?.removeOldFrontCard()
                         self?.cardIsHiding = false
                         if (self?.cards.isEmpty)! {
-                            let text = "That's All Folks \n \nTry Changing The Radius In Settings"
-                            let attributedString = NSMutableAttributedString(string: text)
-                            attributedString.setSizeForText("Try Changing The Radius In Settings", with: 21)
-                            self?.thatsAllFolks.attributedText = attributedString
+                            let text = "That's All Folks"
+                            self?.emptyViewLabel.text = text
                             // disable buttons if empty here
                         }
                         // re-enable buttons after addToLikes/Dislikes function is run to prevent rapid tapping
@@ -1599,10 +1724,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         } else {
             
             card.clipsToBounds = false
-            card.layer.shadowColor = UIColor(averageColorFrom: self.restaurants[self.restaurantIndex].image!).withAlphaComponent(0.6).cgColor
+            card.layer.shadowColor = UIColor(averageColorFrom: self.restaurants[self.restaurantIndex].image!).withAlphaComponent(0.65).cgColor
             card.layer.shadowOffset = CGSize(width: 0, height: 8)
             card.layer.shadowRadius = 15
-            card.layer.shadowPath = UIBezierPath(roundedRect: card.bounds, cornerRadius: 20).cgPath
+            card.layer.shadowPath = UIBezierPath(roundedRect: card.bounds, cornerRadius: CGFloat(cornerRadius)).cgPath
             
             let animation = CABasicAnimation(keyPath: "shadowOpacity")
             animation.fromValue = card.layer.shadowOpacity
@@ -1816,7 +1941,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
             self.updateDislikes()
             
-            let destVC = (segue.destination as! UINavigationController).topViewController as? FavouritesViewController
+            let destVC = (segue.destination as! UINavigationController).topViewController as? FavouritesContainerController
             destVC?.likes = self.likes
             destVC?.removeDelegate = self
             

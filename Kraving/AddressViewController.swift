@@ -264,7 +264,7 @@ class AddressViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         // TODO: Fix nav bar not showing in presented vc
         
-        let vc = storyboard?.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesViewController
+        let vc = storyboard?.instantiateViewController(withIdentifier: "FavouritesViewController") as! FavouritesContainerController
         vc.segment.selectedSegmentIndex = 1
         self.navigationController?.present(vc, animated: true, completion: nil)
         

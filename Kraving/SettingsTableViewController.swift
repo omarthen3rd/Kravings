@@ -298,6 +298,7 @@ class SettingsTableViewController: UITableViewController {
             if isMetric {
                 
                 cell.slider.maximumValue = 40
+                // convert from meters to km
                 cell.radiusLabel.text = "\(defaultsValue / 1000) km"
                 cell.slider.value = Float(defaultsValue / 1000)
                 
