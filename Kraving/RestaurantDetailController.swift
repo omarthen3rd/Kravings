@@ -115,6 +115,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     @IBOutlet var restaurantMapsButton: UIButton!
     @IBOutlet var restaurantWebsiteButton: UIButton!
     
+    // App Button Outlets
+    @IBOutlet var restaurantOptionsView: UIView!
+    @IBOutlet var restaurantOptionsButton: UIButton!
+    
     @IBOutlet var containerBackgroundBlur: VisualEffectView!
     
     @IBOutlet var reviewsTitleLabel: UILabel!
@@ -314,6 +318,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.tintColor = contrastColor
         restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
         
+        restaurantOptionsView.backgroundColor = avgColor.withAlphaComponent(0.7)
+        
         reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
         reviewsMakeReview.imageView?.tintColor = contrastColor
         reviewsMakeReview.tintColor = contrastColor
@@ -330,6 +336,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
         timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
         reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
+        restaurantOptionsButton.addTarget(self, action: #selector(openRestaurantActionSheet), for: .touchUpInside)
         
         // Other UI setup (timings/reviews)
         
@@ -405,6 +412,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         // show/hide button in navigation bar
         if shouldHideStatus == false {
             // navigation bar is active
+            // TODO: 
             
             let barButton = UIBarButtonItem(barButtonSystemItem: .organize, target: self, action: #selector(self.openRestaurantActionSheet))
             self.navigationItem.rightBarButtonItem = barButton
@@ -441,6 +449,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         restaurantAppButtonsView.clipsToBounds = true
         restaurantAppButtonsView.layer.cornerRadius = radius
+        
+        restaurantOptionsView.clipsToBounds = true
+        restaurantOptionsView.layer.cornerRadius = radius
         
         timingsTableView.clipsToBounds = true
         timingsTableView.layer.cornerRadius = radius

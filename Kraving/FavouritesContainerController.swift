@@ -29,6 +29,8 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     
     @IBOutlet var collectionView: UICollectionView!
     @IBOutlet var segment: UISegmentedControl!
+    @IBOutlet var deleteAllButton: UIButton!
+    @IBOutlet var deleteAllButtonView: UIView!
     
     var likes = [Restaurant]()
     
@@ -98,7 +100,10 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     func setupView() {
         
         searchButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(openSearchBar))
-        trashButton = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(trashHandler))
+        trashButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(dismissViewThing))
+        
+        deleteAllButton.addTarget(self, action: #selector(trashHandler), for: .touchUpInside)
+        deleteAllButton.backgroundColor = UIColor.flatRed
         
         self.automaticallyAdjustsScrollViewInsets = false
         
@@ -121,14 +126,10 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         navigationItem.rightBarButtonItem = trashButton
         collectionView.contentOffset = CGPoint(x: 0, y: -150)
         
-        pullToDismiss = PullToDismiss(scrollView: collectionView)
-        pullToDismiss?.delegate = self
-        pullToDismiss?.dismissableHeightPercentage = 0.45
-        pullToDismiss?.dismissAction = {
-            
-            self.dismissViewThing()
-            
-        }
+        // pullToDismiss = PullToDismiss(scrollView: collectionView)
+        // pullToDismiss?.delegate = self
+        // pullToDismiss?.dismissableHeightPercentage = 0.45
+        // pullToDismiss?.dismissAction = { self.dismissViewThing() }
         
         fixNavBar()
         
@@ -425,7 +426,8 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         if restaurants.count > 0 {
             
             loadSadView("")
-            navigationItem.rightBarButtonItem?.isEnabled = true
+            self.deleteAllButtonView.isHidden = false
+            self.deleteAllButton.isEnabled = true
             return 1
             
         } else {
@@ -435,15 +437,18 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             switch arrSource {
             case .likes:
                 message = "No Favourites In This Session"
-                navigationItem.rightBarButtonItem?.isEnabled = false
+                self.deleteAllButtonView.isHidden = true
+                self.deleteAllButton.isEnabled = false
                 
             case .dislikes:
                 message = "No Dislikes Yet"
-                navigationItem.rightBarButtonItem?.isEnabled = false
+                self.deleteAllButtonView.isHidden = true
+                self.deleteAllButton.isEnabled = false
                 
             case .longTermFavourites:
                 message = "No Long Term Favourites Yet"
-                navigationItem.rightBarButtonItem?.isEnabled = false
+                self.deleteAllButtonView.isHidden = true
+                self.deleteAllButton.isEnabled = false
                 
             }
             
