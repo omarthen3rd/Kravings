@@ -164,6 +164,8 @@ class RestaurantCardView: UIView {
         
         thumbsUpDownImage = UIImageView(frame: CGRect(x: 0, y: 0, width: width - 160, height: width - 160))
         thumbsUpDownImage.center = thumbsUpDownView.center
+        thumbsUpDownImage.tintColor = UIColor.flatWhite
+
         
         thumbsUpDownView.addSubview(thumbsUpDownImage)
         thumbsUpDownView.layoutSubviews()

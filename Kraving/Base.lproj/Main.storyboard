@@ -1001,7 +1001,7 @@
                                 <blurEffect style="light"/>
                             </visualEffectView>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wGc-8N-nce">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RaH-2b-vEw">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="687"/>
@@ -1984,7 +1984,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="8xT-qr-rwj"/>
-        <segue reference="Hkm-ys-Cdh"/>
+        <segue reference="cVX-Ne-PWw"/>
         <segue reference="6ZC-dk-2ZL"/>
     </inferredMetricsTieBreakers>
 </document>

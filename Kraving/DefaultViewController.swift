@@ -1569,7 +1569,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 UIView.animate(withDuration: animationTiming, animations: {
                     
                     cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "happyHeart").withRenderingMode(.alwaysTemplate)
-                    cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
                     cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatGreen
                     
                     if cardRestaurant.thumbsUpDownView.alpha == 0 {
@@ -1584,7 +1583,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 UIView.animate(withDuration: animationTiming, animations: {
                     
                     cardRestaurant.thumbsUpDownImage.image = #imageLiteral(resourceName: "notHappyHeart").withRenderingMode(.alwaysTemplate)
-                    cardRestaurant.thumbsUpDownImage.tintColor = UIColor.flatWhite
                     cardRestaurant.thumbsUpDownView.backgroundColor = UIColor.flatRed
                     
                     if cardRestaurant.thumbsUpDownView.alpha == 0 {
@@ -1595,11 +1593,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 
             } else {
                 // fade it out (center)
-                /*
                 UIView.animate(withDuration: animationTiming, animations: {
                     cardRestaurant.thumbsUpDownView.alpha = 0
                 })
-                */
                 
             }
             

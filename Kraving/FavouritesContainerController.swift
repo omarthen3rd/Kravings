@@ -47,11 +47,13 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     var arrSource: RestaurantSource = .likes
     
     var removeAllSession = false
+    var isInEditingMode = false
     
     var resultSearchController = UISearchController(searchResultsController: nil)
     
+    var editButton = UIBarButtonItem()
     var searchButton = UIBarButtonItem()
-    var trashButton = UIBarButtonItem()
+    var closeViewButton = UIBarButtonItem()
     
     private var pullToDismiss: PullToDismiss?
     
@@ -99,8 +101,9 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     
     func setupView() {
         
+        editButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editHandler))
         searchButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(openSearchBar))
-        trashButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(dismissViewThing))
+        closeViewButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(dismissViewThing))
         
         deleteAllButton.addTarget(self, action: #selector(trashHandler), for: .touchUpInside)
         deleteAllButton.backgroundColor = UIColor.flatRed
@@ -122,8 +125,8 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         segment.selectedSegmentIndex = 0
         segment.addTarget(self, action: #selector(indexChanged(_:)), for: .valueChanged)
         
-        navigationItem.leftBarButtonItem = searchButton
-        navigationItem.rightBarButtonItem = trashButton
+        navigationItem.leftBarButtonItems = [editButton, searchButton]
+        navigationItem.rightBarButtonItem = closeViewButton
         collectionView.contentOffset = CGPoint(x: 0, y: -150)
         
         // pullToDismiss = PullToDismiss(scrollView: collectionView)
@@ -283,6 +286,20 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
     }
     
+    func editHandler() {
+        
+        isInEditingMode = !isInEditingMode
+        editButton.title = isInEditingMode ? "Edit" : "Done"
+        searchButton.isEnabled = !isInEditingMode
+        closeViewButton.isEnabled = !isInEditingMode
+        segment.isEnabled = !isInEditingMode
+        
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+        
+    }
+    
     func trashHandler() {
         
         var title = String()
@@ -314,13 +331,14 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
                 self.removeAllDislikes()
             
             case .likes:
-                print("ran this")
                 self.callRemoveDelegate()
             
             case .longTermFavourites:
                 self.removeAllLongTermFavourites()
                 
             }
+            
+            self.editHandler() // to go back to non editing mode
             
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -426,8 +444,8 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         if restaurants.count > 0 {
             
             loadSadView("")
-            self.deleteAllButtonView.isHidden = false
-            self.deleteAllButton.isEnabled = true
+            self.editButton.isEnabled = true
+            self.deleteAllButtonView.isHidden = !isInEditingMode
             return 1
             
         } else {
@@ -437,18 +455,18 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             switch arrSource {
             case .likes:
                 message = "No Favourites In This Session"
-                self.deleteAllButtonView.isHidden = true
-                self.deleteAllButton.isEnabled = false
+                self.editButton.isEnabled = isInEditingMode
+                self.deleteAllButtonView.isHidden = !isInEditingMode
                 
             case .dislikes:
                 message = "No Dislikes Yet"
-                self.deleteAllButtonView.isHidden = true
-                self.deleteAllButton.isEnabled = false
+                self.editButton.isEnabled = isInEditingMode
+                self.deleteAllButtonView.isHidden = !isInEditingMode
                 
             case .longTermFavourites:
                 message = "No Long Term Favourites Yet"
-                self.deleteAllButtonView.isHidden = true
-                self.deleteAllButton.isEnabled = false
+                self.editButton.isEnabled = isInEditingMode
+                self.deleteAllButtonView.isHidden = !isInEditingMode
                 
             }
             
@@ -474,15 +492,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
         let favourite: Restaurant
         
-        if resultSearchController.isActive {
-            
-            favourite = filteredRestaurants[indexPath.row]
-            
-        } else {
-            
-            favourite = restaurants[indexPath.row]
-            
-        }
+        favourite = resultSearchController.isActive ? filteredRestaurants[indexPath.row] : restaurants[indexPath.row]
         
         cell.restaurant = favourite
         
@@ -553,7 +563,7 @@ extension FavouritesContainerController: UISearchResultsUpdating, UISearchBarDel
             searchBar.resignFirstResponder()
             self.navigationItem.titleView = nil
             self.navigationItem.leftBarButtonItem = self.searchButton
-            self.navigationItem.rightBarButtonItem = self.trashButton
+            self.navigationItem.rightBarButtonItem = self.closeViewButton
             self.navigationController?.navigationBar.sizeToFit()
             
         }

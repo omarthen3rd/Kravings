@@ -8,7 +8,6 @@
 
 import UIKit
 import CoreLocation
-import PullToDismiss
 
 protocol SettingsDelegate {
     
@@ -95,8 +94,7 @@ class SettingsTableViewController: UITableViewController {
     var previousRadius = Int()
     var delegate: SettingsDelegate?
     var selectedIndex : NSInteger! = -1
-    
-    private var pullToDismiss: PullToDismiss?
+    var closeViewButton = UIBarButtonItem()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,14 +103,7 @@ class SettingsTableViewController: UITableViewController {
             self.navigationController?.navigationBar.prefersLargeTitles = false
         }
         
-        pullToDismiss = PullToDismiss(scrollView: tableView, viewController: self)
-        pullToDismiss?.delegate = self
-        pullToDismiss?.dismissableHeightPercentage = 0.45
-        pullToDismiss?.dismissAction = {
-            
-            self.dismissViewThing()
-            
-        }
+        closeViewButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(dismissViewThing))
         
         self.previousRadius = defaults.integer(forKey: "searchRadius")
         
@@ -122,6 +113,8 @@ class SettingsTableViewController: UITableViewController {
         tableView.register(UINib(nibName: "ButtonCell", bundle: nil), forCellReuseIdentifier: "ButtonCell")
         
         tableView.tableFooterView = UIView(frame: .zero)
+        
+        navigationItem.rightBarButtonItem = closeViewButton
         
     }
     
