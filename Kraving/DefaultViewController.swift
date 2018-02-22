@@ -314,15 +314,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         self.view.backgroundColor = UIColor.newWhite
         
-        self.emptyViewLabel.text = "That's All Folks"
-        self.selectedSortBy = "best_match"
-        self.sortedBy.text = "Sorting by " + sortByItems[0]
-        self.loadingIndicator.hidesWhenStopped = true
+        emptyView.alpha = 0
+        emptyViewLabel.text = "That's All Folks"
+        selectedSortBy = "best_match"
+        sortedBy.text = "Sorting by " + sortByItems[0]
+        loadingIndicator.hidesWhenStopped = true
         connectionTimerView.isHidden = true
         connectionTimerButton.addTarget(self, action: #selector(reloadView), for: .touchUpInside)
         
-        self.categoriesTableView.dataSource = self
-        self.categoriesTableView.delegate = self
+        categoriesTableView.dataSource = self
+        categoriesTableView.delegate = self
         
         // set images
         let settingsImage = #imageLiteral(resourceName: "btn_settings_selected").withRenderingMode(.alwaysTemplate)
@@ -507,11 +508,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
             if self.cards.isEmpty {
                 
-                self.emptyView.alpha = 1
+                // self.emptyView.alpha = 1
                 
             } else if self.cards.count <= 4 {
                 
-                self.emptyView.alpha = 1
+                // self.emptyView.alpha = 1
                 
                 for i in 0...self.cards.count - 1 {
                     
@@ -526,7 +527,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 
             } else {
                 
-                self.emptyView.alpha = 1
+                // self.emptyView.alpha = 1
                 
                 for i in 0...4 {
                     
@@ -553,7 +554,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         let openView = UIViewPropertyAnimator(duration: duration, dampingRatio: dampingRatio) {
             
-            self.headerView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+            self.headerView.transform = CGAffineTransform(translationX: 0, y: 900)
             self.headerView.alpha = 0
             
             self.shouldHideCards(true)
@@ -1073,7 +1074,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                         
                     } else {
                         
-                        self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
+                        // TODO: - fix error handling
                         
                         if source == .tableview {
                             
@@ -1083,7 +1084,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                             self.emptyViewLabel.attributedText = attributedString
                             
                             self.emptyViewLabel.numberOfLines = 0
+                            self.emptyView.alpha = 1
                             self.loadingAnimator(.hide)
+                            
+                        } else {
+                            
+                            self.loadingText.text = "An error has occured while getting restaurants. Please try again later."
                             
                         }
                         
@@ -1532,7 +1538,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         let panLocationInView = sender.location(in: view)
         let panLocationInCard = sender.location(in: cards[0])
         
-        let animationTiming: Double = 0.2
+        let animationTiming: Double = 0.1
         
         switch sender.state {
         case .began:
@@ -1569,6 +1575,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     if cardRestaurant.thumbsUpDownView.alpha == 0 {
                         cardRestaurant.thumbsUpDownView.alpha = 1
                     }
+                    
                 })
                 
             } else if cards[0].center.x < (self.view.center.x - requiredOffsetFromCenter) {
@@ -1583,14 +1590,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     if cardRestaurant.thumbsUpDownView.alpha == 0 {
                         cardRestaurant.thumbsUpDownView.alpha = 1
                     }
+                    
                 })
                 
             } else {
                 // fade it out (center)
-                
+                /*
                 UIView.animate(withDuration: animationTiming, animations: {
                     cardRestaurant.thumbsUpDownView.alpha = 0
                 })
+                */
                 
             }
             
@@ -1687,6 +1696,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                         if (self?.cards.isEmpty)! {
                             let text = "That's All Folks"
                             self?.emptyViewLabel.text = text
+                            self?.emptyView.alpha = 1
                             // disable buttons if empty here
                         }
                         // re-enable buttons after addToLikes/Dislikes function is run to prevent rapid tapping
@@ -1702,6 +1712,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 self.removeOldFrontCard()
                 if self.cards.isEmpty {
                     // disable buttons if empty here
+                    self.emptyView.alpha = 1
                 }
                 // re-enable buttons after addToLikes/Dislikes function is run to prevent rapid tapping
             })
@@ -1726,7 +1737,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             card.clipsToBounds = false
             card.layer.shadowColor = UIColor(averageColorFrom: self.restaurants[self.restaurantIndex].image!).withAlphaComponent(0.65).cgColor
             card.layer.shadowOffset = CGSize(width: 0, height: 8)
-            card.layer.shadowRadius = 15
+            card.layer.shadowRadius = 12
             card.layer.shadowPath = UIBezierPath(roundedRect: card.bounds, cornerRadius: CGFloat(cornerRadius)).cgPath
             
             let animation = CABasicAnimation(keyPath: "shadowOpacity")
@@ -1935,6 +1946,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             self.updateDislikes()
             
             let destVC = (segue.destination as! UINavigationController).topViewController as? SettingsTableViewController
+            destVC?.modalPresentationStyle = .overCurrentContext
             destVC?.delegate = self
             
         } else if segue.identifier == "favouritesSegue" {
@@ -1943,6 +1955,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
             let destVC = (segue.destination as! UINavigationController).topViewController as? FavouritesContainerController
             destVC?.likes = self.likes
+            destVC?.modalPresentationStyle = .overCurrentContext
             destVC?.removeDelegate = self
             
         }

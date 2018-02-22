@@ -121,7 +121,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         navigationItem.rightBarButtonItem = trashButton
         collectionView.contentOffset = CGPoint(x: 0, y: -150)
         
-        pullToDismiss = PullToDismiss(scrollView: collectionView, viewController: self)
+        pullToDismiss = PullToDismiss(scrollView: collectionView)
         pullToDismiss?.delegate = self
         pullToDismiss?.dismissableHeightPercentage = 0.45
         pullToDismiss?.dismissAction = {
@@ -347,19 +347,25 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     
     func openSearchBar() {
         
-        resultSearchController.searchBar.setShowsCancelButton(true, animated: true)
-        resultSearchController.searchBar.sizeToFit()
-        
-        DispatchQueue.main.async {
-            self.resultSearchController.searchBar.becomeFirstResponder()
+        UIView.animate(withDuration: 0.4) {
+            
+            self.resultSearchController.searchBar.setShowsCancelButton(true, animated: true)
+            self.resultSearchController.searchBar.sizeToFit()
+            
+            DispatchQueue.main.async {
+                self.resultSearchController.searchBar.becomeFirstResponder()
+            }
+            self.navigationItem.titleView = self.resultSearchController.searchBar
+            self.navigationItem.leftBarButtonItem = nil
+            self.navigationItem.rightBarButtonItem = nil
+            self.navigationController?.navigationBar.sizeToFit()
+            
+            // By default the navigation bar hides when presenting the
+            // search interface.  Obviously we don't want this to happen if
+            // our search bar is inside the navigation bar.
+            self.resultSearchController.hidesNavigationBarDuringPresentation = false
+            
         }
-        navigationItem.titleView = resultSearchController.searchBar
-        navigationItem.leftBarButtonItem = nil
-        
-        // By default the navigation bar hides when presenting the
-        // search interface.  Obviously we don't want this to happen if
-        // our search bar is inside the navigation bar.
-        resultSearchController.hidesNavigationBarDuringPresentation = false
         
     }
     
@@ -537,9 +543,15 @@ extension FavouritesContainerController: UISearchResultsUpdating, UISearchBarDel
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         
-        searchBar.resignFirstResponder()
-        navigationItem.titleView = nil
-        navigationItem.leftBarButtonItem = searchButton
+        UIView.animate(withDuration: 0.4) {
+            
+            searchBar.resignFirstResponder()
+            self.navigationItem.titleView = nil
+            self.navigationItem.leftBarButtonItem = self.searchButton
+            self.navigationItem.rightBarButtonItem = self.trashButton
+            self.navigationController?.navigationBar.sizeToFit()
+            
+        }
         
     }
     

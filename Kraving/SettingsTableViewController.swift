@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreLocation
+import PullToDismiss
 
 protocol SettingsDelegate {
     
@@ -91,18 +92,26 @@ extension UIPickerCell: UIPickerViewDelegate, UIPickerViewDataSource {
 class SettingsTableViewController: UITableViewController {
     
     let defaults = UserDefaults.standard
-    
     var previousRadius = Int()
-    
     var delegate: SettingsDelegate?
-    
     var selectedIndex : NSInteger! = -1
+    
+    private var pullToDismiss: PullToDismiss?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         if #available(iOS 11.0, *) {
-            self.navigationController?.navigationBar.prefersLargeTitles = true
+            self.navigationController?.navigationBar.prefersLargeTitles = false
+        }
+        
+        pullToDismiss = PullToDismiss(scrollView: tableView, viewController: self)
+        pullToDismiss?.delegate = self
+        pullToDismiss?.dismissableHeightPercentage = 0.45
+        pullToDismiss?.dismissAction = {
+            
+            self.dismissViewThing()
+            
         }
         
         self.previousRadius = defaults.integer(forKey: "searchRadius")
@@ -130,6 +139,12 @@ class SettingsTableViewController: UITableViewController {
             }
             
         }
+        
+    }
+    
+    func dismissViewThing() {
+        
+        dismiss(animated: true, completion: nil)
         
     }
     

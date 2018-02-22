@@ -145,28 +145,32 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Browser" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n3U-vM-gZf">
-                                            <rect key="frame" x="24" y="25" width="74" height="23"/>
+                                            <rect key="frame" x="24" y="22" width="74" height="23"/>
                                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="19"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Default App" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fdu-AD-9TO">
-                                            <rect key="frame" x="106" y="25" width="245" height="23"/>
+                                            <rect key="frame" x="106" y="22" width="245" height="23"/>
                                             <fontDescription key="fontDescription" type="system" weight="light" pointSize="19"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QMK-ui-Fwg">
-                                            <rect key="frame" x="0.0" y="70" width="375" height="216"/>
+                                            <rect key="frame" x="0.0" y="67" width="375" height="150"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="150" id="tZc-Tz-wnR"/>
+                                            </constraints>
                                         </pickerView>
                                     </subviews>
                                     <constraints>
+                                        <constraint firstItem="n3U-vM-gZf" firstAttribute="top" secondItem="6y2-bc-0MJ" secondAttribute="top" constant="22" id="BOH-Hn-2gX"/>
                                         <constraint firstItem="n3U-vM-gZf" firstAttribute="leading" secondItem="6y2-bc-0MJ" secondAttribute="leadingMargin" constant="8" id="HDQ-Ol-M7Y"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="fdu-AD-9TO" secondAttribute="trailing" constant="8" id="HIs-Gw-mU4"/>
-                                        <constraint firstItem="QMK-ui-Fwg" firstAttribute="top" secondItem="6y2-bc-0MJ" secondAttribute="topMargin" constant="59" id="Jk4-ah-URa"/>
+                                        <constraint firstItem="QMK-ui-Fwg" firstAttribute="top" secondItem="n3U-vM-gZf" secondAttribute="bottom" constant="22" id="KKk-8Q-MGY"/>
+                                        <constraint firstItem="fdu-AD-9TO" firstAttribute="top" secondItem="6y2-bc-0MJ" secondAttribute="top" constant="22" id="LSR-mC-ngh"/>
+                                        <constraint firstItem="QMK-ui-Fwg" firstAttribute="top" secondItem="fdu-AD-9TO" secondAttribute="bottom" constant="22" id="QTM-ec-wRy"/>
                                         <constraint firstItem="fdu-AD-9TO" firstAttribute="leading" secondItem="n3U-vM-gZf" secondAttribute="trailing" constant="8" id="ZS7-KF-Ylt"/>
                                         <constraint firstItem="QMK-ui-Fwg" firstAttribute="leading" secondItem="6y2-bc-0MJ" secondAttribute="leading" id="eLH-Ma-hSA"/>
-                                        <constraint firstItem="n3U-vM-gZf" firstAttribute="top" secondItem="6y2-bc-0MJ" secondAttribute="topMargin" constant="14" id="evf-GH-ysv"/>
-                                        <constraint firstItem="fdu-AD-9TO" firstAttribute="top" secondItem="6y2-bc-0MJ" secondAttribute="topMargin" constant="14" id="g3k-Fy-N7y"/>
                                         <constraint firstAttribute="trailing" secondItem="QMK-ui-Fwg" secondAttribute="trailing" id="jmB-rD-YZH"/>
                                     </constraints>
                                 </tableViewCellContentView>
@@ -184,16 +188,9 @@
                             <outlet property="delegate" destination="Rdo-se-R3c" id="MWQ-Kx-If8"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Settings" id="csS-iC-wYV">
-                        <barButtonItem key="rightBarButtonItem" image="btn_closeView" landscapeImage="btn_closeView" largeContentSizeImage="btn_closeView" style="done" id="O0j-ca-cwK">
-                            <connections>
-                                <segue destination="4zJ-Ad-Wmr" kind="unwind" unwindAction="unwindToMainControllerWithSegue:" id="tXL-Cr-oYz"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Settings" largeTitleDisplayMode="never" id="csS-iC-wYV"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Aa8-XI-hiW" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="4zJ-Ad-Wmr" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1102" y="-430"/>
         </scene>
