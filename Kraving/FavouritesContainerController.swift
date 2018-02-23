@@ -8,7 +8,6 @@
 
 import UIKit
 import DeviceKit
-import PullToDismiss
 
 private let reuseIdentifier = "Cell"
 
@@ -46,33 +45,10 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     let device = Device()
     var arrSource: RestaurantSource = .likes
     
-    var removeAllSession = false
-    var isInEditingMode = false
-    
     var resultSearchController = UISearchController(searchResultsController: nil)
     
-    var editButton = UIBarButtonItem()
     var searchButton = UIBarButtonItem()
     var closeViewButton = UIBarButtonItem()
-    
-    private var pullToDismiss: PullToDismiss?
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        if segment.selectedSegmentIndex == 0 {
-            
-            // only run if "Session" is selected in UISegmentedControl
-            guard let index = indexToRemove else { return }
-            
-            if let del = removeDelegate {
-                print("ran this and bool: \(removeAllSession)")
-                del.removeWith(index, shouldRemoveAll: removeAllSession)
-            }
-            
-        }
-        
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -101,7 +77,6 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     
     func setupView() {
         
-        editButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editHandler))
         searchButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(openSearchBar))
         closeViewButton = UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(dismissViewThing))
         
@@ -125,14 +100,9 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         segment.selectedSegmentIndex = 0
         segment.addTarget(self, action: #selector(indexChanged(_:)), for: .valueChanged)
         
-        navigationItem.leftBarButtonItems = [editButton, searchButton]
+        navigationItem.leftBarButtonItems = [editButtonItem, searchButton]
         navigationItem.rightBarButtonItem = closeViewButton
         collectionView.contentOffset = CGPoint(x: 0, y: -150)
-        
-        // pullToDismiss = PullToDismiss(scrollView: collectionView)
-        // pullToDismiss?.delegate = self
-        // pullToDismiss?.dismissableHeightPercentage = 0.45
-        // pullToDismiss?.dismissAction = { self.dismissViewThing() }
         
         fixNavBar()
         
@@ -269,16 +239,12 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
         // for removing from sessions likes in Favourites controller
         
-        removeAllSession = true
-        
         if segment.selectedSegmentIndex == 0 {
             
             // only run if "Session" is selected in UISegmentedControl
-            print("ran this 2")
             if let del = removeDelegate {
-                print("ran this 3 and bool: \(removeAllSession)")
                 self.likes.removeAll()
-                del.removeWith(0, shouldRemoveAll: removeAllSession)
+                del.removeWith(0, shouldRemoveAll: true)
                 indexChanged(segment)
             }
             
@@ -286,13 +252,13 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
     }
     
-    func editHandler() {
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
         
-        isInEditingMode = !isInEditingMode
-        editButton.title = isInEditingMode ? "Edit" : "Done"
-        searchButton.isEnabled = !isInEditingMode
-        closeViewButton.isEnabled = !isInEditingMode
-        segment.isEnabled = !isInEditingMode
+        collectionView.isUserInteractionEnabled = !editing
+        searchButton.isEnabled = !editing
+        closeViewButton.isEnabled = !editing
+        segment.isEnabled = !editing
         
         DispatchQueue.main.async {
             self.collectionView.reloadData()
@@ -338,7 +304,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
                 
             }
             
-            self.editHandler() // to go back to non editing mode
+            self.setEditing(false, animated: true) // to go back to non editing mode
             
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -374,10 +340,11 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             DispatchQueue.main.async {
                 self.resultSearchController.searchBar.becomeFirstResponder()
             }
-            self.navigationItem.titleView = self.resultSearchController.searchBar
-            self.navigationItem.leftBarButtonItem = nil
+            self.navigationItem.leftBarButtonItems = nil
             self.navigationItem.rightBarButtonItem = nil
+            self.navigationItem.titleView = self.resultSearchController.searchBar
             self.navigationController?.navigationBar.sizeToFit()
+            self.segment.isEnabled = !self.resultSearchController.isActive
             
             // By default the navigation bar hides when presenting the
             // search interface.  Obviously we don't want this to happen if
@@ -400,8 +367,6 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     // MARK: - Segmented Control
     
     func indexChanged(_ sender: UISegmentedControl) {
-        
-        print("ran indexChanged")
         
         switch sender.selectedSegmentIndex {
         case 0:
@@ -444,8 +409,9 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         if restaurants.count > 0 {
             
             loadSadView("")
-            self.editButton.isEnabled = true
-            self.deleteAllButtonView.isHidden = !isInEditingMode
+            self.editButtonItem.isEnabled = true
+            self.searchButton.isEnabled = true
+            self.deleteAllButtonView.isHidden = !isEditing
             return 1
             
         } else {
@@ -455,20 +421,17 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             switch arrSource {
             case .likes:
                 message = "No Favourites In This Session"
-                self.editButton.isEnabled = isInEditingMode
-                self.deleteAllButtonView.isHidden = !isInEditingMode
                 
             case .dislikes:
                 message = "No Dislikes Yet"
-                self.editButton.isEnabled = isInEditingMode
-                self.deleteAllButtonView.isHidden = !isInEditingMode
                 
             case .longTermFavourites:
                 message = "No Long Term Favourites Yet"
-                self.editButton.isEnabled = isInEditingMode
-                self.deleteAllButtonView.isHidden = !isInEditingMode
                 
             }
+            
+            self.editButtonItem.isEnabled = isEditing
+            self.deleteAllButtonView.isHidden = !isEditing
             
             self.loadSadView(message)
             return 0
@@ -562,9 +525,10 @@ extension FavouritesContainerController: UISearchResultsUpdating, UISearchBarDel
             
             searchBar.resignFirstResponder()
             self.navigationItem.titleView = nil
-            self.navigationItem.leftBarButtonItem = self.searchButton
+            self.navigationItem.leftBarButtonItems = [self.editButtonItem, self.searchButton]
             self.navigationItem.rightBarButtonItem = self.closeViewButton
             self.navigationController?.navigationBar.sizeToFit()
+            self.segment.isEnabled = !self.resultSearchController.isActive
             
         }
         
