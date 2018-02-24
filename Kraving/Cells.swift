@@ -82,7 +82,27 @@ class FavouritesCollectionViewCell: UICollectionViewCell {
     @IBOutlet var restaurantImage: UIImageView!
     @IBOutlet var restaurantTitle: UILabel!
     @IBOutlet var restaurantStars: CosmosView!
+    @IBOutlet var checkMarkView: UIView!
+    @IBOutlet var checkMarkImage: UIImageView!
     
+    var isChecked = false {
+        
+        didSet {
+            
+            if isChecked == true {
+                print("isChecked")
+                DispatchQueue.main.async {
+                    self.checkMarkView.alpha = 1
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.checkMarkView.alpha = 0
+                }
+            }
+            
+        }
+        
+    }
     var restaurant: Restaurant? {
         
         didSet {
@@ -91,6 +111,8 @@ class FavouritesCollectionViewCell: UICollectionViewCell {
             guard let restaurantTitle = restaurantTitle else { return }
             guard let restaurantImage = restaurantImage else { return }
             guard let restaurantStars = restaurantStars else { return }
+            guard let checkMarkView = checkMarkView else { return }
+            guard let checkMarkImage = checkMarkImage else { return }
             
             restaurantTitle.text = favourite.name
             restaurantStars.rating = Double(favourite.rating)
@@ -111,6 +133,11 @@ class FavouritesCollectionViewCell: UICollectionViewCell {
             restaurantImage.image = img
             restaurantImage.clipsToBounds = true
             restaurantImage.layer.cornerRadius = 5
+            
+            // checkMarkView.alpha = 0
+            checkMarkView.backgroundColor = .flatRed
+            checkMarkImage.image = #imageLiteral(resourceName: "checkmark").withRenderingMode(.alwaysTemplate)
+            checkMarkImage.tintColor = UIColor.flatWhite
             
             backgroundColor = avgColor
             layer.cornerRadius = 12

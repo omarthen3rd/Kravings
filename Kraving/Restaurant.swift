@@ -9,6 +9,13 @@
 import Foundation
 import UIKit
 
+struct RestaurantCategory {
+    
+    var title: String
+    var alias: String
+    
+}
+
 class Restaurant: NSObject, NSCoding {
     
     var name: String

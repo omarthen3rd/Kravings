@@ -20,6 +20,7 @@
 		567D97D41FE47E3900382358 /* DefaultViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567D97D31FE47E3900382358 /* DefaultViewController.swift */; };
 		568683191F89868700D4BE60 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568683171F89868100D4BE60 /* VisualEffectView.swift */; };
 		568A9EF5203BA1A600E3197E /* FavouritesContainerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */; };
+		56B873C72041BB2D0057E0CB /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B873C62041BB2D0057E0CB /* Extensions.swift */; };
 		56BB4F1D1F5DF21200F2CA2C /* ButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 56BB4F1C1F5DF21200F2CA2C /* ButtonCell.xib */; };
 		56BB4F1F1F5DF2A700F2CA2C /* ButtonTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BB4F1E1F5DF2A700F2CA2C /* ButtonTableViewCell.swift */; };
 		56BF7BDC1F58AC170098644B /* StartUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BF7BDB1F58AC170098644B /* StartUpViewController.swift */; };
@@ -73,7 +74,6 @@
 		5636C6671F165F41006D41E6 /* Slidercell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Slidercell.xib; sourceTree = "<group>"; };
 		5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderTableViewCell.swift; sourceTree = "<group>"; };
 		56375B521F92357D001FCAFE /* Cells.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cells.swift; sourceTree = "<group>"; };
-		564F9AA51FE567DD00C650D0 /* FavouritesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesViewController.swift; sourceTree = "<group>"; };
 		565418631FE44B6300A2286B /* RestaurantCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantCard.swift; sourceTree = "<group>"; };
 		565418651FE44DDD00A2286B /* RestaurantCard1.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RestaurantCard1.xib; sourceTree = "<group>"; };
 		567D97D31FE47E3900382358 /* DefaultViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultViewController.swift; sourceTree = "<group>"; };
@@ -83,6 +83,7 @@
 		568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesContainerController.swift; sourceTree = "<group>"; };
 		56B5C7541FF8005F00990AD5 /* HGPlaceholders.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = HGPlaceholders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		56B7B1D01F6C6BBD00E5EB1F /* loadingLines.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = loadingLines.json; sourceTree = "<group>"; };
+		56B873C62041BB2D0057E0CB /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		56BB4F1C1F5DF21200F2CA2C /* ButtonCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ButtonCell.xib; sourceTree = "<group>"; };
 		56BB4F1E1F5DF2A700F2CA2C /* ButtonTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ButtonTableViewCell.swift; sourceTree = "<group>"; };
 		56BF7BDB1F58AC170098644B /* StartUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartUpViewController.swift; sourceTree = "<group>"; };
@@ -153,14 +154,16 @@
 			name = Settings;
 			sourceTree = "<group>";
 		};
-		56515EC01F30E7E3006F2719 /* Main View */ = {
+		56515EC01F30E7E3006F2719 /* Main View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */,
+				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
 				56BF7BDB1F58AC170098644B /* StartUpViewController.swift */,
 				56BF7BDD1F58FAF50098644B /* AddressViewController.swift */,
 				567D97D31FE47E3900382358 /* DefaultViewController.swift */,
 			);
-			name = "Main View";
+			name = "Main View Controllers";
 			sourceTree = "<group>";
 		};
 		567F26761F14555B001B90BF /* Frameworks */ = {
@@ -201,6 +204,15 @@
 			name = "Restaurant Card";
 			sourceTree = "<group>";
 		};
+		56B873C82041BB4C0057E0CB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				56B873C62041BB2D0057E0CB /* Extensions.swift */,
+				56375B521F92357D001FCAFE /* Cells.swift */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		56C895BD2006E3FB00FC9C60 /* ConnectionView */ = {
 			isa = PBXGroup;
 			children = (
@@ -239,13 +251,10 @@
 				5636C66C1F165F99006D41E6 /* Settings */,
 				56C895BD2006E3FB00FC9C60 /* ConnectionView */,
 				56B552D41FFA951C002CFA89 /* Restaurant Card */,
-				56515EC01F30E7E3006F2719 /* Main View */,
+				56515EC01F30E7E3006F2719 /* Main View Controllers */,
+				56B873C82041BB4C0057E0CB /* Resources */,
 				56B7B1D01F6C6BBD00E5EB1F /* loadingLines.json */,
-				56375B521F92357D001FCAFE /* Cells.swift */,
 				56D99D9E1F102F35000FA4F8 /* AppDelegate.swift */,
-				568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */,
-				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
-				564F9AA51FE567DD00C650D0 /* FavouritesViewController.swift */,
 				56D99DA21F102F35000FA4F8 /* Main.storyboard */,
 				56D99DA51F102F35000FA4F8 /* Assets.xcassets */,
 				56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */,
@@ -509,6 +518,7 @@
 				568A9EF5203BA1A600E3197E /* FavouritesContainerController.swift in Sources */,
 				567D97D41FE47E3900382358 /* DefaultViewController.swift in Sources */,
 				56D99D9F1F102F35000FA4F8 /* AppDelegate.swift in Sources */,
+				56B873C72041BB2D0057E0CB /* Extensions.swift in Sources */,
 				5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */,
 				56BF7BDE1F58FAF50098644B /* AddressViewController.swift in Sources */,
 			);

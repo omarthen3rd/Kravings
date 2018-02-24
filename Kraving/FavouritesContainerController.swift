@@ -24,12 +24,13 @@ enum RestaurantSource {
     
 }
 
-class FavouritesContainerController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, RemoveFromArray {
+class FavouritesContainerController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, RemoveFromArray, UpdateStatusBar {
     
     @IBOutlet var collectionView: UICollectionView!
     @IBOutlet var segment: UISegmentedControl!
     @IBOutlet var deleteAllButton: UIButton!
     @IBOutlet var deleteAllButtonView: UIView!
+    @IBOutlet var deleteViewConstraint: NSLayoutConstraint!
     
     var likes = [Restaurant]()
     
@@ -49,6 +50,20 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     
     var searchButton = UIBarButtonItem()
     var closeViewButton = UIBarButtonItem()
+    
+    var constant = CGFloat()
+    
+    var statusBarShouldBeHidden = false
+    
+    override var prefersStatusBarHidden: Bool {
+        return statusBarShouldBeHidden
+    }
+    
+    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return .slide // animation when opening/closing
+    }
+    
+    // MARK: - Default Functions
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,6 +86,16 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             // self.loadDislikes()
             self.collectionView.collectionViewLayout.invalidateLayout()
             self.collectionView.reloadData()
+        }
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        statusBarShouldBeHidden = false
+        UIView.animate(withDuration: 0.25) {
+            self.setNeedsStatusBarAppearanceUpdate()
         }
         
     }
@@ -104,7 +129,9 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         navigationItem.rightBarButtonItem = closeViewButton
         collectionView.contentOffset = CGPoint(x: 0, y: -150)
         
-        fixNavBar()
+        constant = device.isOneOf([.iPhoneX]) ? -92 : -72
+        deleteViewConstraint.constant = constant
+        self.view.layoutIfNeeded()
         
     }
     
@@ -255,10 +282,18 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         
-        collectionView.isUserInteractionEnabled = !editing
+        // collectionView.isUserInteractionEnabled = !editing
         searchButton.isEnabled = !editing
         closeViewButton.isEnabled = !editing
         segment.isEnabled = !editing
+        
+        // constant larger for iPhone X to account for home bar
+        
+        
+        deleteViewConstraint.constant = isEditing ? 0 : constant
+        UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseOut, animations: {
+            self.view.layoutIfNeeded()
+        }, completion: nil)
         
         DispatchQueue.main.async {
             self.collectionView.reloadData()
@@ -315,22 +350,13 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
     }
     
-    func fixNavBar() {
-        
-        for view: UIView in (navigationController?.navigationBar.subviews)! {
-            for view2: UIView in view.subviews {
-                if (view2 is UIImageView) {
-                    view2.removeFromSuperview()
-                }
-            }
-        }
-
-        
-    }
-    
     // Search bar func
     
     func openSearchBar() {
+        
+        // buggy animation if they are animated
+        self.navigationItem.leftBarButtonItems = nil
+        self.navigationItem.rightBarButtonItem = nil
         
         UIView.animate(withDuration: 0.4) {
             
@@ -340,11 +366,9 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             DispatchQueue.main.async {
                 self.resultSearchController.searchBar.becomeFirstResponder()
             }
-            self.navigationItem.leftBarButtonItems = nil
-            self.navigationItem.rightBarButtonItem = nil
             self.navigationItem.titleView = self.resultSearchController.searchBar
             self.navigationController?.navigationBar.sizeToFit()
-            self.segment.isEnabled = !self.resultSearchController.isActive
+            self.segment.alpha = 0
             
             // By default the navigation bar hides when presenting the
             // search interface.  Obviously we don't want this to happen if
@@ -402,6 +426,15 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
     }
     
+    func updateStatusBar() {
+        
+        statusBarShouldBeHidden = false
+        UIView.animate(withDuration: 0.25) {
+            self.setNeedsStatusBarAppearanceUpdate()
+        }
+        
+    }
+    
     // MARK: - UICollectionViewDataSource
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -410,8 +443,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             
             loadSadView("")
             self.editButtonItem.isEnabled = true
-            self.searchButton.isEnabled = true
-            self.deleteAllButtonView.isHidden = !isEditing
+            self.searchButton.isEnabled = isEditing ? !isEditing : true
             return 1
             
         } else {
@@ -430,8 +462,8 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
                 
             }
             
+            self.searchButton.isEnabled = false
             self.editButtonItem.isEnabled = isEditing
-            self.deleteAllButtonView.isHidden = !isEditing
             
             self.loadSadView(message)
             return 0
@@ -450,6 +482,48 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! FavouritesCollectionViewCell
+        
+        if isEditing {
+            cell.isChecked = true
+            
+        } else {
+            
+            let destVC = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
+            
+            var favourite: Restaurant
+            
+            if resultSearchController.isActive {
+                
+                favourite = filteredRestaurants[indexPath.row]
+                
+            } else {
+                
+                favourite = restaurants[indexPath.row]
+                
+            }
+            
+            statusBarShouldBeHidden = true
+            UIView.animate(withDuration: 0.25) {
+                self.setNeedsStatusBarAppearanceUpdate()
+            }
+            
+            destVC.restaurant = favourite
+            destVC.removeDelegate = self
+            destVC.restaurantSource = arrSource
+            destVC.shouldHideStatus = true
+            destVC.statusBarDelegate = self
+            
+            
+            destVC.modalPresentationStyle = .overFullScreen
+            present(destVC, animated: true, completion: nil)
+            
+        }
+        
+    }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! FavouritesCollectionViewCell
         
@@ -458,6 +532,10 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         favourite = resultSearchController.isActive ? filteredRestaurants[indexPath.row] : restaurants[indexPath.row]
         
         cell.restaurant = favourite
+        
+        if isEditing == false {
+            cell.isChecked = false
+        }
         
         return cell
     }
@@ -484,26 +562,30 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
         if segue.identifier == "favouriteDetail" {
             
-            if let currentCell = sender as? FavouritesCollectionViewCell, let indexPath = self.collectionView.indexPath(for: currentCell) {
+            if !isEditing {
                 
-                let destVC = segue.destination as! RestaurantDetailController
-                
-                var favourite: Restaurant
-                
-                if resultSearchController.isActive {
+                if let currentCell = sender as? FavouritesCollectionViewCell, let indexPath = self.collectionView.indexPath(for: currentCell) {
                     
-                    favourite = filteredRestaurants[indexPath.row]
+                    let destVC = segue.destination as! RestaurantDetailController
                     
-                } else {
+                    var favourite: Restaurant
                     
-                    favourite = restaurants[indexPath.row]
+                    if resultSearchController.isActive {
+                        
+                        favourite = filteredRestaurants[indexPath.row]
+                        
+                    } else {
+                        
+                        favourite = restaurants[indexPath.row]
+                        
+                    }
+                    
+                    destVC.restaurant = favourite
+                    destVC.removeDelegate = self
+                    destVC.restaurantSource = arrSource
+                    destVC.shouldHideStatus = true
                     
                 }
-                
-                destVC.restaurant = favourite
-                destVC.removeDelegate = self
-                destVC.restaurantSource = arrSource
-                destVC.shouldHideStatus = true
                 
             }
             
@@ -528,7 +610,7 @@ extension FavouritesContainerController: UISearchResultsUpdating, UISearchBarDel
             self.navigationItem.leftBarButtonItems = [self.editButtonItem, self.searchButton]
             self.navigationItem.rightBarButtonItem = self.closeViewButton
             self.navigationController?.navigationBar.sizeToFit()
-            self.segment.isEnabled = !self.resultSearchController.isActive
+            self.segment.alpha = 1
             
         }
         

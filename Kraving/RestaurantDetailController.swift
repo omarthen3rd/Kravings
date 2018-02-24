@@ -168,14 +168,15 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     private var pullToDismiss: PullToDismiss?
     
     override var prefersStatusBarHidden: Bool {
-        return shouldHideStatus
+        return true
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // shouldHideStatus == false -> means that navigation bar will be used
-        self.setNeedsStatusBarAppearanceUpdate()
+        DispatchQueue.main.async {
+            self.setNeedsStatusBarAppearanceUpdate()
+        }
         
         if #available(iOS 11.0, *) {
             // for favourites segue with navigation bar
@@ -318,7 +319,14 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.tintColor = contrastColor
         restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
         
+        // Restaurants options and Images
         restaurantOptionsView.backgroundColor = avgColor.withAlphaComponent(0.7)
+        
+        let dotsImage = #imageLiteral(resourceName: "dots").withRenderingMode(.alwaysTemplate)
+        restaurantOptionsButton.setImage(dotsImage, for: .normal)
+        restaurantOptionsButton.imageView?.tintColor = contrastColor
+        restaurantOptionsButton.tintColor = contrastColor
+        restaurantOptionsButton.imageView?.contentMode = .scaleAspectFit
         
         reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
         reviewsMakeReview.imageView?.tintColor = contrastColor
@@ -335,7 +343,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
         restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
         timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
-        reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
+        // reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
         restaurantOptionsButton.addTarget(self, action: #selector(openRestaurantActionSheet), for: .touchUpInside)
         
         // Other UI setup (timings/reviews)
@@ -1555,7 +1563,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func showBusinessDetails(_ id: String, completionHandler: @escaping ([RestaurantHours], [String], [URL]) -> ()) {
         
-        let headers = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        let headers = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
         
         Alamofire.request("https://api.yelp.com/v3/businesses/\(id)", headers: headers).responseJSON { (Response) in
             
@@ -1644,7 +1652,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         guard let restaurant = restaurant else { return }
         
-        let headers: HTTPHeaders = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        let headers: HTTPHeaders = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
         
         Alamofire.request("https://api.yelp.com/v3/businesses/\(restaurant.id)", headers: headers).responseJSON { (Response) in
             
@@ -1713,7 +1721,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         guard let restaurant = restaurant else { return }
         
-        let headers: HTTPHeaders = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        let headers: HTTPHeaders = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
         
         Alamofire.request("https://api.yelp.com/v3/businesses/\(restaurant.id)/reviews", headers: headers).responseJSON { (Response) in
             

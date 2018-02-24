@@ -19,122 +19,6 @@ enum OpenClose {
     
 }
 
-extension Notification.Name {
-    static let applicationWillResignActive = Notification.Name(rawValue: "applicationWillResignActive")
-}
-
-extension UIBarButtonSystemItem {
-    
-    func image() -> UIImage? {
-        let tempItem = UIBarButtonItem(barButtonSystemItem: self, target: nil, action: nil)
-        
-        // add to toolbar and render it
-        let bar = UIToolbar()
-        bar.setItems([tempItem],
-                     animated: false)
-        bar.snapshotView(afterScreenUpdates: true)
-        
-        // got image from real uibutton
-        let itemView = tempItem.value(forKey: "view") as! UIView
-        for view in itemView.subviews {
-            if let button = view as? UIButton,
-                let image = button.imageView?.image {
-                return image.withRenderingMode(.alwaysTemplate)
-            }
-        }
-        
-        return nil
-    }
-}
-
-extension UIView {
-    
-    func applyGradient(colours: [UIColor]) -> Void {
-        self.applyGradient(colours: colours, locations: nil)
-    }
-    
-    func applyGradient(colours: [UIColor], locations: [NSNumber]?) -> Void {
-        let gradient: CAGradientLayer = CAGradientLayer()
-        gradient.frame = self.bounds
-        gradient.colors = colours.map { $0.cgColor }
-        gradient.locations = locations
-        self.layer.insertSublayer(gradient, at: 0)
-    }
-    
-}
-
-extension NSMutableAttributedString {
-    
-    func setColorForText(_ textToFind: String, with color: UIColor) {
-        let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
-        if range.location != NSNotFound {
-            addAttribute(NSForegroundColorAttributeName, value: color, range: range)
-        }
-    }
-    
-    func setColorForRange(_ range: NSRange, with color: UIColor) {
-        if range.location != NSNotFound {
-            addAttribute(NSForegroundColorAttributeName, value: color, range: range)
-        }
-    }
-    
-    func setBoldForText(_ textToFind: String) {
-        let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
-        if range.location != NSNotFound {
-            let attrs = [NSFontAttributeName : UIFont.boldSystemFont(ofSize: 19)]
-            addAttributes(attrs, range: range)
-        }
-        
-    }
-    
-    func setSizeForText(_ textToFind: String, with size: CGFloat) {
-        let range = self.mutableString.range(of: textToFind, options: .caseInsensitive)
-        if range.location != NSNotFound {
-            let attrs = [NSFontAttributeName : UIFont.systemFont(ofSize: size)]
-            addAttributes(attrs, range: range)
-        }
-        
-    }
-    
-}
-
-extension String {
-    
-    init(htmlEncodedString: String) {
-        do {
-            let encodedData = htmlEncodedString.data(using: String.Encoding.utf8)!
-            let attributedOptions : [String: AnyObject] = [
-                NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType as AnyObject,
-                NSCharacterEncodingDocumentAttribute: NSNumber(value: String.Encoding.utf8.rawValue)
-            ]
-            let attributedString = try NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil)
-            self.init(attributedString.string)!
-        } catch {
-            fatalError("Unhandled error: \(error)")
-        }
-    }
-    
-    var first: String {
-        return String(self.prefix(1))
-    }
-    
-    var last: String {
-        return String(self.suffix(1))
-    }
-    
-    var uppercaseFirst: String {
-        return first.uppercased() + String(self.dropFirst())
-    }
-    
-}
-
-extension UIColor {
-    
-    static let newBlack = UIColor(red:0.20, green:0.20, blue:0.20, alpha:1.0)
-    static let newWhite = UIColor(red:0.96, green:0.96, blue:0.96, alpha:1.0)
-    
-}
-
 enum SourceOfFunction {
     case settings, tableview, mainview, searchRadius
 }
@@ -155,9 +39,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     @IBOutlet var loadingView: UIView!
     @IBOutlet var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet var loadingText: UILabel!
-    @IBOutlet var connectionTimerView: UIView!
-    @IBOutlet var connectionTimerLabel: UILabel!
-    @IBOutlet var connectionTimerButton: UIButton!
     
     @IBOutlet var headerView: UIView!
     @IBOutlet var categoryTapView: UIView!
@@ -188,15 +69,14 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     var feedbackGenerator = UIImpactFeedbackGenerator()
     var defaults = UserDefaults.standard
     
-    var categories = [String]()
-    var filteredCategories = [String]()
+    var restaurantCategories = [RestaurantCategory]()
+    var filteredRestaurantCategories = [RestaurantCategory]()
     var sortByItems = ["Best Match", "Rating", "Review Count", "Distance"]
     var selectedCategory = String() // initialized in getCategories()
     var selectedSortBy = String() // initialized in setupView()
     var shouldSelectCell = false
     var didSelectCell = false
     
-    var connectionTimer = Timer()
     var counter = 0.0
     var cornerRadius = Float()
     
@@ -319,8 +199,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         selectedSortBy = "best_match"
         sortedBy.text = "Sorting by " + sortByItems[0]
         loadingIndicator.hidesWhenStopped = true
-        connectionTimerView.isHidden = true
-        connectionTimerButton.addTarget(self, action: #selector(reloadView), for: .touchUpInside)
         
         categoriesTableView.dataSource = self
         categoriesTableView.delegate = self
@@ -607,38 +485,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         if attribute == .hide {
             
             // hide view
-            UIView.animate(withDuration: 0.3, animations: {
-                
-                self.loadingView.transform = CGAffineTransform(scaleX: 0.2, y: 0.2)
-                self.loadingView.alpha = 0.0
-                
-            }, completion: { (success) in
-                self.loadingView.isHidden = true
-                self.loadingIndicator.stopAnimating()
-                DispatchQueue.main.async {
-                    self.connectionTimer.invalidate() // finish connectionTimer when view is being called to hide
-                }
-                self.connectionTimerView.isHidden = true
-            })
+            self.loadingView.isHidden = true
+            self.loadingIndicator.stopAnimating()
             
         } else {
             
             // open view
+            self.loadingText.text = self.getLoadingLines()
             self.view.bringSubview(toFront: loadingView)
-            self.loadingView.transform = CGAffineTransform(scaleX: 0.2, y: 0.2)
-            self.loadingView.alpha = 0.0
-            
-            UIView.animate(withDuration: 0.3, animations: {
-                
-                self.loadingView.transform = CGAffineTransform.identity
-                self.loadingView.alpha = 1.0
-                
-            }, completion: { (success) in
-                self.loadingView.isHidden = false
-                self.loadingText.text = self.getLoadingLines()
-                self.loadingIndicator.startAnimating()
-                self.connectionTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.updateTimer), userInfo: nil, repeats: true) // reistablish timer
-            })
+            self.loadingView.isHidden = false
+            self.loadingIndicator.startAnimating()
             
         }
         
@@ -679,28 +535,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         return date12
         
-        
-    }
-    
-    func updateTimer() {
-        
-        counter += 1
-                
-        if counter >= 9 && connectionTimerView.isHidden {
-            
-            connectionTimerView.alpha = 0
-            // transform connectionTimerView before animation
-            connectionTimerView.transform = CGAffineTransform(translationX: 0, y: (connectionTimerView.bounds.size.height + 20))
-            connectionTimerView.isHidden = false
-            
-            UIView.animate(withDuration: 0.5, animations: {
-                
-                self.connectionTimerView.alpha = 1
-                self.connectionTimerView.transform = CGAffineTransform.identity
-                
-            })
-            
-        }
         
     }
     
@@ -965,7 +799,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     
                     DispatchQueue.main.async {
                         completionHandler(true)
-                        self.currentCategory.text = self.categories[0]
+                        self.currentCategory.text = self.restaurantCategories[0].title
                         self.categoriesTableView.reloadData()
                     }
                 } else {
@@ -1064,6 +898,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                                 }
                                 
                                 DispatchQueue.main.async {
+                                    print(self.restaurants.count)
                                     self.resetCards()
                                     self.loadingAnimator(.hide)
                                 }
@@ -1169,16 +1004,17 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                         let parent = things.stringValue
                         if parent == "restaurants" {
                             // only return restaurants that fall under the parent category of restaurants
-                            self.categories.append(item["title"].stringValue)
+                            let category = RestaurantCategory(title: item["title"].stringValue, alias: item["alias"].stringValue)
+                            self.restaurantCategories.append(category)
                         }
                     }
                     
                 }
-                self.categories.insert("All Types", at: 0)
+                self.restaurantCategories.insert(RestaurantCategory(title: "All Types", alias: "alltypes"), at: 0)
                 DispatchQueue.main.async {
                     self.categoriesTableView.reloadData()
                 }
-                self.selectedCategory = "All Types"
+                self.selectedCategory = "alltypes"
                 
                 completionHandler(true)
                 
@@ -1194,7 +1030,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func searchBusinesses(_ lat: Double, _ long: Double, completetionHandler: @escaping (Bool) -> Void) {
         
-        let headers: HTTPHeaders = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        let headers: HTTPHeaders = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
         
         var searchRadius = defaults.integer(forKey: "searchRadius")
         
@@ -1228,7 +1064,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         var url = ""
         
         switch self.selectedCategory {
-        case "All Types":
+        case "alltypes":
             
             url = "https://api.yelp.com/v3/businesses/search?radius=\(searchRadius)&latitude=\(lat)&longitude=\(long)&limit=50&sort_by=\(selectedSortBy)"
             
@@ -1237,6 +1073,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             url = "https://api.yelp.com/v3/businesses/search?radius=\(searchRadius)&latitude=\(lat)&longitude=\(long)&limit=50&categories=\(selectedCategory.lowercased())&sort_by=\(selectedSortBy)"
             
         }
+        
+        print(url)
         
         var name = String()
         var website = String()
@@ -1264,6 +1102,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             if let value = response.result.value {
                 
                 let json = JSON(value)
+                print(json)
                 
                 if json["total"].intValue == 0 {
                     
@@ -1335,7 +1174,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func showBusinessDetails(_ id: String, completionHandler: @escaping ([RestaurantHours]) -> ()) {
         
-        let headers = ["Authorization": "Bearer Y43yqZUkj6vah5sgOHU-1PFN2qpapJsSwXZYScYTo0-nK9w5Y3lDvrdRJeG1IpQAADep0GrRL5ZDv6ybln03nIVzP7BL_IzAf_s7Wj5_QLPOO6oXns-nJe3-kIPiWHYx"]
+        let headers = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
         var restaurantHoursEmbedded = [RestaurantHours]()
         
         Alamofire.request("https://api.yelp.com/v3/businesses/\(id)", headers: headers).responseJSON { (Response) in
@@ -1806,37 +1645,24 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         didSelectCell = true
         
-        if tableView == categoriesTableView {
-            
-            if categoriesSearchBar.alpha == 1 {
-                self.selectedCategory = self.filteredCategories[indexPath.row]
-            } else {
-                self.selectedCategory = self.categories[indexPath.row]
-            }
-            
-            self.currentCategory.text = self.selectedCategory
-            self.shouldSelectCell = false
-            
+        if categoriesSearchBar.alpha == 1 {
+            self.selectedCategory = self.filteredRestaurantCategories[indexPath.row].alias
+            self.currentCategory.text = self.filteredRestaurantCategories[indexPath.row].title
         } else {
-            
-            var sortBy = sortByItems[indexPath.row]
-            self.sortedBy.text = "Sorting by " + sortBy
-            sortBy = sortBy.replacingOccurrences(of: " ", with: "_")
-            sortBy = sortBy.lowercased()
-            self.selectedSortBy = sortBy
-            
-            self.shouldSelectCell = false
-            
+            self.selectedCategory = self.restaurantCategories[indexPath.row].alias
+            self.currentCategory.text = self.restaurantCategories[indexPath.row].title
         }
+        
+        self.shouldSelectCell = false
         
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         if categoriesSearchBar.alpha == 1 {
-            return filteredCategories.count
+            return filteredRestaurantCategories.count
         } else {
-            return self.categories.count
+            return restaurantCategories.count
         }
     }
     
@@ -1845,9 +1671,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CategoryTableViewCell
         
         if categoriesSearchBar.alpha == 1 {
-            cell.categoryLabel.text = filteredCategories[indexPath.row]
+            cell.categoryLabel.text = filteredRestaurantCategories[indexPath.row].title
         } else {
-            cell.categoryLabel.text = categories[indexPath.row]
+            cell.categoryLabel.text = restaurantCategories[indexPath.row].title
         }
         
         return cell
@@ -1909,8 +1735,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func filterResults(_ searchText: String) {
         
-        filteredCategories = categories.filter({ (category) -> Bool in
-            return category.lowercased().contains(searchText.lowercased())
+        filteredRestaurantCategories = restaurantCategories.filter({ (category) -> Bool in
+            return category.title.lowercased().contains(searchText.lowercased())
         })
         self.categoriesTableView.reloadData()
         
