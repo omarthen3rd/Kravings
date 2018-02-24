@@ -157,11 +157,11 @@
 		56515EC01F30E7E3006F2719 /* Main View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */,
-				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
 				56BF7BDB1F58AC170098644B /* StartUpViewController.swift */,
 				56BF7BDD1F58FAF50098644B /* AddressViewController.swift */,
 				567D97D31FE47E3900382358 /* DefaultViewController.swift */,
+				568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */,
+				56295FCA2024E55D00600A4F /* RestaurantDetailController.swift */,
 			);
 			name = "Main View Controllers";
 			sourceTree = "<group>";
