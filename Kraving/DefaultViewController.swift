@@ -30,7 +30,7 @@ class SortByCollectionCell: UICollectionViewCell {
     
 }
 
-class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UpdateStatusBar, RemoveFromMainArray, SettingsDelegate {
+class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, RemoveFromMainArray, SettingsDelegate, UpdateStatusBar {
     
     @IBOutlet var emptyView: UIView!
     @IBOutlet var emptyViewLabel: UILabel!
@@ -112,21 +112,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
 
     // MARK: - Default Functions
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        statusBarShouldBeHidden = false
-        UIView.animate(withDuration: 0.25) {
-            self.setNeedsStatusBarAppearanceUpdate()
-        }
-        
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -136,11 +121,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         setDefaults()
         setupView()
         
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-                
     }
 
     // MARK: - Location delegate
@@ -726,28 +706,28 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
     }
     
-    func removeWith(_ indexToRemove: Int, shouldRemoveAll: Bool) {
+    func removeFromLikesWith(_ index: Int, shouldRemoveAll: Bool) {
         
         // func for protocol RemoveFromMainArray
-        // for removing likes in main view when removed in FavouritesViewController
+        // for removing likes in main view when removed in Favourites Controller
         
         if shouldRemoveAll {
             self.likes.removeAll()
         } else {
-            self.likes.remove(at: indexToRemove)
+            self.likes.remove(at: index)
         }
         
     }
     
-    func removeFromDislikesWith(_ indexToRemove: Int, shouldRemoveAll: Bool) {
+    func removeFromDislikesWith(_ index: Int, shouldRemoveAll: Bool) {
         
         // func for protocol RemoveFromMainArray
-        // for removing dislikes in main view when removed in FavouritesViewController
+        // for removing dislikes in main view when removed in Favourites Controller
         
         if shouldRemoveAll {
             self.dislikes.removeAll()
         } else {
-            self.dislikes.remove(at: indexToRemove)
+            self.dislikes.remove(at: index)
         }
         
     }
@@ -898,7 +878,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                                 }
                                 
                                 DispatchQueue.main.async {
-                                    print(self.restaurants.count)
                                     self.resetCards()
                                     self.loadingAnimator(.hide)
                                 }
@@ -1074,8 +1053,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
         }
         
-        print(url)
-        
         var name = String()
         var website = String()
         var image = UIImage()
@@ -1102,7 +1079,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             if let value = response.result.value {
                 
                 let json = JSON(value)
-                print(json)
                 
                 if json["total"].intValue == 0 {
                     
@@ -1592,24 +1568,18 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
         vc.restaurant = restaurant
-        vc.shouldHideStatus = true
-        vc.modalPresentationStyle = .overFullScreen
-        vc.statusBarDelegate = self
+        vc.parentSource = .defaultController
+        vc.modalPresentationStyle = .overCurrentContext
+        vc.statusBarDelegate = self // for updating status bar in this view when dismiss modal
         
+        // hide status bar with animation
         statusBarShouldBeHidden = true
         UIView.animate(withDuration: 0.25) {
             self.setNeedsStatusBarAppearanceUpdate()
         }
         
-        self.present(vc, animated: true, completion: nil)
-        
-    }
-    
-    // MARK: - Settings Delegate
-    
-    func dataChanged() {
-        
-        searchRestaurants(.settings)
+        // present modal view
+        present(vc, animated: true, completion: nil)
         
     }
     
@@ -1621,6 +1591,14 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         UIView.animate(withDuration: 0.25) {
             self.setNeedsStatusBarAppearanceUpdate()
         }
+        
+    }
+    
+    // MARK: - Settings Delegate
+    
+    func dataChanged() {
+        
+        searchRestaurants(.settings)
         
     }
     

@@ -24,8 +24,6 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>$(EXECUTABLE_NAME) will use your location to find restaurants near your location</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photo Library Access Warning</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -28,53 +28,9 @@ protocol UpdateStatusBar {
     
 }
 
-extension CIImage {
+enum ParentController {
     
-    var image: UIImage? {
-        let image = UIImage(ciImage: self)
-        UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
-        defer { UIGraphicsEndImageContext() }
-        image.draw(in: CGRect(origin: .zero, size: image.size))
-        return UIGraphicsGetImageFromCurrentImageContext()
-    }
-    
-}
-
-extension UIImage {
-    
-    func applying(saturation value: NSNumber) -> UIImage? {
-        return CIImage(image: self)?
-            .applyingFilter("CIColorControls", withInputParameters: [kCIInputSaturationKey: value])
-            .image
-    }
-    
-    var grayscale: UIImage? {
-        return applying(saturation: 0)
-    }
-    
-}
-
-extension UIImageView {
-    
-    func downloadedFrom(url: URL, contentMode mode: UIViewContentMode = .scaleAspectFill) {
-        contentMode = mode
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            guard
-                let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
-                let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
-                let data = data, error == nil,
-                let image = UIImage(data: data)
-                else { return }
-            DispatchQueue.main.async() {
-                self.image = image
-            }
-            }.resume()
-    }
-    
-    func downloadedFrom(link: String, contentMode mode: UIViewContentMode = .scaleAspectFill) {
-        guard let url = URL(string: link) else { return }
-        downloadedFrom(url: url, contentMode: mode)
-    }
+    case defaultController, favouritesController
     
 }
 
@@ -114,11 +70,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     @IBOutlet var restaurantPhoneButton: UIButton!
     @IBOutlet var restaurantMapsButton: UIButton!
     @IBOutlet var restaurantWebsiteButton: UIButton!
-    
-    // App Button Outlets
-    @IBOutlet var restaurantOptionsView: UIView!
-    @IBOutlet var restaurantOptionsButton: UIButton!
-    
+        
     @IBOutlet var containerBackgroundBlur: VisualEffectView!
     
     @IBOutlet var reviewsTitleLabel: UILabel!
@@ -147,7 +99,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     var phoneNumberKit = PhoneNumberKit()
     var photos = [URL]()
     var isRestaurantOpen = Bool()
-    var shouldHideStatus: Bool = false
     
     typealias TimeOfDay = (hour: Int, minute: Int)
     
@@ -158,6 +109,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     var cornerRadius = Float()
     
+    var parentSource: ParentController?
     var restaurantSource: RestaurantSource = .likes
     var removeDelegate: RemoveFromArray?
     var statusBarDelegate: UpdateStatusBar?
@@ -168,28 +120,16 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     private var pullToDismiss: PullToDismiss?
     
     override var prefersStatusBarHidden: Bool {
-        return true
+        // if parent controller == defaultViewController
+        // then status bar should be hidden
+        return parentSource == .defaultController ? true : false
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        DispatchQueue.main.async {
-            self.setNeedsStatusBarAppearanceUpdate()
-        }
-        
-        if #available(iOS 11.0, *) {
-            // for favourites segue with navigation bar
-            self.navigationItem.largeTitleDisplayMode = .never
-        }
-        
         setupView()
         
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     // MARK: - Functions
@@ -319,15 +259,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.tintColor = contrastColor
         restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
         
-        // Restaurants options and Images
-        restaurantOptionsView.backgroundColor = avgColor.withAlphaComponent(0.7)
-        
-        let dotsImage = #imageLiteral(resourceName: "dots").withRenderingMode(.alwaysTemplate)
-        restaurantOptionsButton.setImage(dotsImage, for: .normal)
-        restaurantOptionsButton.imageView?.tintColor = contrastColor
-        restaurantOptionsButton.tintColor = contrastColor
-        restaurantOptionsButton.imageView?.contentMode = .scaleAspectFit
-        
         reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
         reviewsMakeReview.imageView?.tintColor = contrastColor
         reviewsMakeReview.tintColor = contrastColor
@@ -344,7 +275,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
         timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
         // reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
-        restaurantOptionsButton.addTarget(self, action: #selector(openRestaurantActionSheet), for: .touchUpInside)
+        
         
         // Other UI setup (timings/reviews)
         
@@ -417,25 +348,19 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         alertViewImage.tintColor = avgColor
         alertViewLabel.textColor = avgColor
         
-        // show/hide button in navigation bar
-        if shouldHideStatus == false {
-            // navigation bar is active
-            // TODO: 
-            
-            let barButton = UIBarButtonItem(barButtonSystemItem: .organize, target: self, action: #selector(self.openRestaurantActionSheet))
+        if parentSource == .favouritesController {
+            // show button on navigation bar since favouriteController pushes this view with a nav bar
+            let barButton = UIBarButtonItem(image: #imageLiteral(resourceName: "dots"), style: .plain, target: self, action: #selector(self.openRestaurantActionSheet))
             self.navigationItem.rightBarButtonItem = barButton
             
         } else {
-            
+            // use pull to dismiss since defaultController pushes this view using a modal segue
             pullToDismiss = PullToDismiss(scrollView: scrollView, viewController: self)
             pullToDismiss?.delegate = self
             pullToDismiss?.dismissableHeightPercentage = 0.45
             pullToDismiss?.dismissAction = {
-                
                 self.dismissViewThing()
-                
             }
-            
         }
         
         setCornerRadius()
@@ -457,9 +382,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         restaurantAppButtonsView.clipsToBounds = true
         restaurantAppButtonsView.layer.cornerRadius = radius
-        
-        restaurantOptionsView.clipsToBounds = true
-        restaurantOptionsView.layer.cornerRadius = radius
         
         timingsTableView.clipsToBounds = true
         timingsTableView.layer.cornerRadius = radius
@@ -486,14 +408,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func dismissViewThing() {
         
-        if shouldHideStatus == false {
-            // nav bar is used
-            self.navigationController?.popViewController(animated: true)
-        } else {
-            self.dismiss(animated: true, completion: nil)
-            if let del = statusBarDelegate {
-                del.updateStatusBar()
-            }
+        self.dismiss(animated: true, completion: nil)
+        if let del = statusBarDelegate {
+            del.updateStatusBar()
         }
         
     }
@@ -851,7 +768,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             self.timingsContainerView.isUserInteractionEnabled = true
             self.containerBackgroundBlur.alpha = 1
             self.containerBackgroundBlur.isUserInteractionEnabled = true
-            if self.shouldHideStatus == false {
+            if self.parentSource == .favouritesController {
                 self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
                 self.navigationController?.navigationBar.alpha = 0
             }
@@ -865,7 +782,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             self.timingsContainerView.isUserInteractionEnabled = false
             self.containerBackgroundBlur.alpha = 0
             self.containerBackgroundBlur.isUserInteractionEnabled = false
-            if self.shouldHideStatus == false {
+            if self.parentSource == .favouritesController {
                 self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
                 self.navigationController?.navigationBar.alpha = 1
             }
@@ -902,7 +819,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             self.reviewsContainerView.isUserInteractionEnabled = true
             self.containerBackgroundBlur.alpha = 1
             self.containerBackgroundBlur.isUserInteractionEnabled = true
-            if self.shouldHideStatus == false {
+            if self.parentSource == .favouritesController {
                 self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
                 self.navigationController?.navigationBar.alpha = 0
             }
@@ -916,7 +833,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             self.reviewsContainerView.isUserInteractionEnabled = false
             self.containerBackgroundBlur.alpha = 0
             self.containerBackgroundBlur.isUserInteractionEnabled = false
-            if self.shouldHideStatus == false {
+            if self.parentSource == .favouritesController {
                 self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
                 self.navigationController?.navigationBar.alpha = 1
             }
@@ -1260,7 +1177,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func callRemoveDelegate() {
         
-        // for removing from sessions likes in Favourites controller
+        // removes from sessions likes in Favourites controller
+        // then goes back to favourites view
         
         guard let restaurant = restaurant else { return }
         
@@ -1305,7 +1223,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                 self.showAlertView(withMessage: "Added To Dislikes", #imageLiteral(resourceName: "notHappyHeart"))
                 self.removeFromLongTermFavourites()
                 self.addToDislikes()
-                self.callRemoveDelegate()
+                self.callRemoveDelegate() // removes from FavouritesViewController (collection view) and then goes to back to preview view
                 self.navigationController?.popViewController(animated: true)
             })
             alertCtrl.addAction(addToLongTerm)
@@ -1323,7 +1241,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        
         alertCtrl.addAction(cancelAction)
         
         self.present(alertCtrl, animated: true, completion: nil)

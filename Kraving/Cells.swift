@@ -92,7 +92,7 @@ class FavouritesCollectionViewCell: UICollectionViewCell {
             if isChecked == true {
                 print("isChecked")
                 DispatchQueue.main.async {
-                    self.checkMarkView.alpha = 1
+                    self.checkMarkView.alpha = 0
                 }
             } else {
                 DispatchQueue.main.async {

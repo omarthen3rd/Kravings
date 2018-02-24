@@ -124,3 +124,54 @@ extension UIColor {
     static let newWhite = UIColor(red:0.96, green:0.96, blue:0.96, alpha:1.0)
     
 }
+
+
+extension CIImage {
+    
+    var image: UIImage? {
+        let image = UIImage(ciImage: self)
+        UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+        defer { UIGraphicsEndImageContext() }
+        image.draw(in: CGRect(origin: .zero, size: image.size))
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
+    
+}
+
+extension UIImage {
+    
+    func applying(saturation value: NSNumber) -> UIImage? {
+        return CIImage(image: self)?
+            .applyingFilter("CIColorControls", withInputParameters: [kCIInputSaturationKey: value])
+            .image
+    }
+    
+    var grayscale: UIImage? {
+        return applying(saturation: 0)
+    }
+    
+}
+
+extension UIImageView {
+    
+    func downloadedFrom(url: URL, contentMode mode: UIViewContentMode = .scaleAspectFill) {
+        contentMode = mode
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard
+                let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
+                let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
+                let data = data, error == nil,
+                let image = UIImage(data: data)
+                else { return }
+            DispatchQueue.main.async() {
+                self.image = image
+            }
+            }.resume()
+    }
+    
+    func downloadedFrom(link: String, contentMode mode: UIViewContentMode = .scaleAspectFill) {
+        guard let url = URL(string: link) else { return }
+        downloadedFrom(url: url, contentMode: mode)
+    }
+    
+}
