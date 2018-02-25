@@ -175,7 +175,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         self.view.backgroundColor = UIColor.newWhite
         
         emptyView.alpha = 0
-        emptyViewLabel.text = "That's All Folks"
+        emptyViewLabel.text = "That's All Folks!"
         selectedSortBy = "best_match"
         sortedBy.text = "Sorting by " + sortByItems[0]
         loadingIndicator.hidesWhenStopped = true
@@ -256,17 +256,11 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         layout.minimumLineSpacing = 0
         sortByColletionView!.collectionViewLayout = layout
         
-        // increase radius button
-        
-        let isMetric = Locale.current.usesMetricSystem
-        let increaseTitle = isMetric ? "Increase Radius By 2 km" : "Increase Radius By 2 miles"
-        
-        increaseRadius.setTitle(increaseTitle, for: [])
+        // configure increase radius button
+        setIncreaseRadiusButton()
         increaseRadius.setTitleColor(UIColor.flatWhite, for: [])
-        increaseRadius.backgroundColor = UIColor.blue
         increaseRadius.layer.cornerRadius = CGFloat(cornerRadius)
         increaseRadius.clipsToBounds = true
-        
         increaseRadius.addTarget(self, action: #selector(increaseSearchRadius), for: .touchUpInside)
         
     }
@@ -366,7 +360,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
             if self.cards.isEmpty {
                 
-                // self.emptyView.alpha = 1
+                self.emptyView.alpha = 1
                 
             } else if self.cards.count <= 4 {
                 
@@ -937,21 +931,103 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
     }
     
+    func setIncreaseRadiusButton() {
+        
+        let isMetric = Locale.current.usesMetricSystem
+        
+        let radiusLimit = isMetric ? 40000 : 23
+        let searchRadius = defaults.integer(forKey: "searchRadius")
+        
+        if isMetric {
+            
+            if searchRadius != radiusLimit {
+                
+                if 18...23 ~= searchRadius {
+                    let increaseTitle = "Increase Radius By 1 km"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                } else {
+                    let increaseTitle = "Increase Radius By 2 km"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                }
+                
+            } else {
+                self.emptyViewLabel.text = self.emptyViewLabel.text! + "\nYou have reached the maximum radius limit of 40 km"
+                self.increaseRadius.isEnabled = false
+            }
+            
+        } else {
+            
+            if searchRadius != radiusLimit {
+                
+                if 18...23 ~= searchRadius {
+                    let increaseTitle = "Increase Radius By 1 mile"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                } else {
+                    let increaseTitle = "Increase Radius By 3 miles"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                }
+                
+            } else {
+                // self.emptyViewLabel.text = self.emptyViewLabel.text! + "\n\nYou have reached the maximum radius limit of 23 miles"
+                let limitString = isMetric ? "40 KM Reached" : "23 Miles Reached"
+                self.increaseRadius.setTitle("Limit of " + limitString, for: [])
+                self.increaseRadius.isUserInteractionEnabled = false
+            }
+            
+        }
+        
+    }
+    
     func increaseSearchRadius() {
         
         let isMetric = Locale.current.usesMetricSystem
         
+        let radiusLimit = isMetric ? 40000 : 23
+        
         var searchRadius = defaults.integer(forKey: "searchRadius")
         
+        print(searchRadius)
+        print(radiusLimit)
+        
         if isMetric {
-            // meters
-            // increase search radius by 2000 m
-            searchRadius += 2000
+            
+            if searchRadius != radiusLimit {
+                
+                if 18...23 ~= searchRadius {
+                    let increaseTitle = "Increase Radius By 1 km"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                    searchRadius += 1000
+                } else {
+                    let increaseTitle = "Increase Radius By 2 km"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                    searchRadius += 2000
+                }
+                
+            } else {
+                self.emptyViewLabel.text = self.emptyViewLabel.text! + "\nYou have reached the maximum radius limit of 40 km"
+                self.increaseRadius.isEnabled = false
+            }
             
         } else {
-            // miles
-            // increase search radius by 2 miles
-            searchRadius += 2
+            
+            if searchRadius != radiusLimit {
+                
+                if 18...23 ~= searchRadius {
+                    let increaseTitle = "Increase Radius By 1 mile"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                    searchRadius += 1
+                } else {
+                    let increaseTitle = "Increase Radius By 3 miles"
+                    self.increaseRadius.setTitle(increaseTitle, for: [])
+                    searchRadius += 3
+                }
+
+            } else {
+                // self.emptyViewLabel.text = self.emptyViewLabel.text! + "\n\nYou have reached the maximum radius limit of 23 miles"
+                let limitString = isMetric ? "40 KM Reached" : "23 Miles Reached"
+                self.increaseRadius.setTitle("Limit of " + limitString, for: [])
+                self.increaseRadius.isUserInteractionEnabled = false
+            }
             
         }
         
@@ -959,6 +1035,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         let currentRestaurants = restaurants
         
+        // current restaurants: resturants to not include when updating radius
         searchRestaurants(.searchRadius, currentRestaurants)
         
     }
@@ -1211,16 +1288,25 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         self.cards.removeAll()
         
-        for i in 0...self.restaurants.count - 1 {
+        if restaurants.count != 0 {
             
-            let card = RestaurantCardView(frame: CGRect(x: 0, y: 0, width: cardPlaceholder.bounds.size.width, height: cardPlaceholder.bounds.size.height))
-            card.restaurant = self.restaurants[i]
-            self.cards.append(card)
+            for i in 0...self.restaurants.count - 1 {
+                
+                let card = RestaurantCardView(frame: CGRect(x: 0, y: 0, width: cardPlaceholder.bounds.size.width, height: cardPlaceholder.bounds.size.height))
+                card.restaurant = self.restaurants[i]
+                self.cards.append(card)
+                
+            }
+            
+            // layout the first 4 cards for the user
+            self.layoutCards()
+            
+        } else {
+            
+            loadingAnimator(.unhide)
+            emptyView.alpha = 1
             
         }
-        
-        // layout the first 4 cards for the user
-        self.layoutCards()
         
     }
     
@@ -1505,7 +1591,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                         self?.removeOldFrontCard()
                         self?.cardIsHiding = false
                         if (self?.cards.isEmpty)! {
-                            let text = "That's All Folks"
+                            let text = "That's All Folks!"
                             self?.emptyViewLabel.text = text
                             self?.emptyView.alpha = 1
                             // disable buttons if empty here

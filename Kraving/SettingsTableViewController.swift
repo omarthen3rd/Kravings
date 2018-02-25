@@ -312,7 +312,7 @@ class SettingsTableViewController: UITableViewController {
                 
             } else {
                 
-                cell.slider.maximumValue = 24
+                cell.slider.maximumValue = 23
                 cell.radiusLabel.text = "\(defaultsValue) mi"
                 cell.slider.value = Float(defaultsValue)
                 
