@@ -108,8 +108,9 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         navigationItem.rightBarButtonItem = closeViewButton
         collectionView.contentOffset = CGPoint(x: 0, y: -150)
         
+        deleteAllButtonView.alpha = 0
         // constant larger for iPhone X to account for home bar
-        constant = device.isOneOf([.iPhoneX]) ? -92 : -72
+        constant = device.isOneOf([.iPhoneX]) ? -132 : -72
         deleteViewConstraint.constant = constant
         self.view.layoutIfNeeded()
         
@@ -283,6 +284,8 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
                 
         deleteViewConstraint.constant = isEditing ? 0 : constant
         UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseOut, animations: {
+            // if collection view is in editing mode, alpha of delete view should be 1
+            self.deleteAllButtonView.alpha = editing ? 1 : 0
             self.view.layoutIfNeeded()
         }, completion: nil)
         

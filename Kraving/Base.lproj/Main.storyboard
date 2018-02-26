@@ -1177,7 +1177,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="343" height="46"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Timings" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hRj-kw-Zhc">
-                                                <rect key="frame" x="8" y="8" width="89.5" height="30"/>
+                                                <rect key="frame" x="8" y="8" width="183" height="30"/>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -1212,7 +1212,7 @@
                                         </subviews>
                                         <constraints>
                                             <constraint firstAttribute="bottom" secondItem="CUr-GK-QxC" secondAttribute="bottom" constant="8" id="26D-Ff-iDw"/>
-                                            <constraint firstItem="CUr-GK-QxC" firstAttribute="leading" secondItem="hRj-kw-Zhc" secondAttribute="trailing" constant="101.5" id="6rp-bC-5HN"/>
+                                            <constraint firstItem="CUr-GK-QxC" firstAttribute="leading" secondItem="hRj-kw-Zhc" secondAttribute="trailing" constant="8" id="6rp-bC-5HN"/>
                                             <constraint firstItem="ZXv-04-ahZ" firstAttribute="leading" secondItem="CUr-GK-QxC" secondAttribute="trailing" constant="8" id="JqQ-BM-tcZ"/>
                                             <constraint firstItem="hRj-kw-Zhc" firstAttribute="leading" secondItem="R7c-5O-43O" secondAttribute="leading" constant="8" id="MvM-oj-K5w"/>
                                             <constraint firstItem="CUr-GK-QxC" firstAttribute="top" secondItem="R7c-5O-43O" secondAttribute="top" constant="8" id="Ndu-zq-ZID"/>
@@ -1297,7 +1297,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="343" height="46"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Reviews" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sZT-42-bck">
-                                                <rect key="frame" x="8" y="8" width="94" height="30"/>
+                                                <rect key="frame" x="8" y="8" width="161" height="30"/>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -1311,6 +1311,9 @@
                                             </view>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DsF-en-j0h">
                                                 <rect key="frame" x="305" y="8" width="30" height="30"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="30" id="rhK-gP-xnx"/>
+                                                </constraints>
                                             </button>
                                         </subviews>
                                         <constraints>
@@ -1322,7 +1325,7 @@
                                             <constraint firstAttribute="bottom" secondItem="MMZ-cw-D1I" secondAttribute="bottom" constant="12" id="UQK-6w-pmV"/>
                                             <constraint firstAttribute="trailing" secondItem="DsF-en-j0h" secondAttribute="trailing" constant="8" id="YIq-G8-Rmo"/>
                                             <constraint firstItem="MMZ-cw-D1I" firstAttribute="top" secondItem="Lnr-7M-Rqf" secondAttribute="top" constant="12" id="f3H-fB-Fh2"/>
-                                            <constraint firstItem="MMZ-cw-D1I" firstAttribute="leading" secondItem="sZT-42-bck" secondAttribute="trailing" constant="75" id="ifp-L0-BkW"/>
+                                            <constraint firstItem="MMZ-cw-D1I" firstAttribute="leading" secondItem="sZT-42-bck" secondAttribute="trailing" constant="8" id="ifp-L0-BkW"/>
                                             <constraint firstAttribute="bottom" secondItem="sZT-42-bck" secondAttribute="bottom" constant="8" id="pSy-ne-KWw"/>
                                         </constraints>
                                     </view>
