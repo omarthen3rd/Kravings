@@ -146,17 +146,15 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         // Immediate visible UI setup
         restaurantPhotoBlur.colorTint = contrastColor
-        restaurantPhotoBlur.colorTintAlpha = 0.2
+        restaurantPhotoBlur.colorTintAlpha = 0.45
         restaurantPhotoBlur.blurRadius = 23
         restaurantPhotoBlur.scale = 1
         
-        // photo saturation
-        let filteredImage = restaurant.image?.applying(saturation: 0.3)
-        restaurantPhoto.image = filteredImage
+        restaurantPhoto.image = restaurant.image
         restaurantPhoto.clipsToBounds = true
         restaurantPhoto.contentMode = .scaleAspectFill
         
-        restaurantHeaderView.backgroundColor = avgColor.withAlphaComponent(0.7)
+        restaurantHeaderView.backgroundColor = avgColor.withAlphaComponent(0.8)
         
         restaurantName.text = restaurant.name
         restaurantName.textColor = contrastColor
@@ -221,7 +219,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         // set colors/tints for buttons
         
         // Timings Button Blur and Image
-        restaurantTimingsView.backgroundColor = avgColor.withAlphaComponent(0.7)
+        restaurantTimingsView.backgroundColor = avgColor.withAlphaComponent(0.8)
         
         let timingsImage = #imageLiteral(resourceName: "btn_timings").withRenderingMode(.alwaysTemplate)
         restaurantTimingsButton.setImage(timingsImage, for: .normal)
@@ -230,7 +228,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantTimingsButton.imageView?.contentMode = .scaleAspectFit
         
         // Reviews Button Blur and Image
-        restaurantReviewsView.backgroundColor = avgColor.withAlphaComponent(0.7)
+        restaurantReviewsView.backgroundColor = avgColor.withAlphaComponent(0.8)
         
         let reviewsImage = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
         restaurantReviewsButton.setImage(reviewsImage, for: .normal)
@@ -239,7 +237,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantReviewsButton.imageView?.contentMode = .scaleAspectFit
         
         // App Buttons Blur and Images
-        restaurantAppButtonsView.backgroundColor = avgColor.withAlphaComponent(0.7)
+        restaurantAppButtonsView.backgroundColor = avgColor.withAlphaComponent(0.8)
         
         let phoneImage = #imageLiteral(resourceName: "btn_call_selected").withRenderingMode(.alwaysTemplate)
         restaurantPhoneButton.setImage(phoneImage, for: .normal)

@@ -80,6 +80,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     var counter = 0.0
     var cornerRadius = Float()
     
+    var currentRestaurants = [Restaurant]()
     var restaurants = [Restaurant]()
     var likes = [Restaurant]()
     var dislikes = [Restaurant]()
@@ -763,6 +764,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         switch source {
         case .mainview:
             // runs when first searching for restaurants on app launch
+            self.currentRestaurants.removeAll()
             self.restaurants.removeAll()
             self.cards.removeAll()
             self.restaurantIndex = 0
@@ -790,6 +792,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             // not running updateDislikes as it already runs when opening settings view
             self.restaurantIndex = 0
             self.restaurants.removeAll()
+            self.currentRestaurants.removeAll()
             self.cards.removeAll()
             loadingAnimator(.unhide)
             completionHandler(true)
@@ -800,6 +803,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             self.updateDislikes()
             self.restaurantIndex = 0
             self.restaurants.removeAll()
+            self.currentRestaurants.removeAll()
             self.cards.removeAll()
             categoriesSearchBar.resignFirstResponder() // get rid of keyboard
             openCategories() // TODO: fix header view poping up before loading shows when done button pressed
@@ -1033,7 +1037,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
         defaults.set(searchRadius, forKey: "searchRadius")
         
-        let currentRestaurants = restaurants
+        currentRestaurants += restaurants
         
         // current restaurants: resturants to not include when updating radius
         searchRestaurants(.searchRadius, currentRestaurants)
@@ -1809,8 +1813,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         
         openSearchBar()
-        self.categoriesSearchBar.text = "" // clears potential remaining text
-        self.categoriesTableView.reloadData() // get rid of potential filtered searches remaining in table view
+        categoriesSearchBar.text = "" // clears potential remaining text
+        categoriesTableView.reloadData() // get rid of potential filtered searches remaining in table view
         
     }
     
