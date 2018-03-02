@@ -1253,13 +1253,13 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
     }
     
-    func formatDate(_ OGdate: String) -> String {
+    func formatDate(_ ogDate: String) -> String {
         
         let inputFormatter = DateFormatter()
         let tempLocale = inputFormatter.locale
         inputFormatter.locale = Locale(identifier: "en_US_POSIX")
         inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        let dateOutput = inputFormatter.date(from: OGdate)!
+        let dateOutput = inputFormatter.date(from: ogDate)!
         inputFormatter.dateFormat = "MMM dd, yyyy"
         inputFormatter.locale = tempLocale
         let dateString = inputFormatter.string(from: dateOutput)

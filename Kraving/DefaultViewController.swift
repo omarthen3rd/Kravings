@@ -937,6 +937,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func setIncreaseRadiusButton() {
         
+        // confirgure button at startup
+        
         let isMetric = Locale.current.usesMetricSystem
         
         let radiusLimit = isMetric ? 40000 : 23
@@ -989,9 +991,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         let radiusLimit = isMetric ? 40000 : 23
         
         var searchRadius = defaults.integer(forKey: "searchRadius")
-        
-        print(searchRadius)
-        print(radiusLimit)
         
         if isMetric {
             
@@ -1314,8 +1313,9 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         
     }
     
-    /// Scale and alpha of successive cards visible to the user
+    // Scale and alpha of successive cards visible to the user
     let cardAttributes: [(downscale: CGFloat, alpha: CGFloat)] = [(1, 1), (0.92, 0.8), (0.84, 0.6), (0.76, 0.4)]
+    
     let cardInteritemSpacing: CGFloat = 10
     
     func layoutCards() {
