@@ -87,12 +87,12 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         deleteAllButton.addTarget(self, action: #selector(trashHandler), for: .touchUpInside)
         deleteAllButton.backgroundColor = UIColor.flatRed
         
-        self.automaticallyAdjustsScrollViewInsets = false
+        automaticallyAdjustsScrollViewInsets = false
         
-        self.collectionView.backgroundColor = UIColor.clear
+        collectionView.backgroundColor = UIColor.clear
         blurEffectView = UIView(frame: collectionView.bounds)
         
-        self.collectionView.backgroundView = blurEffectView
+        collectionView.backgroundView = blurEffectView
         
         resultSearchController.searchBar.delegate = self
         resultSearchController.searchResultsUpdater = self

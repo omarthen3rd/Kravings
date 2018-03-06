@@ -81,6 +81,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     var cornerRadius = Float()
     
     var currentRestaurants = [Restaurant]()
+    var googleRestauarants = [GoogleRestaurant]()
     var restaurants = [Restaurant]()
     var likes = [Restaurant]()
     var dislikes = [Restaurant]()
@@ -774,6 +775,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     self.shouldSelectCell = true // will be accessed in willDisplayCell to select first cell of categoriesTableView
                     
                     DispatchQueue.main.async {
+                        print("got categories")
                         completionHandler(true)
                         self.currentCategory.text = self.restaurantCategories[0].title
                         self.categoriesTableView.reloadData()
@@ -827,6 +829,19 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         runCases(source) { (success) in
             
             if success {
+                
+                print("ran cases")
+                
+                self.getGoogleRestaurants(completionHandler: { (success) in
+                    
+                    DispatchQueue.main.async {
+                        self.resetCards()
+                        self.loadingAnimator(.hide)
+                    }
+                    
+                })
+                
+                /*
                 
                 self.searchBusinesses(self.lat, self.long, completetionHandler: { (success) in
                     
@@ -909,7 +924,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                     }
                     
                 })
-                
+ 
+                 */
             }
             
         }
@@ -1221,6 +1237,96 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 // add refresh type of button to try to reload results
                 
                 completetionHandler(false)
+                
+            }
+            
+        }
+        
+    }
+    
+    func getGoogleRestaurants(completionHandler: @escaping (Bool) -> ()) {
+        
+        var searchRadius = defaults.integer(forKey: "searchRadius")
+        
+        let locale = Locale.current
+        let isMetric = locale.usesMetricSystem
+        
+        if !isMetric {
+            
+            // convert searchRadius to meteres here from miles
+            
+            let numberFormatter = NumberFormatter()
+            numberFormatter.maximumFractionDigits = 0
+            let measurementFormatter = MeasurementFormatter()
+            measurementFormatter.unitOptions = .providedUnit
+            measurementFormatter.numberFormatter = numberFormatter
+            
+            let searchMiles = Measurement(value: Double(searchRadius), unit: UnitLength.miles)
+            let searchMeters = searchMiles.converted(to: UnitLength.meters)
+            
+            let searchToUse = measurementFormatter.string(from: searchMeters)
+            let oneReplaced = searchToUse.replacingOccurrences(of: " m", with: "")
+            
+            if let intVal = Int(oneReplaced) {
+                
+                searchRadius = intVal
+                
+            }
+            
+        }
+        
+        let stringUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(lat),\(long)&radius=\(searchRadius)&type=restaurant&key=AIzaSyBfBphVionPiyoDp0KFcz_jrKwJIKiWStI"
+        
+        print(stringUrl)
+        
+        guard let url = URL(string: stringUrl) else { return }
+        Alamofire.request(url).responseJSON { (response) in
+            
+            if let value = response.result.value {
+                
+                let json = JSON(value)
+                
+                if json["status"].stringValue == "OK" {
+                    
+                    for result in json["results"].arrayValue {
+                        
+                        let placeID = result["place_id"].stringValue
+                        let name = result["name"].stringValue
+                        let rating = result["rating"].doubleValue
+                        let photo_reference = result["photos"][0]["photo_reference"].stringValue
+                        let address = result["vicinity"].stringValue
+                        let openNow = result["opening_hours"]["open_now"].boolValue
+                        var heroImage = UIImage()
+                        
+                        if let unwrappedImageURL = URL(string: "https://maps.googleapis.com/maps/api/place/photo?maxheight=600&photoreference=\(photo_reference)&key=AIzaSyBfBphVionPiyoDp0KFcz_jrKwJIKiWStI") {
+                            
+                            print(unwrappedImageURL)
+                            
+                            if let imageData = try? Data(contentsOf: unwrappedImageURL) {
+                                
+                                heroImage = UIImage(data: imageData)!
+                                
+                            }
+                            
+                        } else {
+                            
+                            heroImage = #imageLiteral(resourceName: "placeholderImage")
+                            
+                        }
+                        
+                        let newRestaurant = GoogleRestaurant(placeId: placeID, name: name, website: "", heroImage: heroImage, images: [heroImage], rating: rating, priceRange: "", phone: "", openNow: openNow, distance: 0, address: address, timings: [""], types: [""])
+                        self.googleRestauarants.append(newRestaurant)
+                        
+                        
+                    }
+                    
+                    completionHandler(true)
+                    
+                } else {
+                    
+                    completionHandler(false)
+                    
+                }
                 
             }
             
@@ -1636,7 +1742,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
         } else {
             
             card.clipsToBounds = false
-            card.layer.shadowColor = UIColor(averageColorFrom: self.restaurants[self.restaurantIndex].image!).withAlphaComponent(0.65).cgColor
+            card.layer.shadowColor = UIColor(averageColorFrom: self.restaurants[self.restaurantIndex].heroImage).withAlphaComponent(0.65).cgColor
             card.layer.shadowOffset = CGSize(width: 0, height: 8)
             card.layer.shadowRadius = 12
             card.layer.shadowPath = UIBezierPath(roundedRect: card.bounds, cornerRadius: CGFloat(cornerRadius)).cgPath
