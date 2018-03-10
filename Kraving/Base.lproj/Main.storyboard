@@ -1297,35 +1297,35 @@
                                         <rect key="frame" x="0.0" y="0.0" width="343" height="46"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Reviews" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sZT-42-bck">
-                                                <rect key="frame" x="8" y="8" width="161" height="30"/>
+                                                <rect key="frame" x="8" y="8" width="94" height="30"/>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <view contentMode="right" translatesAutoresizingMaskIntoConstraints="NO" id="MMZ-cw-D1I" customClass="CosmosView" customModule="Cosmos">
-                                                <rect key="frame" x="177" y="12" width="120" height="22"/>
+                                                <rect key="frame" x="211" y="12" width="120" height="22"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="120" id="eu4-gt-zD6"/>
                                                 </constraints>
                                             </view>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DsF-en-j0h">
-                                                <rect key="frame" x="305" y="8" width="30" height="30"/>
+                                                <rect key="frame" x="169" y="8" width="30" height="30"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="30" id="rhK-gP-xnx"/>
                                                 </constraints>
                                             </button>
                                         </subviews>
                                         <constraints>
-                                            <constraint firstItem="DsF-en-j0h" firstAttribute="leading" secondItem="MMZ-cw-D1I" secondAttribute="trailing" constant="8" id="HeS-nM-Ac7"/>
                                             <constraint firstAttribute="bottom" secondItem="DsF-en-j0h" secondAttribute="bottom" constant="8" id="Kvv-6O-a6j"/>
                                             <constraint firstItem="sZT-42-bck" firstAttribute="top" secondItem="Lnr-7M-Rqf" secondAttribute="top" constant="8" id="Mvf-kn-SYe"/>
                                             <constraint firstItem="sZT-42-bck" firstAttribute="leading" secondItem="Lnr-7M-Rqf" secondAttribute="leading" constant="8" id="OzD-f9-ahp"/>
+                                            <constraint firstAttribute="trailing" secondItem="MMZ-cw-D1I" secondAttribute="trailing" constant="12" id="Qov-Qf-yVu"/>
+                                            <constraint firstItem="DsF-en-j0h" firstAttribute="leading" secondItem="sZT-42-bck" secondAttribute="trailing" constant="67" id="Spo-3E-jmu"/>
                                             <constraint firstItem="DsF-en-j0h" firstAttribute="top" secondItem="Lnr-7M-Rqf" secondAttribute="top" constant="8" id="Tsq-vv-G7l"/>
                                             <constraint firstAttribute="bottom" secondItem="MMZ-cw-D1I" secondAttribute="bottom" constant="12" id="UQK-6w-pmV"/>
-                                            <constraint firstAttribute="trailing" secondItem="DsF-en-j0h" secondAttribute="trailing" constant="8" id="YIq-G8-Rmo"/>
                                             <constraint firstItem="MMZ-cw-D1I" firstAttribute="top" secondItem="Lnr-7M-Rqf" secondAttribute="top" constant="12" id="f3H-fB-Fh2"/>
-                                            <constraint firstItem="MMZ-cw-D1I" firstAttribute="leading" secondItem="sZT-42-bck" secondAttribute="trailing" constant="8" id="ifp-L0-BkW"/>
+                                            <constraint firstItem="MMZ-cw-D1I" firstAttribute="leading" secondItem="DsF-en-j0h" secondAttribute="trailing" constant="12" id="f5Q-3v-hHK"/>
                                             <constraint firstAttribute="bottom" secondItem="sZT-42-bck" secondAttribute="bottom" constant="8" id="pSy-ne-KWw"/>
                                         </constraints>
                                     </view>

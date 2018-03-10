@@ -33,7 +33,6 @@
 		56D99DA91F102F35000FA4F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 56D99DA71F102F35000FA4F8 /* LaunchScreen.storyboard */; };
 		56D99DB41F102F36000FA4F8 /* KravingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DB31F102F36000FA4F8 /* KravingTests.swift */; };
 		56D99DBF1F102F36000FA4F8 /* KravingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */; };
-		56F5727F204F1AB8002D6B3D /* GoogleRestaurant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F5727E204F1AB8002D6B3D /* GoogleRestaurant.swift */; };
 		56F5FC221F1037F600AF0B18 /* Restaurant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F5FC211F1037F600AF0B18 /* Restaurant.swift */; };
 		E34CFD0E21812AD505AB703C /* Pods_Kraving.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C58A34F87F39BAA98E839963 /* Pods_Kraving.framework */; };
 /* End PBXBuildFile section */
@@ -103,7 +102,6 @@
 		56D99DBA1F102F36000FA4F8 /* KravingUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KravingUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		56D99DBE1F102F36000FA4F8 /* KravingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KravingUITests.swift; sourceTree = "<group>"; };
 		56D99DC01F102F36000FA4F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		56F5727E204F1AB8002D6B3D /* GoogleRestaurant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleRestaurant.swift; sourceTree = "<group>"; };
 		56F5FC211F1037F600AF0B18 /* Restaurant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Restaurant.swift; sourceTree = "<group>"; };
 		56F77BDB1F9698020070988B /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		56F77BDC1F9698020070988B /* ChameleonFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ChameleonFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -199,7 +197,6 @@
 			isa = PBXGroup;
 			children = (
 				56F5FC211F1037F600AF0B18 /* Restaurant.swift */,
-				56F5727E204F1AB8002D6B3D /* GoogleRestaurant.swift */,
 				565418631FE44B6300A2286B /* RestaurantCard.swift */,
 				562EE9B12030ACC8000BE07A /* RestaurantCardView.swift */,
 				565418651FE44DDD00A2286B /* RestaurantCard1.xib */,
@@ -514,7 +511,6 @@
 				56375B531F92357D001FCAFE /* Cells.swift in Sources */,
 				56BF7BDC1F58AC170098644B /* StartUpViewController.swift in Sources */,
 				56295FCB2024E55D00600A4F /* RestaurantDetailController.swift in Sources */,
-				56F5727F204F1AB8002D6B3D /* GoogleRestaurant.swift in Sources */,
 				56BB4F1F1F5DF2A700F2CA2C /* ButtonTableViewCell.swift in Sources */,
 				568683191F89868700D4BE60 /* VisualEffectView.swift in Sources */,
 				56C895BA2006E1B500FC9C60 /* NoConnectionView.swift in Sources */,

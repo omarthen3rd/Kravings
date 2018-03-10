@@ -61,14 +61,6 @@ class RestaurantCardView: UIView {
         
     }
     
-    var googleRestaurant: GoogleRestaurant? {
-        
-        didSet {
-            commonInitTwo()
-        }
-        
-    }
-    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -174,118 +166,6 @@ class RestaurantCardView: UIView {
         thumbsUpDownImage.center = thumbsUpDownView.center
         thumbsUpDownImage.tintColor = UIColor.flatWhite
 
-        
-        thumbsUpDownView.addSubview(thumbsUpDownImage)
-        thumbsUpDownView.layoutSubviews()
-        stuffContainer.addSubview(thumbsUpDownView)
-        stuffContainer.bringSubview(toFront: thumbsUpDownView)
-        
-        addSubview(stuffContainer)
-        self.layoutSubviews()
-        
-        self.layer.cornerRadius = CGFloat(cornerRadius)
-        self.clipsToBounds = true
-        
-        self.backgroundColor = .clear
-        
-    }
-    
-    func commonInitTwo() {
-        
-        guard let restaurant = googleRestaurant else { return }
-        
-        let width = self.bounds.size.width
-        let height = self.bounds.size.height
-        
-        let stuffContainer = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-        stuffContainer.layer.cornerRadius = 15
-        stuffContainer.clipsToBounds = true
-        stuffContainer.backgroundColor = .clear
-        
-        cornerRadius = defaults.float(forKey: "cornerRadius")
-        
-        smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
-        let deviceIsSmall = Device().isOneOf(smallDevices)
-        
-        let avgColor = UIColor(averageColorFrom: restaurant.heroImage)
-        let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: false)
-        
-        let bgImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-        bgImageView.image = restaurant.heroImage
-        bgImageView.clipsToBounds = true
-        bgImageView.contentMode = .scaleAspectFill
-        stuffContainer.addSubview(bgImageView)
-        
-        let containerHeight: CGFloat = deviceIsSmall ? 106 : 110
-        
-        let containerBlurView = VisualEffectView(frame: CGRect(x: 0, y: height - containerHeight, width: width, height: containerHeight))
-        containerBlurView.blurRadius = 20
-        containerBlurView.colorTint = avgColor.withAlphaComponent(0.6)
-        containerBlurView.colorTintAlpha = 1
-        
-        let restaurantName = UILabel(frame: CGRect(x: 10, y: 10, width: width - 20, height: 32))
-        restaurantName.font = UIFont.boldSystemFont(ofSize: deviceIsSmall ? 23 : 26)
-        restaurantName.textColor = contrastColor
-        restaurantName.text = restaurant.name
-        restaurantName.lineBreakMode = .byTruncatingTail
-        
-        let starsWidth: CGFloat = deviceIsSmall ? 119 : 134
-        
-        // 30 is spacing between the category/stars as they are side by side ------------------------------>
-        let restaurantCategory = UILabel(frame: CGRect(x: 10, y: restaurantName.totalY + 4, width: width - (30 + starsWidth), height: 23))
-        restaurantCategory.font = UIFont.systemFont(ofSize: deviceIsSmall ? 17 : 19, weight: UIFontWeightLight)
-        restaurantCategory.textColor = contrastColor
-        restaurantCategory.text = "NA"
-        restaurantCategory.lineBreakMode = .byTruncatingTail
-        
-        let restaurantStars = CosmosView(frame: CGRect(x: restaurantCategory.totalX + 10, y: restaurantName.totalY + 4, width: starsWidth, height: deviceIsSmall ? 21 : 23))
-        restaurantStars.contentMode = .right
-        restaurantStars.rating = Double(restaurant.rating)
-        restaurantStars.settings.textColor = contrastColor
-        restaurantStars.settings.emptyBorderWidth = 0
-        restaurantStars.settings.filledBorderColor = UIColor.clear
-        restaurantStars.settings.emptyBorderColor = UIColor.clear
-        restaurantStars.settings.filledColor = contrastColor
-        restaurantStars.settings.emptyColor = contrastColor.withAlphaComponent(0.3)
-        restaurantStars.settings.updateOnTouch = false
-        restaurantStars.settings.starSize = deviceIsSmall ? 21 : 23
-        restaurantStars.contentMode = .right
-        
-        let restaurantPriceDistance = UILabel(frame: CGRect(x: 10, y: restaurantCategory.totalY + 4, width: width - 20, height: deviceIsSmall ? 21 : 23))
-        restaurantPriceDistance.font = UIFont.systemFont(ofSize: deviceIsSmall ? 17 : 19, weight: UIFontWeightLight)
-        restaurantPriceDistance.textColor = contrastColor
-        
-        // Start attributed label
-        
-        // get range of text to colour
-        let textColorRange = NSRange(location: 0, length: restaurant.priceRange.count)
-        // get location of text to have a darker colour (4 is highest price)
-        let nonColor = 4 - restaurant.priceRange.count
-        // get range of text to have a darker colour
-        let nonTextColorRange = NSRange(location: restaurant.priceRange.count, length: nonColor)
-        let multipleText = "$$$$ · " + convert(restaurant.distance)
-        
-        let attributedString = NSMutableAttributedString(string: multipleText)
-        attributedString.setColorForRange(textColorRange, with: contrastColor)
-        attributedString.setColorForRange(nonTextColorRange, with: contrastColor.withAlphaComponent(0.3))
-        
-        restaurantPriceDistance.attributedText = attributedString
-        
-        // End attributed label
-        
-        containerBlurView.contentView.addSubview(restaurantName)
-        containerBlurView.contentView.addSubview(restaurantCategory)
-        containerBlurView.contentView.addSubview(restaurantStars)
-        containerBlurView.contentView.addSubview(restaurantPriceDistance)
-        stuffContainer.addSubview(containerBlurView)
-        
-        thumbsUpDownView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-        thumbsUpDownView.alpha = 0
-        
-        thumbsUpDownImage = UIImageView(frame: CGRect(x: 0, y: 0, width: width - 160, height: width - 160))
-        thumbsUpDownImage.center = thumbsUpDownView.center
-        thumbsUpDownImage.tintColor = UIColor.flatWhite
-        
         
         thumbsUpDownView.addSubview(thumbsUpDownImage)
         thumbsUpDownView.layoutSubviews()

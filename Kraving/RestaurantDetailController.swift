@@ -257,10 +257,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         restaurantWebsiteButton.tintColor = contrastColor
         restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
         
-        reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
-        reviewsMakeReview.imageView?.tintColor = contrastColor
-        reviewsMakeReview.tintColor = contrastColor
-        reviewsMakeReview.imageView?.contentMode = .scaleAspectFit
+        // reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
+        // reviewsMakeReview.imageView?.tintColor = contrastColor
+        // reviewsMakeReview.tintColor = contrastColor
+        // reviewsMakeReview.imageView?.contentMode = .scaleAspectFit
         
         // targets
         // restaurantTimingsButton target is added in doTimings() function
@@ -285,7 +285,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         self.timingsTableView.reloadData()
         self.timingsTableView.delegate = self
         self.timingsTableView.dataSource = self
-        self.timingsTableView.backgroundColor = contrastColor
         timingsContainerView.isHidden = false // will now use blur effect == nil to open/close view
         timingsContainerView.alpha = 0
         
@@ -297,7 +296,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         self.reviewsTableView.reloadData()
         self.reviewsTableView.delegate = self
         self.reviewsTableView.dataSource = self
-        self.reviewsTableView.backgroundColor = contrastColor
         reviewsContainerView.isHidden = false // will now use blur effect == nil to open/close view
         reviewsContainerView.alpha = 0
         
@@ -1717,9 +1715,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             cell.textReview.text = currentReview.reviewText
             cell.timeOfReview.text = currentReview.reviewTime
             
-            cell.name.textColor = avgColor.darken(byPercentage: 0.25)
-            cell.textReview.textColor = avgColor.darken(byPercentage: 0.25)
-            cell.timeOfReview.textColor = avgColor.darken(byPercentage: 0.25)
+            cell.name.textColor = UIColor.flatBlack
+            cell.textReview.textColor = UIColor.flatBlack
+            cell.timeOfReview.textColor = UIColor.flatBlack
             
             return cell
             
@@ -1742,8 +1740,8 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
                 
             }
             
-            cell.day.textColor = avgColor.darken(byPercentage: 0.25)
-            cell.hours.textColor = avgColor.darken(byPercentage: 0.25)
+            cell.day.textColor = UIColor.flatBlack
+            cell.hours.textColor = UIColor.flatBlack
             
             return cell
             
