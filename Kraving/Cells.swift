@@ -15,7 +15,6 @@ import ChameleonFramework
 class TimingsCell: UITableViewCell {
     
     @IBOutlet var day: UILabel!
-    @IBOutlet var hours: UILabel!
     
 }
 
@@ -103,7 +102,7 @@ class FavouritesCollectionViewCell: UICollectionViewCell {
         }
         
     }
-    var restaurant: Restaurant? {
+    var restaurant: GoogleRestaurant? {
         
         didSet {
             
@@ -116,11 +115,11 @@ class FavouritesCollectionViewCell: UICollectionViewCell {
             
             restaurantTitle.text = favourite.name
             restaurantStars.rating = Double(favourite.rating)
-            restaurantStars.text = "\(favourite.reviewCount)" + " VOTES"
+            // restaurantStars.text = "\(favourite.reviewCount)" + " VOTES"
             
-            let img = favourite.image
+            let img = favourite.heroImage
             
-            let avgColor = UIColor(averageColorFrom: img!)
+            let avgColor = UIColor(averageColorFrom: img)
             let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: true)
             
             restaurantTitle.textColor = contrastColor

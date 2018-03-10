@@ -11,14 +11,13 @@ import Alamofire
 import Cosmos
 import SwiftyJSON
 import ChameleonFramework
-import PhoneNumberKit
 import SimpleImageViewer
 import DeviceKit
 import PullToDismiss
 
 protocol RemoveFromArray {
     
-    func removeFromArrayWith(_ restaurant: Restaurant)
+    func removeFromArrayWith(_ restaurant: GoogleRestaurant)
     
 }
 
@@ -95,17 +94,12 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     @IBOutlet var alertViewImage: UIImageView!
     
     let defaults = UserDefaults.standard
-    var restaurant: Restaurant?
-    var phoneNumberKit = PhoneNumberKit()
-    var photos = [URL]()
+    var googleRestaurant: GoogleRestaurant?
+    var imagesOfRestaurant = [UIImage]()
+    var restaurantTimes = [String]()
     var isRestaurantOpen = Bool()
     
-    typealias TimeOfDay = (hour: Int, minute: Int)
-    
-    var timingsDict = [String: String]()
     var currentReviews = [RestaurantReviews]()
-    var currentTimings = [RestaurantHours]()
-    var restaurantTimings = [(key: Int, value: [String: String])]()
     
     var cornerRadius = Float()
     
@@ -136,232 +130,247 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func setupView() {
         
+        guard let restaurantToUse = googleRestaurant else { return }
+        
         // universal corner radius for elements (set in DefaultViewController)
         cornerRadius = defaults.float(forKey: "cornerRadius")
         
-        guard let restaurant = restaurant else { return }
-        
-        avgColor = UIColor(averageColorFrom: restaurant.image!)
-        contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: true)
-        
-        // Immediate visible UI setup
-        restaurantPhotoBlur.colorTint = contrastColor
-        restaurantPhotoBlur.colorTintAlpha = 0.45
-        restaurantPhotoBlur.blurRadius = 23
-        restaurantPhotoBlur.scale = 1
-        
-        restaurantPhoto.image = restaurant.image
-        restaurantPhoto.clipsToBounds = true
-        restaurantPhoto.contentMode = .scaleAspectFill
-        
-        restaurantHeaderView.backgroundColor = avgColor.withAlphaComponent(0.8)
-        
-        restaurantName.text = restaurant.name
-        restaurantName.textColor = contrastColor
-        
-        restaurantCategory.text = restaurant.category
-        setOtherCategories()
-        restaurantCategory.textColor = contrastColor
-        restaurantCategory.numberOfLines = 0
-        
-        restaurantRating.contentMode = .right
-        restaurantRating.rating = Double(restaurant.rating)
-        restaurantRating.text = "\(restaurant.reviewCount) VOTES"
-        restaurantRating.settings.textColor = contrastColor
-        restaurantRating.settings.emptyBorderWidth = 0
-        restaurantRating.settings.filledBorderColor = UIColor.clear
-        restaurantRating.settings.emptyBorderColor = UIColor.clear
-        restaurantRating.settings.filledColor = contrastColor
-        restaurantRating.settings.emptyColor = contrastColor.withAlphaComponent(0.3)
-        restaurantRating.settings.updateOnTouch = false
-        restaurantRating.settings.starSize = 23
-        
-        // start attributed label
-        
-        restaurantPriceDistance.textColor = contrastColor
-        
-        // get range of text to colour
-        let textColorRange = NSRange(location: 0, length: restaurant.priceRange.count)
-        // get location of text to have a darker colour (4 is highest price)
-        let nonColor = 4 - restaurant.priceRange.count
-        // get range of text to have a darker colour
-        let nonTextColorRange = NSRange(location: restaurant.priceRange.count, length: nonColor)
-        let multipleText = "$$$$ · " + convert(restaurant.distance)
-        
-        let attributedString = NSMutableAttributedString(string: multipleText)
-        attributedString.setColorForRange(textColorRange, with: contrastColor)
-        attributedString.setColorForRange(nonTextColorRange, with: contrastColor.withAlphaComponent(0.3))
-        restaurantPriceDistance.attributedText = attributedString
-        
-        // end attributed label
-        
-        restaurantAddressTitle.textColor = contrastColor.withAlphaComponent(0.7)
-        let address = "\(restaurant.address) \n\(restaurant.city), \(restaurant.state) \n\(restaurant.country)"
-        restaurantAddress.text = address
-        restaurantAddress.textColor = contrastColor
-        
-        restaurantPhoneTitle.textColor = contrastColor.withAlphaComponent(0.7)
-        let phoneNumber = returnFormatted(restaurant.phone)
-        restaurantPhone.text = phoneNumber
-        restaurantPhone.textColor = contrastColor
-        
-        // does timings and sets everything
-        doTimings() // sets/sorts timings for todays day
-        restaurantTimingsTitle.textColor = contrastColor.withAlphaComponent(0.7)
-        restaurantTimingsLabel.textColor = contrastColor
-        restaurantTimingsLabel.text = "Loading..."
-        
-        restaurantPhotosTitle.textColor = contrastColor.withAlphaComponent(0.7)
-        photosCollectionView.delegate = self
-        photosCollectionView.dataSource = self
-        loadPhotos()
-        
-        // set colors/tints for buttons
-        
-        // Timings Button Blur and Image
-        restaurantTimingsView.backgroundColor = avgColor.withAlphaComponent(0.8)
-        
-        let timingsImage = #imageLiteral(resourceName: "btn_timings").withRenderingMode(.alwaysTemplate)
-        restaurantTimingsButton.setImage(timingsImage, for: .normal)
-        restaurantTimingsButton.imageView?.tintColor = contrastColor
-        restaurantTimingsButton.tintColor = contrastColor
-        restaurantTimingsButton.imageView?.contentMode = .scaleAspectFit
-        
-        // Reviews Button Blur and Image
-        restaurantReviewsView.backgroundColor = avgColor.withAlphaComponent(0.8)
-        
-        let reviewsImage = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
-        restaurantReviewsButton.setImage(reviewsImage, for: .normal)
-        restaurantReviewsButton.imageView?.tintColor = contrastColor
-        restaurantReviewsButton.tintColor = contrastColor
-        restaurantReviewsButton.imageView?.contentMode = .scaleAspectFit
-        
-        // App Buttons Blur and Images
-        restaurantAppButtonsView.backgroundColor = avgColor.withAlphaComponent(0.8)
-        
-        let phoneImage = #imageLiteral(resourceName: "btn_call_selected").withRenderingMode(.alwaysTemplate)
-        restaurantPhoneButton.setImage(phoneImage, for: .normal)
-        restaurantPhoneButton.imageView?.tintColor = contrastColor
-        restaurantPhoneButton.tintColor = contrastColor
-        restaurantPhoneButton.imageView?.contentMode = .scaleAspectFit
-        
-        let mapsImage = #imageLiteral(resourceName: "btn_directions_selected").withRenderingMode(.alwaysTemplate)
-        restaurantMapsButton.setImage(mapsImage, for: .normal)
-        restaurantMapsButton.imageView?.tintColor = contrastColor
-        restaurantMapsButton.tintColor = contrastColor
-        restaurantMapsButton.imageView?.contentMode = .scaleAspectFit
-        
-        let websiteImage = #imageLiteral(resourceName: "btn_openWebsite_selected").withRenderingMode(.alwaysTemplate)
-        restaurantWebsiteButton.setImage(websiteImage, for: .normal)
-        restaurantWebsiteButton.imageView?.tintColor = contrastColor
-        restaurantWebsiteButton.tintColor = contrastColor
-        restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
-        
-        reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
-        reviewsMakeReview.imageView?.tintColor = contrastColor
-        reviewsMakeReview.tintColor = contrastColor
-        reviewsMakeReview.imageView?.contentMode = .scaleAspectFit
-        
-        // targets
-        // restaurantTimingsButton target is added in doTimings() function
-        restaurantReviewsButton.addTarget(self, action: #selector(openReviewView), for: .touchUpInside)
-        timingsDoneButton.addTarget(self, action: #selector(self.openTimingsView), for: .touchUpInside)
-        reviewsDoneButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
-        restaurantReviewsButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
-        restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
-        restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
-        restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
-        timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
-        // reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
-        
-        
-        // Other UI setup (timings/reviews)
-        
-        // timings
-        self.timingsTableView.estimatedRowHeight = 400
-        self.timingsTableView.rowHeight = UITableViewAutomaticDimension
-        self.timingsTableView.setNeedsLayout()
-        self.timingsTableView.layoutIfNeeded()
-        self.timingsTableView.reloadData()
-        self.timingsTableView.delegate = self
-        self.timingsTableView.dataSource = self
-        self.timingsTableView.backgroundColor = contrastColor
-        timingsContainerView.isHidden = false // will now use blur effect == nil to open/close view
-        timingsContainerView.alpha = 0
-        
-        // reviews
-        self.reviewsTableView.estimatedRowHeight = 400
-        self.reviewsTableView.rowHeight = UITableViewAutomaticDimension
-        self.reviewsTableView.setNeedsLayout()
-        self.reviewsTableView.layoutIfNeeded()
-        self.reviewsTableView.reloadData()
-        self.reviewsTableView.delegate = self
-        self.reviewsTableView.dataSource = self
-        self.reviewsTableView.backgroundColor = contrastColor
-        reviewsContainerView.isHidden = false // will now use blur effect == nil to open/close view
-        reviewsContainerView.alpha = 0
-        
-        // use .alpha instead of .effect to reduce CPU usage and lag
-        // plus the VisualEffectView framework doesn't allow for
-        // animating the .effect component
-        containerBackgroundBlur.colorTint = avgColor
-        containerBackgroundBlur.colorTintAlpha = 0.3
-        containerBackgroundBlur.blurRadius = 25
-        containerBackgroundBlur.scale = 1
-        containerBackgroundBlur.alpha = 0
-        
-        getReviews()
-        getTimings() // gets general timings for tableview
-        
-        // timings view coloring
-        timingsDoneButton.backgroundColor = contrastColor
-        timingsDoneButton.setTitleColor(avgColor, for: .normal)
-        timingsTitleLabel.textColor = contrastColor
-        timingsOpenOrCloseView.backgroundColor = contrastColor
-        timingsOpenOrClose.textColor = avgColor.withAlphaComponent(0.8)
-        
-        timingsOpenOrClose.text = "LOADING..."
-        updateOpenCloseLabel()
-        
-        let refreshImage = #imageLiteral(resourceName: "btn_refresh").withRenderingMode(.alwaysTemplate)
-        timingsRedoButton.setImage(refreshImage, for: .normal)
-        timingsRedoButton.tintColor = contrastColor
-        timingsRedoButton.imageView?.tintColor = contrastColor
-        timingsRedoButton.imageView?.contentMode = .scaleAspectFit
-        
-        // reviews view coloring
-        reviewsDoneButton.backgroundColor = contrastColor
-        reviewsDoneButton.setTitleColor(avgColor, for: .normal)
-        reviewsTitleLabel.textColor = contrastColor
-        reviewsStarView.settings.textColor = contrastColor
-        reviewsStarView.settings.filledBorderColor = UIColor.clear
-        reviewsStarView.settings.emptyBorderColor = UIColor.clear
-        reviewsStarView.settings.filledColor = contrastColor
-        reviewsStarView.settings.emptyColor = contrastColor.withAlphaComponent(0.3)
-        
-        // alertView coloring
-        alertView.blurRadius = 10
-        alertView.colorTint = contrastColor
-        alertView.colorTintAlpha = 0.6
-        alertViewImage.tintColor = avgColor
-        alertViewLabel.textColor = avgColor
-        
-        if parentSource == .favouritesController {
-            // show button on navigation bar since favouriteController pushes this view with a nav bar
-            let barButton = UIBarButtonItem(image: #imageLiteral(resourceName: "dots"), style: .plain, target: self, action: #selector(self.openRestaurantActionSheet))
-            self.navigationItem.rightBarButtonItem = barButton
+        let closeBlur = UIViewPropertyAnimator(duration: 0.5, curve: .easeOut) {
             
-        } else {
-            // use pull to dismiss since defaultController pushes this view using a modal segue
-            pullToDismiss = PullToDismiss(scrollView: scrollView, viewController: self)
-            pullToDismiss?.delegate = self
-            pullToDismiss?.dismissableHeightPercentage = 0.45
-            pullToDismiss?.dismissAction = {
-                self.dismissViewThing()
-            }
+            self.alertView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+            self.alertView.alpha = 0
+            
+        }
+        closeBlur.addCompletion { (position) in
+            
+            self.alertView.isHidden = true
+            
         }
         
-        setCornerRadius()
+        // alertView coloring
+        
+        self.avgColor = UIColor(averageColorFrom: restaurantToUse.heroImage)
+        self.contrastColor = UIColor(contrastingBlackOrWhiteColorOn: self.avgColor, isFlat: true)
+        
+        self.alertView.blurRadius = 10
+        self.alertView.colorTint = self.contrastColor
+        self.alertView.colorTintAlpha = 0.6
+        self.alertViewImage.tintColor = self.avgColor
+        self.alertViewLabel.textColor = self.avgColor
+        
+        self.showAlertView(withMessage: "Loading", #imageLiteral(resourceName: "btn_refresh"))
+        
+        getBusinessDetails(restaurantToUse.placeId) { (restaurant) in
+            
+            // Immediate visible UI setup
+            self.restaurantPhotoBlur.colorTint = self.contrastColor
+            self.restaurantPhotoBlur.colorTintAlpha = 0.45
+            self.restaurantPhotoBlur.blurRadius = 23
+            self.restaurantPhotoBlur.scale = 1
+            
+            self.restaurantPhoto.image = restaurant.heroImage
+            self.restaurantPhoto.clipsToBounds = true
+            self.restaurantPhoto.contentMode = .scaleAspectFill
+            
+            self.restaurantHeaderView.backgroundColor = self.avgColor.withAlphaComponent(0.8)
+            
+            self.restaurantName.text = restaurant.name
+            self.restaurantName.textColor = self.contrastColor
+            
+            self.restaurantCategory.text = restaurant.category
+            self.restaurantCategory.textColor = self.contrastColor
+            self.restaurantCategory.numberOfLines = 0
+            
+            self.restaurantRating.contentMode = .right
+            self.restaurantRating.rating = restaurant.rating
+            // restaurantRating.text = "\(restaurant.reviewCount) VOTES"
+            self.restaurantRating.settings.textColor = self.contrastColor
+            self.restaurantRating.settings.emptyBorderWidth = 0
+            self.restaurantRating.settings.filledBorderColor = UIColor.clear
+            self.restaurantRating.settings.emptyBorderColor = UIColor.clear
+            self.restaurantRating.settings.filledColor = self.contrastColor
+            self.restaurantRating.settings.emptyColor = self.contrastColor.withAlphaComponent(0.3)
+            self.restaurantRating.settings.updateOnTouch = false
+            self.restaurantRating.settings.starSize = 23
+            
+            // start attributed label
+            
+            self.restaurantPriceDistance.textColor = self.contrastColor
+            
+            // get range of text to colour
+            let textColorRange = NSRange(location: 0, length: restaurant.priceRange)
+            // get location of text to have a darker colour (4 is highest price)
+            let nonColor = 4 - restaurant.priceRange
+            // get range of text to have a darker colour
+            let nonTextColorRange = NSRange(location: restaurant.priceRange, length: nonColor)
+            let multipleText = "$$$$ · \(restaurant.distance) · \(restaurant.duration)"
+            
+            let attributedString = NSMutableAttributedString(string: multipleText)
+            attributedString.setColorForRange(textColorRange, with: self.contrastColor)
+            attributedString.setColorForRange(nonTextColorRange, with: self.contrastColor.withAlphaComponent(0.3))
+            self.restaurantPriceDistance.attributedText = attributedString
+            
+            // end attributed label
+            
+            self.restaurantAddressTitle.textColor = self.contrastColor.withAlphaComponent(0.7)
+            self.restaurantAddress.text = restaurant.address
+            self.restaurantAddress.textColor = self.contrastColor
+            
+            self.restaurantPhoneTitle.textColor = self.contrastColor.withAlphaComponent(0.7)
+            self.restaurantPhone.text = restaurant.phone
+            self.restaurantPhone.textColor = self.contrastColor
+            
+            // does timings and sets everything
+            self.restaurantTimes = restaurant.timings
+            self.restaurantTimingsTitle.textColor = self.contrastColor.withAlphaComponent(0.7)
+            self.restaurantTimingsLabel.textColor = self.contrastColor
+            let i = self.getCurrentDayIndex()
+            self.restaurantTimingsLabel.text = restaurant.timings[i]
+            
+            self.restaurantPhotosTitle.textColor = self.contrastColor.withAlphaComponent(0.7)
+            self.photosCollectionView.delegate = self
+            self.photosCollectionView.dataSource = self
+            self.imagesOfRestaurant = restaurant.images
+            DispatchQueue.main.async {
+                self.photosCollectionView.reloadData()
+            }
+            
+            // set colors/tints for buttons
+            
+            // Timings Button Blur and Image
+            self.restaurantTimingsView.backgroundColor = self.avgColor.withAlphaComponent(0.8)
+            
+            let timingsImage = #imageLiteral(resourceName: "btn_timings").withRenderingMode(.alwaysTemplate)
+            self.restaurantTimingsButton.setImage(timingsImage, for: .normal)
+            self.restaurantTimingsButton.imageView?.tintColor = self.contrastColor
+            self.restaurantTimingsButton.tintColor = self.contrastColor
+            self.restaurantTimingsButton.imageView?.contentMode = .scaleAspectFit
+            
+            // Reviews Button Blur and Image
+            self.restaurantReviewsView.backgroundColor = self.avgColor.withAlphaComponent(0.8)
+            
+            let reviewsImage = #imageLiteral(resourceName: "btn_reviews_selected").withRenderingMode(.alwaysTemplate)
+            self.restaurantReviewsButton.setImage(reviewsImage, for: .normal)
+            self.restaurantReviewsButton.imageView?.tintColor = self.contrastColor
+            self.restaurantReviewsButton.tintColor = self.contrastColor
+            self.restaurantReviewsButton.imageView?.contentMode = .scaleAspectFit
+            
+            // App Buttons Blur and Images
+            self.restaurantAppButtonsView.backgroundColor = self.avgColor.withAlphaComponent(0.8)
+            
+            let phoneImage = #imageLiteral(resourceName: "btn_call_selected").withRenderingMode(.alwaysTemplate)
+            self.restaurantPhoneButton.setImage(phoneImage, for: .normal)
+            self.restaurantPhoneButton.imageView?.tintColor = self.contrastColor
+            self.restaurantPhoneButton.tintColor = self.contrastColor
+            self.restaurantPhoneButton.imageView?.contentMode = .scaleAspectFit
+            
+            let mapsImage = #imageLiteral(resourceName: "btn_directions_selected").withRenderingMode(.alwaysTemplate)
+            self.restaurantMapsButton.setImage(mapsImage, for: .normal)
+            self.restaurantMapsButton.imageView?.tintColor = self.contrastColor
+            self.restaurantMapsButton.tintColor = self.contrastColor
+            self.restaurantMapsButton.imageView?.contentMode = .scaleAspectFit
+            
+            let websiteImage = #imageLiteral(resourceName: "btn_openWebsite_selected").withRenderingMode(.alwaysTemplate)
+            self.restaurantWebsiteButton.setImage(websiteImage, for: .normal)
+            self.restaurantWebsiteButton.imageView?.tintColor = self.contrastColor
+            self.restaurantWebsiteButton.tintColor = self.contrastColor
+            self.restaurantWebsiteButton.imageView?.contentMode = .scaleAspectFit
+            
+            self.reviewsMakeReview.setImage(#imageLiteral(resourceName: "btn_closeView"), for: [])
+            self.reviewsMakeReview.imageView?.tintColor = self.contrastColor
+            self.reviewsMakeReview.tintColor = self.contrastColor
+            self.reviewsMakeReview.imageView?.contentMode = .scaleAspectFit
+            
+            // targets
+            self.restaurantTimingsButton.addTarget(self, action: #selector(self.openTimingsView), for: .touchUpInside)
+            self.restaurantReviewsButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
+            self.timingsDoneButton.addTarget(self, action: #selector(self.openTimingsView), for: .touchUpInside)
+            self.reviewsDoneButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
+            self.restaurantReviewsButton.addTarget(self, action: #selector(self.openReviewView), for: .touchUpInside)
+            self.restaurantMapsButton.addTarget(self, action: #selector(self.openMaps), for: .touchUpInside)
+            self.restaurantPhoneButton.addTarget(self, action: #selector(self.callBusiness), for: .touchUpInside)
+            self.restaurantWebsiteButton.addTarget(self, action: #selector(self.openWebsite), for: .touchUpInside)
+            // reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
+            
+            
+            // Other UI setup (timings/reviews)
+            
+            // timings
+            self.timingsTableView.estimatedRowHeight = 400
+            self.timingsTableView.rowHeight = UITableViewAutomaticDimension
+            self.timingsTableView.setNeedsLayout()
+            self.timingsTableView.layoutIfNeeded()
+            self.timingsTableView.reloadData()
+            self.timingsTableView.delegate = self
+            self.timingsTableView.dataSource = self
+            self.timingsContainerView.isHidden = false // will now use blur effect == nil to open/close view
+            self.timingsContainerView.alpha = 0
+            
+            // reviews
+            self.reviewsTableView.estimatedRowHeight = 400
+            self.reviewsTableView.rowHeight = UITableViewAutomaticDimension
+            self.reviewsTableView.setNeedsLayout()
+            self.reviewsTableView.layoutIfNeeded()
+            self.reviewsTableView.reloadData()
+            self.reviewsTableView.delegate = self
+            self.reviewsTableView.dataSource = self
+            self.reviewsContainerView.isHidden = false // will now use blur effect == nil to open/close view
+            self.reviewsContainerView.alpha = 0
+            
+            // use .alpha instead of .effect to reduce CPU usage and lag
+            // plus the VisualEffectView framework doesn't allow for
+            // animating the .effect component
+            self.containerBackgroundBlur.colorTint = self.avgColor
+            self.containerBackgroundBlur.colorTintAlpha = 0.3
+            self.containerBackgroundBlur.blurRadius = 25
+            self.containerBackgroundBlur.scale = 1
+            self.containerBackgroundBlur.alpha = 0
+            
+            // timings view coloring
+            self.timingsDoneButton.backgroundColor = self.contrastColor
+            self.timingsDoneButton.setTitleColor(self.avgColor, for: .normal)
+            self.timingsTitleLabel.textColor = self.contrastColor
+            self.timingsOpenOrCloseView.backgroundColor = self.contrastColor
+            self.timingsOpenOrClose.textColor = self.avgColor.withAlphaComponent(0.8)
+            
+            self.timingsOpenOrClose.text = restaurant.openNow ? "OPEN NOW" : "CLOSED"
+            self.updateOpenCloseLabel()
+            
+            let refreshImage = #imageLiteral(resourceName: "btn_refresh").withRenderingMode(.alwaysTemplate)
+            self.timingsRedoButton.setImage(refreshImage, for: .normal)
+            self.timingsRedoButton.tintColor = self.contrastColor
+            self.timingsRedoButton.imageView?.tintColor = self.contrastColor
+            self.timingsRedoButton.imageView?.contentMode = .scaleAspectFit
+            
+            // reviews view coloring
+            self.reviewsDoneButton.backgroundColor = self.contrastColor
+            self.reviewsDoneButton.setTitleColor(self.avgColor, for: .normal)
+            self.reviewsTitleLabel.textColor = self.contrastColor
+            self.reviewsStarView.settings.textColor = self.contrastColor
+            self.reviewsStarView.settings.filledBorderColor = UIColor.clear
+            self.reviewsStarView.settings.emptyBorderColor = UIColor.clear
+            self.reviewsStarView.settings.filledColor = self.contrastColor
+            self.reviewsStarView.settings.emptyColor = self.contrastColor.withAlphaComponent(0.3)
+            
+            if self.parentSource == .favouritesController {
+                // show button on navigation bar since favouriteController pushes this view with a nav bar
+                let barButton = UIBarButtonItem(image: #imageLiteral(resourceName: "dots"), style: .plain, target: self, action: #selector(self.openRestaurantActionSheet))
+                self.navigationItem.rightBarButtonItem = barButton
+                
+            } else {
+                // use pull to dismiss since defaultController pushes this view using a modal segue
+                self.pullToDismiss = PullToDismiss(scrollView: self.scrollView, viewController: self)
+                self.pullToDismiss?.delegate = self
+                self.pullToDismiss?.dismissableHeightPercentage = 0.45
+                self.pullToDismiss?.dismissAction = {
+                    self.dismissViewThing()
+                }
+            }
+            
+            self.setCornerRadius()
+            closeBlur.startAnimation()
+            
+        }
         
     }
     
@@ -463,216 +472,16 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
     }
     
-    func returnFormatted(_ phoneNumber: String) -> String {
+    func getCurrentDayIndex() -> Int {
         
-        do {
-            
-            let parsedPhoneNumber = try phoneNumberKit.parse(phoneNumber)
-            let formattedNumber = phoneNumberKit.format(parsedPhoneNumber, toType: .international)
-            return formattedNumber
-            
-        } catch {
-            
-            return "Phone Number Unknown"
-            
-        }
+        // return index of day
         
-    }
-    
-    func returnTransactions(_ transactions: [String]) -> String {
+        let date = Date()
+        let calendar = Calendar.current
         
-        var restaurantTransactions = ""
+        let day = calendar.component(.weekday, from: date)
         
-        for transaction in transactions {
-            
-            if transaction == "restaurant_reservation" {
-                
-                restaurantTransactions = restaurantTransactions + "Restaurant Reservation ✓ "
-                
-            } else {
-                
-                restaurantTransactions = restaurantTransactions + "\(transaction.uppercaseFirst) ✓ "
-                
-            }
-            
-        }
-        
-        return restaurantTransactions
-        
-    }
-    
-    func doTimings() {
-        
-        guard let restaurant = restaurant else { return }
-        
-        var i = 0 // checks if multiple timings for a single day (The Maharaja is an example)
-        
-        showBusinessDetails(restaurant.id) { (arr, _, _) in
-            
-            if !(arr.isEmpty) {
-                
-                let daysCount = arr.count
-                
-                if daysCount > 7 {
-                    
-                    // multiple Timings Per Day
-                    
-                    var sameDays = 0
-                    
-                    self.numberOfDays(completionHandler: { (number) in
-                        sameDays = number
-                    })
-                    
-                    let today = self.getCurrentDay()
-                    
-                    self.restaurantTimingsLabel.text = ""
-                    
-                    for day in arr {
-                        
-                        if day.day == today {
-                            
-                            var attrString = NSMutableAttributedString()
-                            var stringy = String()
-                            
-                            if i == sameDays {
-                                
-                                // self.restaurantTimingsLabel.text = self.restaurantTimingsLabel.text! + "\(day.startTime) to " + "\(day.endTime) \n"
-                                stringy += "\(day.startTime) to " + "\(day.endTime) \n"
-                            } else {
-                                
-                                let openOrCloseText = self.isRestaurantOpen ? "OPEN NOW" : "CLOSED NOW"
-                                
-                                stringy += "\(day.startTime) to " + "\(day.endTime) ⋅ \(openOrCloseText)"
-                                
-                                attrString = NSMutableAttributedString(string: stringy)
-                                attrString.setBoldForText(openOrCloseText)
-                                
-                                self.restaurantTimingsLabel.attributedText = attrString
-                                
-                            }
-                            
-                            i += 1
-                        }
-                        
-                    }
-                    
-                    
-                } else {
-                    
-                    // a full week (or less)
-                    
-                    for operationDay in arr {
-                        
-                        if operationDay.day == self.getCurrentDay() {
-                            
-                            let openOrCloseText = self.isRestaurantOpen ? "OPEN NOW" : "CLOSED NOW"
-                            
-                            let stringy = "\(operationDay.startTime) to " + "\(operationDay.endTime) ⋅ \(openOrCloseText)"
-                            
-                            let attrString = NSMutableAttributedString(string: stringy)
-                            attrString.setBoldForText(openOrCloseText)
-                            self.restaurantTimingsLabel.attributedText = attrString
-                            
-                            break // break when restaurant timing is found
-                            
-                        } else if operationDay.day != self.getCurrentDay() {
-                            
-                            // if day is not found, therefore it is closed
-                            
-                            self.restaurantTimingsLabel.text = "Closed Today"
-                            
-                        } else {
-                            
-                            self.restaurantTimingsLabel.text = "Timings Unknown"
-                            
-                        }
-                        
-                    }
-                    
-                }
-                
-                self.restaurantTimingsButton.addTarget(self, action: #selector(self.openTimingsView), for: .touchUpInside)
-                
-            }
-            
-        }
-        
-    }
-    
-    func numberOfDays(completionHandler: @escaping (Int) -> ()) {
-        
-        guard let restaurant = restaurant else { return }
-        
-        var i = 0
-        
-        showBusinessDetails(restaurant.id) { (arr, _, _) in
-            
-            for operationDay in arr {
-                
-                if operationDay.day == self.getCurrentDay() { i += 1 }
-                
-            }
-            
-            completionHandler(i)
-            
-        }
-    }
-    
-    func setOtherCategories() {
-        
-        guard let restaurant = restaurant else { return }
-        
-        showBusinessDetails(restaurant.id) { (_, arr, _) in
-            
-            let filteredArr = arr.filter( { $0 != restaurant.category } )
-            // only return categories that don't match the already given category
-            
-            var arrString = String()
-            
-            if filteredArr.count == 1 {
-                arrString = filteredArr.joined(separator: "")
-            } else if filteredArr.count > 1 {
-                arrString = filteredArr.joined(separator: " / ")
-            }
-            
-            if !filteredArr.isEmpty {
-                // run only if filtered categories is not empty
-                self.restaurantCategory.text = self.restaurantCategory.text! + " / \(arrString)"
-            }
-            
-        }
-        
-    }
-    
-    func loadPhotos() {
-        
-        guard let restaurant = restaurant else { return }
-        
-        showBusinessDetails(restaurant.id) { (_, _, photosEmbedded) in
-            
-            self.photos = photosEmbedded
-            
-            DispatchQueue.main.async {
-                self.photosCollectionView.reloadData()
-            }
-            
-        }
-        
-    }
-    
-    func loadImage(url: URL) -> UIImage {
-        
-        var finalImage = UIImage()
-        
-        Alamofire.request(url).responseData { (response) in
-            
-            guard let result = response.result.value else { return }
-            guard let image = UIImage(data: result) else { return }
-            finalImage = image
-            
-        }
-        
-        return finalImage
+        return day - 2 // - 2 because week starts from sunday
         
     }
     
@@ -712,47 +521,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         }
         
         return weekDay
-        
-    }
-    
-    func timeConverter(_ time: String) -> String {
-        
-        var timeToUse = time
-        timeToUse.insert(":", at: time.index(time.startIndex, offsetBy: 2))
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        let dateToUse = timeFormatter.date(from: timeToUse)
-        
-        timeFormatter.dateFormat = "h:mm a"
-        let date12 = timeFormatter.string(from: dateToUse!)
-        
-        return date12
-        
-    }
-    
-    func compareDates(_ time: String) {
-        
-        let calendar = Calendar.autoupdatingCurrent
-        
-        var timeToUse = time
-        timeToUse.insert(":", at: time.index(time.startIndex, offsetBy: 2))
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        let dateToUse = timeFormatter.date(from: timeToUse)
-        
-        let components = calendar.dateComponents([.hour, .minute], from: dateToUse!)
-        let hourToUse = components.hour
-        let minuteToUse = components.minute
-        
-        let components2 = calendar.dateComponents([.hour, .minute], from: Date())
-        let hourToUse2 = components2.hour
-        let minuteToUse2 = components2.minute
-        
-        var timeOfDay = [TimeOfDay]()
-        timeOfDay.append((hourToUse!, minuteToUse!))
-        timeOfDay.append((hourToUse2!, minuteToUse2!))
         
     }
     
@@ -862,7 +630,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func callBusiness() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         guard let url = URL(string: "tel://\(restaurant.phone)") else { return }
         
         UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
@@ -879,7 +647,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func openWebsite() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         guard let browserName = defaults.object(forKey: "defaultBrowser") as? String else { return }
         
         switch browserName {
@@ -936,11 +704,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func openMaps() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         guard let appName = defaults.object(forKey: "defaultMaps") as? String else { return }
         
-        let string = "\(restaurant.address),\(restaurant.city),\(restaurant.country)"
-        let addressString = string.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+        let addressString = restaurant.address.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
         
         switch appName {
             
@@ -1064,13 +831,13 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func addToLongTermFavourites() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         
         if defaults.object(forKey: "favourites") == nil {
             
             // no favs, create arr, encode and replace
             
-            var favouriteRestaurants = [Restaurant]()
+            var favouriteRestaurants = [GoogleRestaurant]()
             favouriteRestaurants.append(restaurant)
             
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: favouriteRestaurants)
@@ -1083,9 +850,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             
             if let decodedArr = defaults.object(forKey: "favourites") as? Data {
                 
-                if var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                if var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [GoogleRestaurant] {
                     
-                    if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
+                    if !(decodedRestaurants.contains(where: { $0.placeId == restaurant.placeId } )) {
                         
                         // not in favourites -> add to favourites
                         
@@ -1109,12 +876,12 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func addToDislikes() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         if defaults.object(forKey: "dislikes") == nil {
             
             // no dislikes, create arr, encode and replace
             
-            var dislikeRestaurants = [Restaurant]()
+            var dislikeRestaurants = [GoogleRestaurant]()
             dislikeRestaurants.append(restaurant)
             
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: dislikeRestaurants)
@@ -1124,9 +891,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         } else {
             
             guard let decodedArr = defaults.object(forKey: "dislikes") as? Data else { return }
-            guard var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] else { return }
+            guard var decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [GoogleRestaurant] else { return }
             
-            if !(decodedRestaurants.contains(where: { $0.id == restaurant.id } )) {
+            if !(decodedRestaurants.contains(where: { $0.placeId == restaurant.placeId } )) {
                 
                 // not in dislikes -> add to dislikes
                 
@@ -1143,11 +910,11 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func removeFromDislikes() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         guard let decodedArr = defaults.object(forKey: "dislikes") as? Data else { return }
-        guard let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] else { return }
+        guard let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [GoogleRestaurant] else { return }
         
-        let newRestaurants = decodedRestaurants.filter{ !($0.id == restaurant.id) }
+        let newRestaurants = decodedRestaurants.filter{ !($0.placeId == restaurant.placeId) }
         // return everything that doesn't match the current restaurant ID
         // (i.e the one we want deleted)
         
@@ -1159,11 +926,11 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func removeFromLongTermFavourites() {
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         guard let decodedArr = defaults.object(forKey: "favourites") as? Data else { return }
-        guard let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] else { return }
+        guard let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [GoogleRestaurant] else { return }
         
-        let newRestaurants = decodedRestaurants.filter{ !($0.id == restaurant.id) }
+        let newRestaurants = decodedRestaurants.filter{ !($0.placeId == restaurant.placeId) }
         // return everything that doesn't match the current restaurant ID
         // (i.e the one we want deleted)
         
@@ -1178,10 +945,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         // removes from sessions likes in Favourites controller
         // then goes back to favourites view
         
-        guard let restaurant = restaurant else { return }
+        guard let restaurant = googleRestaurant else { return }
         
         if let del = removeDelegate {
-            del.removeFromArrayWith(restaurant)
+            // del.removeFromArrayWith(restaurant)
         }
         
         self.navigationController?.popViewController(animated: true)
@@ -1253,150 +1020,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
     }
     
-    func formatDate(_ ogDate: String) -> String {
-        
-        let inputFormatter = DateFormatter()
-        let tempLocale = inputFormatter.locale
-        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
-        inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        let dateOutput = inputFormatter.date(from: ogDate)!
-        inputFormatter.dateFormat = "MMM dd, yyyy"
-        inputFormatter.locale = tempLocale
-        let dateString = inputFormatter.string(from: dateOutput)
-        
-        return dateString
-        
-    }
-    
-    func fixTimings() {
-        
-        let timings = currentTimings
-        let fullWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        
-        if timings.count > 7 {
-            
-            // multiple timings
-            var i = 0
-            
-            var timingsDictTemp = [Int: [String: String]]()
-            
-            for time in timings {
-                
-                if !(i == currentTimings.count - 1) {
-                    // if not equal to the last last one
-                    if timings[i + 1].day == time.day {
-                        // if next day is equal to current day -> multiple timings for each day
-                        timingsDictTemp[i/2] = [time.day:"\(time.startTime) to \(time.endTime) \n \(timings[(i/2) + 1].startTime) to \(timings[(i/2) + 1].endTime)"]
-                        // divided by 2 because multiple timings (double times for each day)
-                        timingsDict[time.day] = "\(time.startTime) to \(time.endTime) \n \(timings[i + 1].startTime) to \(timings[i + 1].endTime)"
-                    }
-                }
-                
-                i += 1
-                
-            }
-            
-            // sort the dictionary by the int (acts as an index to sort)
-            var newTimings = timingsDictTemp.sorted(by: { $0.0 < $1.0 })
-            
-            // get days from new timings in order
-            var days = [String]()
-            for timi in newTimings {
-                for tim in timi.value {
-                    days.append(tim.key)
-                }
-            }
-            
-            // finalize and add missing days
-            let new = fullWeek.filter( {!days.contains($0)} ) // days that are missing
-            for day in new {
-                
-                // find which index "day" belongs in
-                guard let indexyMcIndexFace = fullWeek.index(of: day) else { return }
-                
-                newTimings.insert((key: indexyMcIndexFace, value: [day : "CLOSED"]), at: indexyMcIndexFace)
-                
-            }
-            
-            self.restaurantTimings = newTimings
-            
-            self.timingsTableView.isUserInteractionEnabled = true
-            
-            
-        } else {
-            
-            // counts as full week
-            
-            var timingsDictTemp = [Int: [String: String]]()
-            
-            if timings.count < fullWeek.count {
-                // day(s) missing, figure out what day is missing
-                let mapped = Set(timings.map( { $0.day } )) // map out only days of timings
-                
-                var index = 0
-                
-                for day in fullWeek {
-                    
-                    if (!(index == mapped.count) && !(index > mapped.count)) {
-                        // if not equal to last count
-                        if day == timings[index].day {
-                            // day is the same
-                            let thing = timings[index].day
-                            timingsDictTemp[index] = [thing:"\(timings[index].startTime) to \(timings[index].endTime)"]
-                        }
-                    } else {
-                        let thing = fullWeek[index]
-                        timingsDictTemp[index] = [thing:"CLOSED"]
-                        
-                    }
-                    
-                    index += 1
-                    
-                }
-                
-                // sort the dictionary by the int (acts as an index to sort)
-                let newTimings = timingsDictTemp.sorted(by: { $0.0 < $1.0 })
-                self.restaurantTimings = newTimings
-                
-                self.timingsTableView.isUserInteractionEnabled = true
-                
-            } else {
-                // a full week, everything is good
-                var index = 0
-                
-                for _ in fullWeek {
-                    
-                    let thing = timings[index].day
-                    timingsDictTemp[index] = [thing:"\(timings[index].startTime) to \(timings[index].endTime)"]
-                    
-                    index += 1
-                    
-                }
-                
-                let newTimings = timingsDictTemp.sorted(by: { $0.0 < $1.0 })
-                self.restaurantTimings = newTimings
-                
-                self.timingsTableView.isUserInteractionEnabled = true
-                
-            }
-            
-        }
-        
-    }
-    
-    func redoTimings() {
-        
-        self.timingsTableView.isUserInteractionEnabled = false
-        
-        self.currentTimings.removeAll()
-        self.restaurantTimings.removeAll()
-        
-        DispatchQueue.main.async {
-            self.getTimings()
-        }
-        
-    }
-    
     // MARK: - Alert Functions
     
     func showAlertController(_ title: String, _ message: String, _ url: String?) {
@@ -1436,28 +1059,10 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     
     func showAlertView(withMessage message: String, _ image: UIImage) {
         
-        let closeBlur = UIViewPropertyAnimator(duration: 0.2, curve: .easeOut) {
-            
-            self.alertView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-            self.alertView.alpha = 0
-            
-        }
-        closeBlur.addCompletion { (position) in
-            
-            self.alertView.isHidden = true
-            
-        }
-        
-        let blurAnimator = UIViewPropertyAnimator(duration: 0.2, curve: .easeIn) {
+        let blurAnimator = UIViewPropertyAnimator(duration: 0.5, curve: .easeIn) {
             
             self.alertView.transform = CGAffineTransform.identity
             self.alertView.alpha = 1
-            
-        }
-        blurAnimator.addCompletion { (position) in
-            
-            // after 2 seconds automatically hide the alert view
-            closeBlur.startAnimation(afterDelay: 1.5)
             
         }
         
@@ -1470,161 +1075,46 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         alertViewImage.image = image.withRenderingMode(.alwaysTemplate)
         alertViewLabel.text = message
         alertView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-        blurAnimator.startAnimation()
+        blurAnimator.startAnimation(afterDelay: 3)
         
     }
     
     // MARK: - API Functions
     
-    func showBusinessDetails(_ id: String, completionHandler: @escaping ([RestaurantHours], [String], [URL]) -> ()) {
+    func getBusinessDetails(_ id: String, completionHandler: @escaping (GoogleRestaurant) -> ()) {
         
-        let headers = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
+        let stringURL = "https://maps.googleapis.com/maps/api/place/details/json?placeid=\(id)&key=AIzaSyBfBphVionPiyoDp0KFcz_jrKwJIKiWStI"
         
-        Alamofire.request("https://api.yelp.com/v3/businesses/\(id)", headers: headers).responseJSON { (Response) in
+        print(stringURL)
+        
+        guard let url = URL(string: stringURL) else { return }
+        
+        Alamofire.request(url).responseJSON { (response) in
             
-            if let value = Response.result.value {
+            if let value = response.result.value {
                 
                 let json = JSON(value)
                 
-                // Restaurant Hours Of Operation
+                var address = json["result"]["vicinity"].stringValue
+                address += ", \(json["result"]["address_components"][4]["long_name"].stringValue) \(json["result"]["address_components"][6]["long_name"].stringValue)"
                 
-                var restaurantHoursEmbedded = [RestaurantHours]()
+                let phoneNumber = json["result"]["formatted_phone_number"].stringValue
+                let website = json["result"]["website"].stringValue
+                let hours = json["result"]["opening_hours"]["weekday_text"].arrayObject as! [String]
                 
-                for day in json["hours"].arrayValue {
+                address = address.replacingOccurrences(of: ", ", with: "\n")
+                
+                guard let unwrappedGoogle = self.googleRestaurant else { return }
+                
+                self.getPhotos(id, completionHandler: { (images) in
                     
-                    let isOpenNow = day["is_open_now"].boolValue
-                    self.isRestaurantOpen = isOpenNow
+                    let newRestaurant = GoogleRestaurant(placeId: unwrappedGoogle.placeId, name: unwrappedGoogle.name, website: website, category: unwrappedGoogle.category, heroImage: unwrappedGoogle.heroImage, images: images, rating: unwrappedGoogle.rating, priceRange: unwrappedGoogle.priceRange, phone: phoneNumber, openNow: unwrappedGoogle.openNow, distance: unwrappedGoogle.distance, duration: unwrappedGoogle.duration, address: address, timings: hours, types: [""])
+                                        
+                    completionHandler(newRestaurant)
                     
-                    for thingy in day["open"].arrayValue {
-                        
-                        let isOvernight = thingy["is_overnight"].boolValue
-                        
-                        let openTime = self.timeConverter(thingy["start"].stringValue)
-                        let endTime = self.timeConverter(thingy["end"].stringValue)
-                        
-                        var weekDay = String()
-                        
-                        switch thingy["day"].intValue {
-                            
-                        case 0:
-                            weekDay = "Monday"
-                        case 1:
-                            weekDay = "Tuesday"
-                        case 2:
-                            weekDay = "Wednesday"
-                        case 3:
-                            weekDay = "Thursday"
-                        case 4:
-                            weekDay = "Friday"
-                        case 5:
-                            weekDay = "Saturday"
-                        case 6:
-                            weekDay = "Sunday"
-                        default:
-                            break
-                            
-                        }
-                        
-                        let dayToUse = RestaurantHours(day: weekDay, isOvernight: isOvernight, startTime: openTime, endTime: endTime)
-                        restaurantHoursEmbedded.append(dayToUse)
-                        
-                    }
-                    
-                }
+                })
                 
-                // More Categories
-                
-                var categoriesEmbedded = [String]()
-                
-                for category in json["categories"].arrayValue {
-                    
-                    let cat = category["title"].stringValue
-                    categoriesEmbedded.append(cat)
-                    
-                }
-                
-                // More Photos
-                
-                var photosEmbedded = [URL]()
-                
-                for string in json["photos"].arrayValue {
-                    
-                    let urlString = string.url
-                    guard let url = urlString else { return }
-                    
-                    photosEmbedded.append(url)
-                    
-                }
-                
-                completionHandler(restaurantHoursEmbedded, categoriesEmbedded, photosEmbedded)
-            }
-            
-        }
-        
-    }
-    
-    func getTimings() {
-        
-        guard let restaurant = restaurant else { return }
-        
-        let headers: HTTPHeaders = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
-        
-        Alamofire.request("https://api.yelp.com/v3/businesses/\(restaurant.id)", headers: headers).responseJSON { (Response) in
-            
-            if let value = Response.result.value {
-                
-                let json = JSON(value)
-                
-                // Restaurant Hours Of Operation
-                
-                for day in json["hours"].arrayValue {
-                    
-                    let isOpenNow = day["is_open_now"].boolValue
-                    self.timingsOpenOrClose.text = isOpenNow ? "OPEN NOW" : "CLOSED NOW"
-                    self.updateOpenCloseLabel()
-                    
-                    for thingy in day["open"].arrayValue {
-                        
-                        let isOvernight = thingy["is_overnight"].boolValue
-                        
-                        let openTime = self.timeConverter(thingy["start"].stringValue)
-                        let endTime = self.timeConverter(thingy["end"].stringValue)
-                        
-                        var weekDay = String()
-                        
-                        switch thingy["day"].intValue {
-                            
-                        case 0:
-                            weekDay = "Monday"
-                        case 1:
-                            weekDay = "Tuesday"
-                        case 2:
-                            weekDay = "Wednesday"
-                        case 3:
-                            weekDay = "Thursday"
-                        case 4:
-                            weekDay = "Friday"
-                        case 5:
-                            weekDay = "Saturday"
-                        case 6:
-                            weekDay = "Sunday"
-                        default:
-                            break
-                            
-                        }
-                        
-                        let dayToUse = RestaurantHours(day: weekDay, isOvernight: isOvernight, startTime: openTime, endTime: endTime)
-                        self.currentTimings.append(dayToUse)
-                        
-                    }
-                    
-                    DispatchQueue.main.async {
-                        self.timingsTableView.reloadData()
-                    }
-                    
-                }
-                
-                self.fixTimings()
+                self.getReviews(id)
                 
             }
             
@@ -1632,49 +1122,88 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
     }
     
-    func getReviews() {
+    func getPhotos(_ id: String, completionHandler: @escaping ([UIImage]) -> ()) {
         
-        guard let restaurant = restaurant else { return }
+        let stringURL = "https://maps.googleapis.com/maps/api/place/details/json?placeid=\(id)&key=AIzaSyBfBphVionPiyoDp0KFcz_jrKwJIKiWStI"
         
-        let headers: HTTPHeaders = ["Authorization": "Bearer 8cHaNbcZ6-R4jvJN4KKAZn6pH8TsLJ341MB41avny9HLVOiawJHgbf6D21Hifmetesmx6jefbHJEYRc5j5ocrEeX0zlOMB_adj5mtUu_gdn6drQbWebaiJCej36RWnYx"]
+        guard let url = URL(string: stringURL) else { return }
         
-        Alamofire.request("https://api.yelp.com/v3/businesses/\(restaurant.id)/reviews", headers: headers).responseJSON { (Response) in
+        Alamofire.request(url).responseJSON { (response) in
             
-            if let value = Response.result.value {
+            if let value = response.result.value {
                 
                 let json = JSON(value)
                 
-                for review in json["reviews"].arrayValue {
+                let photosArr = json["result"]["photos"].arrayValue
+                
+                var images = [UIImage]()
+                for photo in photosArr {
                     
+                    var image = UIImage()
+                    let link = "https://maps.googleapis.com/maps/api/place/photo?maxheight=600&photoreference=\(photo["photo_reference"].stringValue)&key=AIzaSyBfBphVionPiyoDp0KFcz_jrKwJIKiWStI"
+                    if let unwrappedImageURL = URL(string: link) {
+                        
+                        if let imageData = try? Data(contentsOf: unwrappedImageURL) {
+                            
+                            image = UIImage(data: imageData)!
+                            
+                        } else {
+                            
+                            image = #imageLiteral(resourceName: "placeholderImage")
+                            
+                        }
+                        
+                    } else {
+                        
+                        image = #imageLiteral(resourceName: "placeholderImage")
+                        
+                    }
+                    
+                    images.append(image)
+                    
+                }
+                
+                completionHandler(images)
+                
+            }
+            
+        }
+        
+        
+    }
+    
+    func getReviews(_ id: String) {
+        
+        let stringURL = "https://maps.googleapis.com/maps/api/place/details/json?placeid=\(id)&key=AIzaSyBfBphVionPiyoDp0KFcz_jrKwJIKiWStI"
+        
+        guard let url = URL(string: stringURL) else { return }
+        Alamofire.request(url).responseJSON { (response) in
+            
+            if let value = response.result.value {
+                
+                let json = JSON(value)
+                let reviewsArr = json["result"]["reviews"].arrayValue
+                
+                for review in reviewsArr {
+                    
+                    let name = review["author_name"].stringValue
+                    let photoURL = review["profile_photo_url"].stringValue
+                    let time = review["relative_time_description"].stringValue
+                    let text = review["text"].stringValue
                     let rating = review["rating"].intValue
-                    let name = review["user"]["name"].stringValue
-                    let imageUrl = review["user"]["image_url"].stringValue
-                    let reviewText = review["text"].stringValue
-                    let timeCreated = review["time_created"].stringValue
                     
-                    let goodDate = self.formatDate(timeCreated)
-                    
-                    let newReview = RestaurantReviews(name: name, rating: rating, imageURL: imageUrl, reviewText: reviewText, reviewTime: goodDate)
+                    let newReview = RestaurantReviews(name: name, rating: 5, imageURL: photoURL, reviewText: text, reviewTime: time)
                     self.currentReviews.append(newReview)
                     
                 }
                 
                 DispatchQueue.main.async {
-                    
                     self.reviewsTableView.reloadData()
-                    
                 }
                 
             }
             
         }
-        
-        self.reviewsStarView.rating = Double(restaurant.rating)
-        // self.reviewsStarView.text = "\(restaurant.reviewCount) VOTES"
-        self.reviewsStarView.settings.emptyBorderWidth = 0
-        self.reviewsStarView.settings.updateOnTouch = false
-        self.reviewsStarView.settings.starSize = 21
-        self.reviewsStarView.contentMode = .right
         
     }
     
@@ -1689,7 +1218,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         if tableView == reviewsTableView {
             return currentReviews.count
         } else {
-            return restaurantTimings.count
+            return restaurantTimes.count
             
         }
     }
@@ -1717,9 +1246,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             cell.textReview.text = currentReview.reviewText
             cell.timeOfReview.text = currentReview.reviewTime
             
-            cell.name.textColor = avgColor.darken(byPercentage: 0.25)
-            cell.textReview.textColor = avgColor.darken(byPercentage: 0.25)
-            cell.timeOfReview.textColor = avgColor.darken(byPercentage: 0.25)
+            cell.name.textColor = UIColor.flatBlack
+            cell.textReview.textColor = UIColor.flatBlack
+            cell.timeOfReview.textColor = UIColor.flatBlack
             
             return cell
             
@@ -1727,23 +1256,29 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "TimingsCell", for: indexPath) as! TimingsCell
             
-            let timing = restaurantTimings[indexPath.row]
-            let today = self.getCurrentDay()
+            cell.day.numberOfLines = 0
             
-            for tim in timing.value {
-                cell.day.text = tim.key
-                cell.hours.text = tim.value
-            }
+            let fullWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            let timing = restaurantTimes[indexPath.row]
             
-            if cell.day.text == today {
-                // bold text if timing is today
-                cell.day.font = UIFont.systemFont(ofSize: 19, weight: UIFontWeightBold)
-                cell.hours.font = UIFont.systemFont(ofSize: 19, weight: UIFontWeightBold)
+            let range = (timing as NSString).range(of: "\(fullWeek[indexPath.row]):")
+            let text = (timing as NSString).substring(with: range)
+            
+            if let range2 = timing.range(of: "\(fullWeek[indexPath.row]): ") {
+                
+                let other = timing[range2.upperBound...]
+                cell.day.text = "\(text)\n\(other)"
                 
             }
             
-            cell.day.textColor = avgColor.darken(byPercentage: 0.25)
-            cell.hours.textColor = avgColor.darken(byPercentage: 0.25)
+            
+            cell.day.textColor = UIColor.flatBlack
+            
+            if indexPath.row == getCurrentDayIndex() {
+                
+                cell.day.font = UIFont.boldSystemFont(ofSize: 19)
+                
+            }
             
             return cell
             
@@ -1770,7 +1305,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photos.count
+        return imagesOfRestaurant.count
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -1799,9 +1334,9 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! PhotoCell
         
-        let photoURL = photos[indexPath.row]
+        let photos = imagesOfRestaurant[indexPath.row]
         
-        cell.imageView.downloadedFrom(url: photoURL)
+        cell.imageView.image = photos
         cell.imageView.contentMode = .scaleAspectFill
         
         cell.layer.cornerRadius = 10

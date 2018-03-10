@@ -33,10 +33,10 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     @IBOutlet var deleteViewConstraint: NSLayoutConstraint!
     @IBOutlet var segmentTopConstraint: NSLayoutConstraint!
     
-    var likes = [Restaurant]()
+    var likes = [GoogleRestaurant]()
     
-    var restaurants = [Restaurant]()
-    var filteredRestaurants = [Restaurant]()
+    var restaurants = [GoogleRestaurant]()
+    var filteredRestaurants = [GoogleRestaurant]()
     
     var blurEffectView = UIView()
     var noDataLabel = UILabel()
@@ -136,7 +136,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             
             if let decodedArr = defaults.object(forKey: "favourites") as? Data {
                 
-                if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [GoogleRestaurant] {
                     
                     // restaurant arr is now longTermFavourites
                     self.restaurants = decodedRestaurants
@@ -157,7 +157,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             
             if let decodedArr = defaults.object(forKey: "dislikes") as? Data {
                 
-                if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [Restaurant] {
+                if let decodedRestaurants = NSKeyedUnarchiver.unarchiveObject(with: decodedArr) as? [GoogleRestaurant] {
                     
                     // restaurant arr is now dislikes
                     self.restaurants = decodedRestaurants
@@ -199,7 +199,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         
     }
     
-    func removeFromArrayWith(_ restaurant: Restaurant) {
+    func removeFromArrayWith(_ restaurant: GoogleRestaurant) {
         
         // func is from protocol "RemoveFromArray" which is called from RestaurantDetailController
         // removes restaurant from "likes" array in this controller
@@ -208,6 +208,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
         // is called when dismissing this view in "dismissViewThing()" function
         
         let index = likes.index(of: restaurant)
+        // TODO: - NSCoding to fix error
         
         if let index = index {
             // only run if index is valid
@@ -483,7 +484,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
             
             let restaurant = resultSearchController.isActive ? filteredRestaurants[indexPath.row] : restaurants[indexPath.row]
             
-            vc.restaurant = restaurant
+            vc.googleRestaurant = restaurant
             vc.restaurantSource = arrSource
             vc.parentSource = .favouritesController
             vc.removeDelegate = self
@@ -497,7 +498,7 @@ class FavouritesContainerController: UIViewController, UICollectionViewDelegate,
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! FavouritesCollectionViewCell
         
-        let favourite: Restaurant
+        let favourite: GoogleRestaurant
         
         favourite = resultSearchController.isActive ? filteredRestaurants[indexPath.row] : restaurants[indexPath.row]
         

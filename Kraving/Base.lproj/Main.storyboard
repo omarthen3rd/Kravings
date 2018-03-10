@@ -248,7 +248,7 @@
                                         </constraints>
                                     </view>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="50" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="kXa-Nw-aqN">
-                                        <rect key="frame" x="0.0" y="44" width="343" height="353"/>
+                                        <rect key="frame" x="0.0" y="44" width="343" height="397"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <inset key="separatorInset" minX="16" minY="0.0" maxX="16" maxY="0.0"/>
                                         <prototypes>
@@ -286,7 +286,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </tableView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qbu-Vz-kkp">
-                                        <rect key="frame" x="0.0" y="405" width="343" height="134"/>
+                                        <rect key="frame" x="0.0" y="449" width="343" height="90"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ST6-XC-ubU">
                                                 <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
@@ -308,7 +308,7 @@
                                                 </constraints>
                                             </view>
                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="ezm-y6-RM5">
-                                                <rect key="frame" x="0.0" y="44" width="343" height="90"/>
+                                                <rect key="frame" x="0.0" y="44" width="343" height="46"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="1q4-FD-HmT">
                                                     <size key="itemSize" width="168" height="57"/>
@@ -361,7 +361,7 @@
                                             <constraint firstAttribute="bottom" secondItem="ezm-y6-RM5" secondAttribute="bottom" id="3hM-fz-3eR"/>
                                             <constraint firstItem="ezm-y6-RM5" firstAttribute="leading" secondItem="qbu-Vz-kkp" secondAttribute="leading" id="7ZD-TO-33c"/>
                                             <constraint firstAttribute="trailing" secondItem="ezm-y6-RM5" secondAttribute="trailing" id="Chn-VX-n3c"/>
-                                            <constraint firstAttribute="height" constant="134" id="EdB-dD-vKw"/>
+                                            <constraint firstAttribute="height" constant="90" id="EdB-dD-vKw"/>
                                             <constraint firstItem="ST6-XC-ubU" firstAttribute="top" secondItem="qbu-Vz-kkp" secondAttribute="top" id="Evq-hT-C4o"/>
                                             <constraint firstAttribute="trailing" secondItem="ST6-XC-ubU" secondAttribute="trailing" id="irc-gS-EzF"/>
                                             <constraint firstItem="ST6-XC-ubU" firstAttribute="leading" secondItem="qbu-Vz-kkp" secondAttribute="leading" id="ixI-fj-jkl"/>
@@ -1234,30 +1234,21 @@
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Day" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qVV-vl-Fn7">
-                                                            <rect key="frame" x="13" y="13" width="33" height="23"/>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="19"/>
-                                                            <nil key="highlightedColor"/>
-                                                        </label>
-                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hours" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C8d-6I-8SR">
-                                                            <rect key="frame" x="59" y="13" width="271" height="24"/>
+                                                            <rect key="frame" x="13" y="13" width="317" height="23"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="19"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                     </subviews>
                                                     <constraints>
                                                         <constraint firstItem="qVV-vl-Fn7" firstAttribute="leading" secondItem="FMY-T2-OkJ" secondAttribute="leading" constant="13" id="6hJ-hV-XY1"/>
-                                                        <constraint firstAttribute="trailing" secondItem="C8d-6I-8SR" secondAttribute="trailing" constant="13" id="IqJ-QT-m9T"/>
                                                         <constraint firstItem="qVV-vl-Fn7" firstAttribute="top" secondItem="FMY-T2-OkJ" secondAttribute="top" constant="13" id="KlF-Jm-ZKZ"/>
                                                         <constraint firstAttribute="bottom" secondItem="qVV-vl-Fn7" secondAttribute="bottom" constant="13" id="Ven-Ue-dPT"/>
-                                                        <constraint firstItem="C8d-6I-8SR" firstAttribute="leading" secondItem="qVV-vl-Fn7" secondAttribute="trailing" constant="13" id="c3F-E3-xaR"/>
-                                                        <constraint firstAttribute="bottom" secondItem="C8d-6I-8SR" secondAttribute="bottom" constant="13" id="tz4-9x-aN8"/>
-                                                        <constraint firstItem="C8d-6I-8SR" firstAttribute="top" secondItem="FMY-T2-OkJ" secondAttribute="top" constant="13" id="zCA-tB-MHu"/>
+                                                        <constraint firstAttribute="trailing" secondItem="qVV-vl-Fn7" secondAttribute="trailing" constant="13" id="lko-Kz-L6S"/>
                                                     </constraints>
                                                 </tableViewCellContentView>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                 <connections>
                                                     <outlet property="day" destination="qVV-vl-Fn7" id="IcD-cC-qRd"/>
-                                                    <outlet property="hours" destination="C8d-6I-8SR" id="tNr-pr-YOq"/>
                                                 </connections>
                                             </tableViewCell>
                                         </prototypes>
