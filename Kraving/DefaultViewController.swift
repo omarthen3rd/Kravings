@@ -305,11 +305,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             
         }
         
-        if defaults.object(forKey: "cornerRadius") == nil {
-            
-            defaults.set(15, forKey: "cornerRadius")
-            
-        }
+        defaults.set(20, forKey: "cornerRadius")
         
         cornerRadius = defaults.float(forKey: "cornerRadius")
         
