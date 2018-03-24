@@ -11,47 +11,44 @@ import DeviceKit
 import PhoneNumberKit
 import Cosmos
 
-extension UILabel {
+@objc protocol CardDelegate {
     
-    var height: CGFloat {
-        
-        return self.bounds.size.height
-        
-    }
-    
-    var y: CGFloat {
-        
-        return self.bounds.origin.y
-        
-    }
-    
-    var x: CGFloat {
-        
-        return self.bounds.origin.x
-        
-    }
-    
-    var totalY: CGFloat {
-        
-        return (self.frame.origin.y + self.bounds.size.height)
-        
-    }
-    
-    var totalX: CGFloat {
-        
-        return (self.bounds.origin.y + self.bounds.size.width)
-        
-    }
-    
+    @objc optional func cardDidTap(card: RestaurantCardView)
+    @objc optional func cardWillShowDetailView(card: RestaurantCardView)
+    @objc optional func cardDidShowDetailView(card: RestaurantCardView)
+    @objc optional func cardWillCloseDetailView(card: RestaurantCardView)
+    @objc optional func cardDidCloseDetailView(card: RestaurantCardView)
+    @objc optional func cardIsShowingDetail(card: RestaurantCardView)
+    @objc optional func cardIsHidingDetail(card: RestaurantCardView)
+    @objc optional func cardDetailIsScrolling(card: RestaurantCardView)
 }
 
-class RestaurantCardView: UIView {
+class RestaurantCardView: UIView, CardDelegate {
 
     let defaults = UserDefaults.standard
+    
+    var containerBlurView = VisualEffectView()
+    var restaurantName = UILabel()
+    var restaurantCategory = UILabel()
+    var restaurantStars = CosmosView()
+    var restaurantPriceDistance = UILabel()
+    
     var thumbsUpDownView = UIView()
     var thumbsUpDownImage = UIImageView()
+    
     var smallDevices = [Device]()
     var cornerRadius = Float()
+    var originalFrame = CGRect.zero
+    
+    var superVC: UIViewController?
+    var stuffContainer = UIView()
+    var bgImageView = UIImageView()
+    var isPresenting = false
+    
+    public var delegate: CardDelegate?
+    fileprivate var detailVC = DetailViewController()
+    
+    fileprivate var tap = UITapGestureRecognizer()
     
     var restaurant: Restaurant? {
         
@@ -72,17 +69,30 @@ class RestaurantCardView: UIView {
     
     func commonInit() {
         
+        originalFrame = self.frame
+        
         guard let restaurant = restaurant else { return }
         
-        let width = self.bounds.size.width
-        let height = self.bounds.size.height
+        cornerRadius = defaults.float(forKey: "cornerRadius")
         
-        let stuffContainer = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-        stuffContainer.layer.cornerRadius = 15
+        self.addGestureRecognizer(tap)
+        tap.delegate = self
+        tap.cancelsTouchesInView = false
+        
+        detailVC.transitioningDelegate = self
+        
+        let width = self.bounds.width
+        let height = self.bounds.height
+        
+        self.layer.cornerRadius = CGFloat(cornerRadius)
+        
+        stuffContainer.layer.cornerRadius = self.layer.cornerRadius
+        stuffContainer.clipsToBounds = true
+        stuffContainer.frame.origin = bounds.origin
+        stuffContainer.frame.size = CGSize(width: bounds.width, height: bounds.height)
+        
         stuffContainer.clipsToBounds = true
         stuffContainer.backgroundColor = .clear
-        
-        cornerRadius = defaults.float(forKey: "cornerRadius")
         
         smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
         let deviceIsSmall = Device().isOneOf(smallDevices)
@@ -90,7 +100,7 @@ class RestaurantCardView: UIView {
         let avgColor = UIColor(averageColorFrom: restaurant.image!)
         let contrastColor = UIColor(contrastingBlackOrWhiteColorOn: avgColor, isFlat: false)
         
-        let bgImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        bgImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
         bgImageView.image = restaurant.image
         bgImageView.clipsToBounds = true
         bgImageView.contentMode = .scaleAspectFill
@@ -98,12 +108,12 @@ class RestaurantCardView: UIView {
         
         let containerHeight: CGFloat = deviceIsSmall ? 106 : 110
         
-        let containerBlurView = VisualEffectView(frame: CGRect(x: 0, y: height - containerHeight, width: width, height: containerHeight))
+        containerBlurView = VisualEffectView(frame: CGRect(x: 0, y: height - containerHeight, width: width, height: containerHeight))
         containerBlurView.blurRadius = 20
         containerBlurView.colorTint = avgColor.withAlphaComponent(0.6)
         containerBlurView.colorTintAlpha = 1
         
-        let restaurantName = UILabel(frame: CGRect(x: 10, y: 10, width: width - 20, height: 32))
+        restaurantName = UILabel(frame: CGRect(x: 10, y: 10, width: width - 20, height: 32))
         restaurantName.font = UIFont.boldSystemFont(ofSize: deviceIsSmall ? 23 : 26)
         restaurantName.textColor = contrastColor
         restaurantName.text = restaurant.name
@@ -112,13 +122,13 @@ class RestaurantCardView: UIView {
         let starsWidth: CGFloat = deviceIsSmall ? 119 : 134
         
         // 30 is spacing between the category/stars as they are side by side ------------------------------>
-        let restaurantCategory = UILabel(frame: CGRect(x: 10, y: restaurantName.totalY + 4, width: width - (30 + starsWidth), height: 23))
+        restaurantCategory = UILabel(frame: CGRect(x: 10, y: restaurantName.totalY + 4, width: width - (30 + starsWidth), height: 23))
         restaurantCategory.font = UIFont.systemFont(ofSize: deviceIsSmall ? 17 : 19, weight: UIFontWeightLight)
         restaurantCategory.textColor = contrastColor
         restaurantCategory.text = restaurant.category
         restaurantCategory.lineBreakMode = .byTruncatingTail
         
-        let restaurantStars = CosmosView(frame: CGRect(x: restaurantCategory.totalX + 10, y: restaurantName.totalY + 4, width: starsWidth, height: deviceIsSmall ? 21 : 23))
+        restaurantStars = CosmosView(frame: CGRect(x: restaurantCategory.totalX + 10, y: restaurantName.totalY + 4, width: starsWidth, height: deviceIsSmall ? 21 : 23))
         restaurantStars.contentMode = .right
         restaurantStars.rating = Double(restaurant.rating)
         restaurantStars.settings.textColor = contrastColor
@@ -131,7 +141,7 @@ class RestaurantCardView: UIView {
         restaurantStars.settings.starSize = deviceIsSmall ? 21 : 23
         restaurantStars.contentMode = .right
         
-        let restaurantPriceDistance = UILabel(frame: CGRect(x: 10, y: restaurantCategory.totalY + 4, width: width - 20, height: deviceIsSmall ? 21 : 23))
+        restaurantPriceDistance = UILabel(frame: CGRect(x: 10, y: restaurantCategory.totalY + 4, width: width - 20, height: deviceIsSmall ? 21 : 23))
         restaurantPriceDistance.font = UIFont.systemFont(ofSize: deviceIsSmall ? 17 : 19, weight: UIFontWeightLight)
         restaurantPriceDistance.textColor = contrastColor
         
@@ -173,10 +183,6 @@ class RestaurantCardView: UIView {
         stuffContainer.bringSubview(toFront: thumbsUpDownView)
         
         addSubview(stuffContainer)
-        self.layoutSubviews()
-        
-        self.layer.cornerRadius = CGFloat(cornerRadius)
-        self.clipsToBounds = true
         
         self.backgroundColor = .clear
         
@@ -245,5 +251,98 @@ class RestaurantCardView: UIView {
         }
         
     }
+    
+    public func shouldPresent( _ contentViewController: UIViewController?, from superVC: UIViewController?, fullscreen: Bool = false) {
+        if let content = contentViewController {
+            self.superVC = superVC
+            detailVC.addChildViewController(content)
+            detailVC.detailView = content.view
+            detailVC.card = self
+            detailVC.delegate = self.delegate
+            detailVC.isFullscreen = fullscreen
+        }
+    }
+    
+    // MARK: - Layout
+    
+    func layout(animating: Bool = true) {
+        
+        let framer = stuffContainer.frame
+        
+        let width = framer.width
+        let height = framer.height
+        
+        print(width)
+        
+        smallDevices = [.iPhone5, .iPhone5c, .iPhone5s, .iPhoneSE, .iPodTouch5, .iPodTouch6]
+        let deviceIsSmall = Device().isOneOf(smallDevices)
 
+        bgImageView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        
+        let containerHeight: CGFloat = deviceIsSmall ? 106 : 110
+        containerBlurView.frame = CGRect(x: 0, y: height - containerHeight, width: width, height: containerHeight)
+        
+        restaurantName.frame = CGRect(x: 10, y: 10, width: width - 20, height: 32)
+        
+        let starsWidth: CGFloat = deviceIsSmall ? 119 : 134
+        
+        // 30 is spacing between the category/stars as they are side by side ------------------------------>
+        restaurantCategory.frame = CGRect(x: 10, y: restaurantName.totalY + 4, width: width - (30 + starsWidth), height: 23)
+        
+        restaurantStars.frame = CGRect(x: restaurantCategory.totalX + 10, y: restaurantName.totalY + 4, width: starsWidth, height: deviceIsSmall ? 21 : 23)
+        
+        restaurantPriceDistance.frame = CGRect(x: 10, y: restaurantCategory.totalY + 4, width: width - 20, height: deviceIsSmall ? 21 : 23)
+        
+        thumbsUpDownView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        thumbsUpDownImage.frame = CGRect(x: 0, y: 0, width: width - 160, height: width - 160)
+        
+    }
+    
+    @objc func cardTapped() {
+        self.delegate?.cardDidTap?(card: self)
+        
+        if let vc = superVC {
+            vc.present(self.detailVC, animated: true, completion: nil)
+        } else {
+            resetAnimated()
+        }
+        
+    }
+    
+    func pushBackAnimated() {
+        
+        UIView.animate(withDuration: 0.2, animations: { self.transform = CGAffineTransform(scaleX: 0.95, y: 0.95) })
+    }
+    
+    func resetAnimated() {
+        
+        UIView.animate(withDuration: 0.2, animations: { self.transform = CGAffineTransform.identity })
+    }
+
+}
+
+extension RestaurantCardView: UIViewControllerTransitioningDelegate {
+    
+    public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return Animator(presenting: true, from: self)
+    }
+    
+    public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return Animator(presenting: false, from: self)
+    }
+    
+}
+
+extension RestaurantCardView: UIGestureRecognizerDelegate {
+    
+    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        cardTapped()
+    }
+    
+    override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+         if let superview = self.superview {
+            originalFrame = superview.convert(self.frame, to: nil)
+         }
+         pushBackAnimated()
+    }
 }

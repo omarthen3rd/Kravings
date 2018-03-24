@@ -30,7 +30,7 @@ class SortByCollectionCell: UICollectionViewCell {
     
 }
 
-class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, RemoveFromMainArray, SettingsDelegate, UpdateStatusBar {
+class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, RemoveFromMainArray, SettingsDelegate, UpdateStatusBar, CardDelegate {
     
     @IBOutlet var emptyView: UIView!
     @IBOutlet var emptyViewLabel: UILabel!
@@ -112,6 +112,10 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     }
 
     // MARK: - Default Functions
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -803,7 +807,7 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
             self.currentRestaurants.removeAll()
             self.cards.removeAll()
             categoriesSearchBar.resignFirstResponder() // get rid of keyboard
-            openCategories() // TODO: fix header view poping up before loading shows when done button pressed
+            openCategories()
             completionHandler(true)
             
         case .searchRadius:
@@ -884,8 +888,6 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                         })
                         
                     } else {
-                        
-                        // TODO: - fix error handling
                         
                         let text = "No Results With Your Chosen Criteria \n \nTry Changing The Radius In Settings"
                         let attributedString = NSMutableAttributedString(string: text)
@@ -1288,6 +1290,8 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 
                 let card = RestaurantCardView(frame: CGRect(x: 0, y: 0, width: cardPlaceholder.bounds.size.width, height: cardPlaceholder.bounds.size.height))
                 card.restaurant = self.restaurants[i]
+                card.delegate = self
+                
                 self.cards.append(card)
                 
             }
@@ -1311,11 +1315,16 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func layoutCards() {
         
+        let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
+        
+        let restaurant = self.restaurants[self.restaurantIndex]
+        vc.restaurant = restaurant
+        
         let firstCard = cards[0]
         self.view.addSubview(firstCard)
         firstCard.layer.zPosition = CGFloat(cards.count)
         firstCard.center = self.cardPlaceholder.center
-        firstCard.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openCardDetail)))
+        firstCard.shouldPresent(vc, from: self, fullscreen: true)
         firstCard.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleCardPan)))
         shadowTo(firstCard, shouldRemove: false) // add shadow to card
         
@@ -1373,7 +1382,12 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 if i == 1 {
                     // increase index for current restaurant everytime new card shows up
                     self.restaurantIndex += 1
-                    card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.openCardDetail)))
+                    
+                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
+                    let restaurant = self.restaurants[self.restaurantIndex]
+                    vc.restaurant = restaurant
+                    card.shouldPresent(vc, from: self, fullscreen: true)
+                    
                     card.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.handleCardPan)))
                     self.shadowTo(card, shouldRemove: false) // add shadow to card
                 }
@@ -1645,22 +1659,26 @@ class DefaultViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     func openCardDetail() {
         
-        let restaurant = self.restaurants[self.restaurantIndex]
-        
         let vc = storyboard?.instantiateViewController(withIdentifier: "RestaurantDetailController") as! RestaurantDetailController
+        
+        let restaurant = self.restaurants[self.restaurantIndex]
+        let card = self.cards[self.restaurantIndex]
+        
         vc.restaurant = restaurant
-        vc.parentSource = .defaultController
-        vc.modalPresentationStyle = .overCurrentContext
-        vc.statusBarDelegate = self // for updating status bar in this view when dismiss modal
+        // card.shouldPresent(vc, from: self)
         
-        // hide status bar with animation
-        statusBarShouldBeHidden = true
-        UIView.animate(withDuration: 0.25) {
-            self.setNeedsStatusBarAppearanceUpdate()
-        }
+    }
+    
+    // MARK: - Card Delegate
+    
+    func cardDidTap(card: RestaurantCardView) {
         
-        // present modal view
-        present(vc, animated: true, completion: nil)
+    }
+    
+    func cardDidShowDetailView(card: RestaurantCardView) {
+    }
+    
+    func cardDidCloseDetailView(card: RestaurantCardView) {
         
     }
     

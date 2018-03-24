@@ -15,11 +15,11 @@
 		5636C66B1F165F41006D41E6 /* SliderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */; };
 		56375B531F92357D001FCAFE /* Cells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56375B521F92357D001FCAFE /* Cells.swift */; };
 		5637F47E2025F6720061987C /* UIImageEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568683161F89868100D4BE60 /* UIImageEffects.swift */; };
-		565418641FE44B6300A2286B /* RestaurantCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565418631FE44B6300A2286B /* RestaurantCard.swift */; };
-		565418661FE44DDD00A2286B /* RestaurantCard1.xib in Resources */ = {isa = PBXBuildFile; fileRef = 565418651FE44DDD00A2286B /* RestaurantCard1.xib */; };
 		567D97D41FE47E3900382358 /* DefaultViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567D97D31FE47E3900382358 /* DefaultViewController.swift */; };
 		568683191F89868700D4BE60 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568683171F89868100D4BE60 /* VisualEffectView.swift */; };
 		568A9EF5203BA1A600E3197E /* FavouritesContainerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */; };
+		5690DD2A20668CDD00D4F8D7 /* Animator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5690DD2920668CDD00D4F8D7 /* Animator.swift */; };
+		5690DD2C20668F5600D4F8D7 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5690DD2B20668F5600D4F8D7 /* DetailViewController.swift */; };
 		56B873C72041BB2D0057E0CB /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B873C62041BB2D0057E0CB /* Extensions.swift */; };
 		56BB4F1D1F5DF21200F2CA2C /* ButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 56BB4F1C1F5DF21200F2CA2C /* ButtonCell.xib */; };
 		56BB4F1F1F5DF2A700F2CA2C /* ButtonTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BB4F1E1F5DF2A700F2CA2C /* ButtonTableViewCell.swift */; };
@@ -74,13 +74,13 @@
 		5636C6671F165F41006D41E6 /* Slidercell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Slidercell.xib; sourceTree = "<group>"; };
 		5636C6681F165F41006D41E6 /* SliderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderTableViewCell.swift; sourceTree = "<group>"; };
 		56375B521F92357D001FCAFE /* Cells.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cells.swift; sourceTree = "<group>"; };
-		565418631FE44B6300A2286B /* RestaurantCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantCard.swift; sourceTree = "<group>"; };
-		565418651FE44DDD00A2286B /* RestaurantCard1.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RestaurantCard1.xib; sourceTree = "<group>"; };
 		567D97D31FE47E3900382358 /* DefaultViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultViewController.swift; sourceTree = "<group>"; };
 		567F26771F14555B001B90BF /* CallKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CallKit.framework; path = System/Library/Frameworks/CallKit.framework; sourceTree = SDKROOT; };
 		568683161F89868100D4BE60 /* UIImageEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageEffects.swift; sourceTree = "<group>"; };
 		568683171F89868100D4BE60 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		568A9EF4203BA1A600E3197E /* FavouritesContainerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesContainerController.swift; sourceTree = "<group>"; };
+		5690DD2920668CDD00D4F8D7 /* Animator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animator.swift; sourceTree = "<group>"; };
+		5690DD2B20668F5600D4F8D7 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		56B5C7541FF8005F00990AD5 /* HGPlaceholders.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = HGPlaceholders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		56B7B1D01F6C6BBD00E5EB1F /* loadingLines.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = loadingLines.json; sourceTree = "<group>"; };
 		56B873C62041BB2D0057E0CB /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -197,9 +197,9 @@
 			isa = PBXGroup;
 			children = (
 				56F5FC211F1037F600AF0B18 /* Restaurant.swift */,
-				565418631FE44B6300A2286B /* RestaurantCard.swift */,
 				562EE9B12030ACC8000BE07A /* RestaurantCardView.swift */,
-				565418651FE44DDD00A2286B /* RestaurantCard1.xib */,
+				5690DD2920668CDD00D4F8D7 /* Animator.swift */,
+				5690DD2B20668F5600D4F8D7 /* DetailViewController.swift */,
 			);
 			name = "Restaurant Card";
 			sourceTree = "<group>";
@@ -407,7 +407,6 @@
 				562036231F7023A6004DF27B /* loadingLines.json in Resources */,
 				5636C66A1F165F41006D41E6 /* Slidercell.xib in Resources */,
 				56D99DA91F102F35000FA4F8 /* LaunchScreen.storyboard in Resources */,
-				565418661FE44DDD00A2286B /* RestaurantCard1.xib in Resources */,
 				56C895BC2006E23200FC9C60 /* NoConnectionView.xib in Resources */,
 				56D99DA61F102F35000FA4F8 /* Assets.xcassets in Resources */,
 				56BB4F1D1F5DF21200F2CA2C /* ButtonCell.xib in Resources */,
@@ -513,11 +512,12 @@
 				56295FCB2024E55D00600A4F /* RestaurantDetailController.swift in Sources */,
 				56BB4F1F1F5DF2A700F2CA2C /* ButtonTableViewCell.swift in Sources */,
 				568683191F89868700D4BE60 /* VisualEffectView.swift in Sources */,
+				5690DD2C20668F5600D4F8D7 /* DetailViewController.swift in Sources */,
 				56C895BA2006E1B500FC9C60 /* NoConnectionView.swift in Sources */,
-				565418641FE44B6300A2286B /* RestaurantCard.swift in Sources */,
 				568A9EF5203BA1A600E3197E /* FavouritesContainerController.swift in Sources */,
 				567D97D41FE47E3900382358 /* DefaultViewController.swift in Sources */,
 				56D99D9F1F102F35000FA4F8 /* AppDelegate.swift in Sources */,
+				5690DD2A20668CDD00D4F8D7 /* Animator.swift in Sources */,
 				56B873C72041BB2D0057E0CB /* Extensions.swift in Sources */,
 				5636C6691F165F41006D41E6 /* SettingsTableViewController.swift in Sources */,
 				56BF7BDE1F58FAF50098644B /* AddressViewController.swift in Sources */,

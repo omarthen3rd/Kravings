@@ -274,7 +274,6 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         timingsRedoButton.addTarget(self, action: #selector(redoTimings), for: .touchUpInside)
         // reviewsMakeReview.addTarget(self, action: #selector(openSubmitReviewView), for: .touchUpInside)
         
-        
         // Other UI setup (timings/reviews)
         
         // timings
@@ -360,6 +359,7 @@ class RestaurantDetailController: UIViewController, UICollectionViewDelegate, UI
         }
         
         setCornerRadius()
+        scrollView.isScrollEnabled = false
         
     }
     

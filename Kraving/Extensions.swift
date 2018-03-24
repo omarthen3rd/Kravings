@@ -9,6 +9,47 @@
 import Foundation
 import UIKit
 
+extension CGRect {
+    
+    var center: CGPoint {
+        return CGPoint(x: width/2 + minX, y: height/2 + minY)
+    }
+}
+
+extension UILabel {
+    
+    var height: CGFloat {
+        
+        return self.bounds.size.height
+        
+    }
+    
+    var y: CGFloat {
+        
+        return self.bounds.origin.y
+        
+    }
+    
+    var x: CGFloat {
+        
+        return self.bounds.origin.x
+        
+    }
+    
+    var totalY: CGFloat {
+        
+        return (self.frame.origin.y + self.bounds.size.height)
+        
+    }
+    
+    var totalX: CGFloat {
+        
+        return (self.bounds.origin.y + self.bounds.size.width)
+        
+    }
+    
+}
+
 extension Notification.Name {
     static let applicationWillResignActive = Notification.Name(rawValue: "applicationWillResignActive")
 }
